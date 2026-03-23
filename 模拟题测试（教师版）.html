@@ -1,0 +1,999 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>题库裁判招募 - A/B题大PK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* [保留你原有的所有CSS样式] */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: 'Noto Sans SC', sans-serif; background: linear-gradient(135deg, #e11d48 0%, #be123c 50%, #9f1239 100%); }
+        .slider-container { display: flex; height: 100%; width: 100%; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
+        .slide-page { flex: 0 0 100%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; position: relative; overflow: hidden; }
+        .content-card { background: rgba(255, 255, 255, 0.98); border-radius: 20px; padding: 20px; width: 100%; max-width: 400px; max-height: 90vh; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .home-card { text-align: center; padding: 30px 20px; }
+        .home-title { font-size: 28px; font-weight: 900; color: #1f2937; line-height: 1.3; margin-bottom: 8px; }
+        .home-subtitle { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #e11d48, #be123c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
+        .home-badge { display: inline-block; background: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 700; margin-bottom: 16px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .home-desc { color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 24px; }
+        .start-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #e11d48, #be123c); color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.3); transition: transform 0.2s; }
+        .start-btn:active { transform: scale(0.98); }
+        .home-stats { margin-top: 20px; font-size: 13px; color: #6b7280; display: flex; justify-content: center; gap: 12px; }
+        .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .progress-bg { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #e11d48, #be123c); border-radius: 4px; transition: width 0.3s; }
+        .progress-text { font-size: 14px; font-weight: 700; color: #e11d48; white-space: nowrap; }
+        .timer { text-align: center; font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+        .tab-wrap { display: flex; gap: 10px; margin-bottom: 12px; position: relative; }
+        .tab-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .tab-btn.active { background: linear-gradient(135deg, #fb7185, #e11d48); color: white; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); }
+        .tab-btn.inactive { background: #f3f4f6; color: #6b7280; }
+        .content-box { flex: 1; background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 12px; position: relative; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .content-panel { display: none; }
+        .content-panel.show { display: block; }
+        .question-card { background: white; border-radius: 12px; padding: 16px; }
+        .question-body { font-size: 14px; color: #1f2937; line-height: 1.8; margin-bottom: 12px; }
+        .question-list { margin: 12px 0; padding-left: 0; }
+        .question-list-item { margin-bottom: 8px; font-size: 14px; line-height: 1.6; }
+        .options-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .option-item { padding: 12px 14px; background: #ffffff; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 14px; color: #374151; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; user-select: none; margin-bottom: 8px; font-weight: 500; }
+        .option-item:hover { background: #f9fafb; border-color: #d1d5db; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .option-item:active { transform: scale(0.96) translateY(0); transition: transform 0.1s; }
+        .option-item.selected { background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important; border-color: #10b981 !important; color: #047857 !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); transform: translateY(-1px); }
+        .option-item.selected::after { content: "✓"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-weight: bold; font-size: 18px; color: #10b981; animation: checkPop 0.3s ease-out; }
+        @keyframes checkPop { 0% { transform: translateY(-50%) scale(0); } 50% { transform: translateY(-50%) scale(1.3); } 100% { transform: translateY(-50%) scale(1); } }
+        .guide-bar { padding: 12px; border-radius: 10px; text-align: center; font-size: 14px; font-weight: 500; margin-bottom: 12px; line-height: 1.4; }
+        .guide-bar.locked { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; color: #b45309; }
+        .guide-bar.unlocked { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 2px solid #10b981; color: #047857; }
+        .choice-title { font-size: 14px; font-weight: 700; color: #1f2937; margin-bottom: 12px; line-height: 1.4; text-align: center; padding: 10px; background: #f3f4f6; border-radius: 8px; }
+        .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .choice-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .choice-btn { padding: 12px 8px; border-radius: 10px; border: 2px solid #e5e7eb; background: #f9fafb; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; line-height: 1.3; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .choice-btn:not(:disabled):active { transform: scale(0.95); }
+        .choice-btn-a:not(:disabled) { background: linear-gradient(135deg, #fef3ff, #fce7f3); border-color: #f9a8d4; color: #be185d; }
+        .choice-btn-b:not(:disabled) { background: linear-gradient(135deg, #fff3f1, #ffe4e6); border-color: #fda4af; color: #be123c; }
+        .choice-btn-same:not(:disabled) { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-color: #7dd3fc; color: #0369a1; }
+        .choice-btn.selected { background: linear-gradient(135deg, #e11d48, #be123c) !important; color: white !important; border-color: transparent !important; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4); }
+        .choice-btn-gray:not(:disabled) { background: #f3f4f6; border-color: #d1d5db; color: #4b5563; }
+        .analysis-card { background: white; border-radius: 12px; padding: 16px; border-left: 4px solid; }
+        .analysis-card.a { border-left-color: #e11d48; }
+        .analysis-card.b { border-left-color: #fb7185; }
+        .analysis-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .analysis-tag { margin-left: auto; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .analysis-tag.a { background: #ffe4e6; color: #e11d48; }
+        .analysis-tag.b { background: #fecdd3; color: #fb7185; }
+        .analysis-origin { font-size: 13px; color: #6b7280; background: #f9fafb; padding: 10px; border-radius: 8px; margin-bottom: 10px; line-height: 1.5; }
+        .analysis-body { font-size: 14px; color: #374151; line-height: 1.7; }
+        .survey-title { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 12px; line-height: 1.4; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; }
+        .survey-option { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: white; border-radius: 10px; margin-bottom: 8px; border: 2px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
+        .survey-option.selected { background: linear-gradient(135deg, #fff1f2, #ffe4e6); border-color: #fda4af; }
+        .survey-option input { width: 18px; height: 18px; margin-top: 2px; accent-color: #e11d48; flex-shrink: 0; }
+        .survey-option-text { flex: 1; font-size: 14px; color: #374151; font-weight: 500; }
+        .survey-input { border: none; border-bottom: 2px solid #e5e7eb; background: transparent; padding: 8px 4px; font-size: 14px; width: 100%; min-width: 200px; max-width: 300px; outline: none; flex: 1; }
+        .survey-input:focus { border-bottom-color: #e11d48; }
+        .survey-submit { width: 100%; padding: 14px; margin-top: 12px; background: linear-gradient(135deg, #e11d48, #be123c); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .survey-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .survey-submit:not(:disabled):active { transform: scale(0.98); }
+        .result-card { text-align: center; padding: 24px 20px; }
+        .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #4ade80, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3); }
+        .result-title { font-size: 22px; font-weight: 900; color: #1f2937; margin-bottom: 4px; }
+        .result-subtitle { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #e11d48, #be123c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
+        .stat-list { margin-bottom: 20px; }
+        .stat-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9fafb; border-radius: 10px; margin-bottom: 8px; text-align: left; }
+        .stat-icon { font-size: 24px; }
+        .stat-content { flex: 1; }
+        .stat-label { font-size: 13px; color: #6b7280; font-weight: 600; }
+        .stat-value { font-size: 15px; color: #1f2937; font-weight: 700; }
+        .reward-box { background: linear-gradient(135deg, #fefce8, #ffedd5); border-radius: 16px; padding: 16px; border: 2px solid #fcd34d; margin-bottom: 16px; }
+        .reward-text { font-size: 14px; color: #374151; font-weight: 600; margin-bottom: 12px; }
+        .reward-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #f97316, #dc2626); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
+        .reward-btn:disabled { opacity: 0.6; }
+        .reward-success { display: none; color: #16a34a; font-weight: 700; margin-top: 8px; }
+        .nav-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 100; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.3s; cursor: pointer; }
+        .dot.active { width: 24px; border-radius: 4px; background: white; }
+        .celebrate-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e11d48, #be123c); display: none; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; }
+        .celebrate-overlay.show { display: flex; }
+        .celebrate-circle { width: 120px; height: 120px; background: radial-gradient(circle, #ffd700, #ff6b6b); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; margin-bottom: 20px; animation: popIn 0.5s ease-out; box-shadow: 0 20px 40px rgba(255, 215, 0, 0.4); }
+        @keyframes popIn { 0% { transform: scale(0) rotate(-180deg); } 70% { transform: scale(1.2) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
+        .celebrate-text { color: white; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .celebrate-sub { color: rgba(255,255,255,0.8); font-size: 14px; }
+        .debug-nav { position: fixed; bottom: 60px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 999; }
+        .debug-btn { padding: 6px 12px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; }
+        
+        /* 新增：提交状态提示 */
+        .submit-status { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .submit-status.show { opacity: 1; }
+        .submit-status.success { background: #10b981; color: white; }
+        .submit-status.error { background: #ef4444; color: white; }
+        .submit-status.loading { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- 提交状态提示 -->
+    <div id="submitStatus" class="submit-status"></div>
+
+    <!-- 导航点 -->
+    <div class="nav-dots" id="navDots">
+        <div class="dot active" onclick="goToPage(0)"></div>
+        <div class="dot" onclick="goToPage(1)"></div>
+        <div class="dot" onclick="goToPage(2)"></div>
+        <div class="dot" onclick="goToPage(3)"></div>
+        <div class="dot" onclick="goToPage(4)"></div>
+        <div class="dot" onclick="goToPage(5)"></div>
+        <div class="dot" onclick="goToPage(6)"></div>
+    </div>
+
+    <!-- 调试导航 -->
+    <div class="debug-nav">
+        <button class="debug-btn" onclick="goToPage(0)">首页</button>
+        <button class="debug-btn" onclick="goToPage(1)">题1</button>
+        <button class="debug-btn" onclick="goToPage(2)">题2</button>
+        <button class="debug-btn" onclick="goToPage(3)">题3</button>
+        <button class="debug-btn" onclick="goToPage(4)">题4</button>
+        <button class="debug-btn" onclick="goToPage(5)">问卷1</button>
+        <button class="debug-btn" onclick="goToPage(6)">问卷2</button>
+        <button class="debug-btn" onclick="goToPage(7)">完成</button>
+    </div>
+
+    <!-- 滑动容器 -->
+    <div class="slider-container" id="slider">
+        
+        <!-- ==================== 第0页：首页 ==================== -->
+        <div class="slide-page" data-index="0">
+            <div class="content-card home-card">
+                <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #fb7185, #e11d48); border-radius: 2px; margin: 0 auto 16px;"></div>
+                
+                <div class="home-badge">🔥 火热招募中</div>
+                
+                <h1 class="home-title">题库裁判招募！</h1>
+                <h2 class="home-subtitle">A/B题大PK，你说了算</h2>
+                
+                <div class="home-desc">
+                    <div style="margin-bottom: 12px;">⏱️ 仅需1分钟，不费脑、不费力</div>
+                    <div>🎁 裁判通关，直接解锁冲刺模拟卷福利</div>
+                </div>
+                
+                <button class="start-btn" onclick="startJudge()">
+                    立即开始裁判任务 →
+                </button>
+                
+                <div class="home-stats">
+                    <span>● <span id="participantCount">2,847</span> 人已参与</span>
+                    <span>|</span>
+                    <span>平均 58 秒</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第1页：题目1对比 ==================== -->
+        <div class="slide-page" data-index="1">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 20%;"></div>
+                    </div>
+                    <span class="progress-text">1/6</span>
+                </div>
+                
+                <div class="timer">⏱️ <span id="timer1">0</span>秒</div>
+
+                <div class="tab-wrap">
+                    <button id="tab1A" class="tab-btn active" onclick="switchTab(1, 'A')">题目 A</button>
+                    <button id="tab1B" class="tab-btn inactive" onclick="switchTab(1, 'B')">题目 B</button>
+                </div>
+
+                <div class="content-box" id="box1">
+                    <div id="panel1A" class="content-panel show">
+                        <div class="question-card">
+                            <div class="question-body">习近平总书记指出："战略问题是一个政党、一个国家的根本性问题。战略上判断得准、谋划得科学、布局得合理、实施得有效，我们党和人民事业就会大有希望。"关于"坚持战略思维"，下列说法正确的有几项：</div>
+                            <div class="question-list">
+                                <div class="question-list-item">①战略思维能力是领导干部必备的基本能力，关系党和国家事业兴衰</div>
+                                <div class="question-list-item">②提高战略思维能力，需增强工作的原则性、系统性、预见性、创造性</div>
+                                <div class="question-list-item">③战略思维的根本特性是全局性，要求从全局、长远、大势上把握问题</div>
+                                <div class="question-list-item">④坚持战略思维要求在战略上保持定力，在战术上精心运筹</div>
+                            </div>
+                            <div class="options-list" id="options1A">
+                                <div class="option-item" onclick="selectOption(1, 'A', this)">A、1项</div>
+                                <div class="option-item" onclick="selectOption(1, 'A', this)">B、2项</div>
+                                <div class="option-item" onclick="selectOption(1, 'A', this)">C、3项</div>
+                                <div class="option-item" onclick="selectOption(1, 'A', this)">D、4项</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="panel1B" class="content-panel">
+                        <div class="question-card">
+                            <div class="question-body">农业农村现代化关系中国式现代化全局和成色。"十五五"时期是基本实现社会主义现代化夯实基础、全面发力的关键时期，要加快补上农业农村领域突出短板，加快建设农业强国。2026年中央一号文件《中共中央 国务院关于锚定农业农村现代化 扎实推进乡村全面振兴的意见》发布，下列有关说法正确的有（    ）。</div>
+                            <div class="question-list">
+                                <div class="question-list-item">①统筹做好市场化收购和政策性收储，促进粮食等重要农产品价格持续提升</div>
+                                <div class="question-list-item">②坚持农林牧渔并举，推动构建集约化食物供给体系</div>
+                                <div class="question-list-item">③全面开展第二轮土地承包到期后再延长三十年整省试点</div>
+                                <div class="question-list-item">④落实好粮食产销区省际横向利益补偿政策，支持粮食主产区补充财力、发展粮食产业</div>
+                            </div>
+                            <div class="options-list" id="options1B">
+                                <div class="option-item" onclick="selectOption(1, 'B', this)">A、1项</div>
+                                <div class="option-item" onclick="selectOption(1, 'B', this)">B、2项</div>
+                                <div class="option-item" onclick="selectOption(1, 'B', this)">C、3项</div>
+                                <div class="option-item" onclick="selectOption(1, 'B', this)">D、4项</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide1" class="guide-bar locked">📖 请查看题目B</div>
+
+                <div class="choice-title">凭你的刷题直觉，哪道题更像"真实考试（真题）"的风格？</div>
+
+                <div class="choice-grid">
+                    <button id="btn1A" class="choice-btn choice-btn-a" onclick="makeChoice(1, 'A')" disabled><div style="font-size: 20px; margin-bottom: 4px;">📄</div><div>题A</div></button>
+                    <button id="btn1B" class="choice-btn choice-btn-b" onclick="makeChoice(1, 'B')" disabled><div style="font-size: 20px; margin-bottom: 4px;">📄</div><div>题B</div></button>
+                    <button id="btn1Same" class="choice-btn choice-btn-same" onclick="makeChoice(1, 'same')" disabled><div style="font-size: 20px; margin-bottom: 4px;">⚖️</div><div>差不多</div></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第2页：解析1对比 ==================== -->
+        <div class="slide-page" data-index="2">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg"><div class="progress-fill" style="width: 40%;"></div></div>
+                    <span class="progress-text">2/6</span>
+                </div>
+                
+                <div class="timer">⏱️ <span id="timer2">0</span>秒</div>
+
+                <div class="tab-wrap">
+                    <button id="tab2A" class="tab-btn active" onclick="switchTab(2, 'A')">解析 A</button>
+                    <button id="tab2B" class="tab-btn inactive" onclick="switchTab(2, 'B')">解析 B</button>
+                </div>
+
+                <div class="content-box" id="box2">
+                    <div id="panel2A" class="content-panel show">
+                        <div class="analysis-card a">
+                            <div class="analysis-body">
+                                <strong>【逐项分析】</strong><br><br>
+                                <strong>①正确。</strong>新质生产力是创新起主导作用，摆脱传统经济增长方式、生产力发展路径的先进生产力质态。<br><br>
+                                <strong>②正确。</strong>习近平总书记强调要防止一哄而上、泡沫化，避免搞一种模式的"抄作业"，体现了因地制宜的重要性。<br><br>
+                                <strong>③正确。</strong>新质生产力以劳动者、劳动资料、劳动对象及其优化组合的跃升为基本内涵，以全要素生产率大幅提升为核心标志。<br><br>
+                                <strong>④正确。</strong>发展新质生产力要坚持从实际出发，先立后破、因地制宜、分类指导。<br><br>
+                                <strong>综上所述，4项均正确，答案选D。</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="panel2B" class="content-panel">
+                        <div class="analysis-card b">
+                            <div class="analysis-body">
+                                <strong>【秒杀技巧】</strong>记住"3个3"：新质生产力的3个特征（高科技、高效能、高质量）、3要素跃升（劳动者、劳动资料、劳动对象）、3个防止（一哄而上、泡沫化、抄作业）。<br><br>
+                                <strong>【快速判断】</strong><br>
+                                ①创新主导✓ ②防止抄作业✓ ③3要素跃升✓ ④因地制宜、先立后破✓<br><br>
+                                四项表述均符合官方定义，<strong>答案选D。</strong><br><br>
+                                <strong>【避坑提醒】</strong>注意"先立后破"的顺序不能颠倒，这是最新表述！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide2" class="guide-bar locked">📖 请查看解析B</div>
+
+                <div class="choice-title" style="font-size: 13px;">如果你这道题做错了，哪份解析能让你"一看就懂"并且知道以后怎么避坑？</div>
+
+                <div class="choice-grid-2">
+                    <button id="btn2A" class="choice-btn choice-btn-a" onclick="makeChoice(2, 'A')" disabled><div style="font-size: 18px; margin-bottom: 4px;">📖</div><div style="font-size: 12px;">解析A<br>更容易看懂</div></button>
+                    <button id="btn2B" class="choice-btn choice-btn-b" onclick="makeChoice(2, 'B')" disabled><div style="font-size: 18px; margin-bottom: 4px;">📖</div><div style="font-size: 12px;">解析B<br>更容易看懂</div></button>
+                    <button id="btn2Same" class="choice-btn choice-btn-same" onclick="makeChoice(2, 'same')" disabled><div style="font-size: 18px; margin-bottom: 4px;">⚖️</div><div style="font-size: 12px;">都差不多</div></button>
+                    <button id="btn2None" class="choice-btn choice-btn-gray" onclick="makeChoice(2, 'none')" disabled><div style="font-size: 18px; margin-bottom: 4px;">❓</div><div style="font-size: 12px;">都看不懂</div></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第3页：题目2对比 ==================== -->
+        <div class="slide-page" data-index="3">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg"><div class="progress-fill" style="width: 60%;"></div></div>
+                    <span class="progress-text">3/6</span>
+                </div>
+                
+                <div class="timer">⏱️ <span id="timer3">0</span>秒</div>
+
+                <div class="tab-wrap">
+                    <button id="tab3A" class="tab-btn active" onclick="switchTab(3, 'A')">题目 A</button>
+                    <button id="tab3B" class="tab-btn inactive" onclick="switchTab(3, 'B')">题目 B</button>
+                </div>
+
+                <div class="content-box" id="box3">
+                    <div id="panel3A" class="content-panel show">
+                        <div class="question-card">
+                            <div class="question-body">关于新质生产力的重要论述，下列说法正确的有几项：</div>
+                            <div class="question-list">
+                                <div class="question-list-item">①新质生产力是创新起主导作用，摆脱传统经济增长方式的先进生产力质态</div>
+                                <div class="question-list-item">②发展新质生产力要防止一哄而上、泡沫化，避免搞一种模式的"抄作业"</div>
+                                <div class="question-list-item">③新质生产力以劳动者、劳动资料、劳动对象及其优化组合的跃升为基本内涵</div>
+                                <div class="question-list-item">④发展新质生产力要因地制宜，坚持从实际出发，先立后破</div>
+                            </div>
+                            <div class="options-list" id="options3A">
+                                <div class="option-item" onclick="selectOption(3, 'A', this)">A、1项</div>
+                                <div class="option-item" onclick="selectOption(3, 'A', this)">B、2项</div>
+                                <div class="option-item" onclick="selectOption(3, 'A', this)">C、3项</div>
+                                <div class="option-item" onclick="selectOption(3, 'A', this)">D、4项</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="panel3B" class="content-panel">
+                        <div class="question-card">
+                            <div class="question-body">关于全过程人民民主，下列说法正确的有（    ）。</div>
+                            <div class="question-list">
+                                <div class="question-list-item">①全过程人民民主是社会主义民主政治的本质属性</div>
+                                <div class="question-list-item">②全过程人民民主是最广泛、最真实、最管用的民主</div>
+                                <div class="question-list-item">③全过程人民民主不仅有完整的制度程序，而且有完整的参与实践</div>
+                                <div class="question-list-item">④全过程人民民主实现了过程民主和成果民主、程序民主和实质民主的统一</div>
+                            </div>
+                            <div class="options-list" id="options3B">
+                                <div class="option-item" onclick="selectOption(3, 'B', this)">A、1项</div>
+                                <div class="option-item" onclick="selectOption(3, 'B', this)">B、2项</div>
+                                <div class="option-item" onclick="selectOption(3, 'B', this)">C、3项</div>
+                                <div class="option-item" onclick="selectOption(3, 'B', this)">D、4项</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide3" class="guide-bar locked">📖 请查看题目B</div>
+
+                <div class="choice-title">凭你的刷题直觉，哪道题更像"真实考试（真题）"的风格？</div>
+
+                <div class="choice-grid">
+                    <button id="btn3A" class="choice-btn choice-btn-a" onclick="makeChoice(3, 'A')" disabled><div style="font-size: 20px; margin-bottom: 4px;">📄</div><div>题A</div></button>
+                    <button id="btn3B" class="choice-btn choice-btn-b" onclick="makeChoice(3, 'B')" disabled><div style="font-size: 20px; margin-bottom: 4px;">📄</div><div>题B</div></button>
+                    <button id="btn3Same" class="choice-btn choice-btn-same" onclick="makeChoice(3, 'same')" disabled><div style="font-size: 20px; margin-bottom: 4px;">⚖️</div><div>差不多</div></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第4页：解析2对比 ==================== -->
+        <div class="slide-page" data-index="4">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
+                    <span class="progress-text">4/6</span>
+                </div>
+                
+                <div class="timer">⏱️ <span id="timer4">0</span>秒</div>
+
+                <div class="tab-wrap">
+                    <button id="tab4A" class="tab-btn active" onclick="switchTab(4, 'A')">解析 A</button>
+                    <button id="tab4B" class="tab-btn inactive" onclick="switchTab(4, 'B')">解析 B</button>
+                </div>
+
+                <div class="content-box" id="box4">
+                    <div id="panel4A" class="content-panel show">
+                        <div class="analysis-card a">
+                            <div class="analysis-body">
+                                <strong>【逐项分析】</strong><br><br>
+                                <strong>①正确。</strong>全过程人民民主是社会主义民主政治的本质属性，是最广泛、最真实、最管用的民主。<br><br>
+                                <strong>②正确。</strong>全过程人民民主实现了过程民主和成果民主、程序民主和实质民主、直接民主和间接民主、人民民主和国家意志相统一。<br><br>
+                                <strong>③正确。</strong>全过程人民民主不仅有完整的制度程序，而且有完整的参与实践。<br><br>
+                                <strong>④正确。</strong>全过程人民民主是全链条、全方位、全覆盖的民主。<br><br>
+                                <strong>综上所述，4项均正确，答案选D。</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="panel4B" class="content-panel">
+                        <div class="analysis-card b">
+                            <div class="analysis-body">
+                                <strong>【秒杀技巧】</strong>记住"3个全"：全链条、全方位、全覆盖；"+3统一"：过程与成果、程序与实质、直接与间接。<br><br>
+                                <strong>【快速判断】</strong><br>
+                                ①本质属性✓ ②最广泛最真实最管用✓ ③制度程序+参与实践✓ ④四个统一✓<br><br>
+                                四项表述均符合官方定义，<strong>答案选D。</strong><br><br>
+                                <strong>【避坑提醒】</strong>注意"本质属性"这个关键词，是全过程人民民主的核心定位！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide4" class="guide-bar locked">📖 请查看解析B</div>
+
+                <div class="choice-title" style="font-size: 13px;">如果你这道题做错了，哪份解析能让你"一看就懂"并且知道以后怎么避坑？</div>
+
+                <div class="choice-grid-2">
+                    <button id="btn4A" class="choice-btn choice-btn-a" onclick="makeChoice(4, 'A')" disabled><div style="font-size: 18px; margin-bottom: 4px;">📖</div><div style="font-size: 12px;">解析A<br>更容易看懂</div></button>
+                    <button id="btn4B" class="choice-btn choice-btn-b" onclick="makeChoice(4, 'B')" disabled><div style="font-size: 18px; margin-bottom: 4px;">📖</div><div style="font-size: 12px;">解析B<br>更容易看懂</div></button>
+                    <button id="btn4Same" class="choice-btn choice-btn-same" onclick="makeChoice(4, 'same')" disabled><div style="font-size: 18px; margin-bottom: 4px;">⚖️</div><div style="font-size: 12px;">都差不多</div></button>
+                    <button id="btn4None" class="choice-btn choice-btn-gray" onclick="makeChoice(4, 'none')" disabled><div style="font-size: 18px; margin-bottom: 4px;">❓</div><div style="font-size: 12px;">都看不懂</div></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第5页：问卷1 ==================== -->
+        <div class="slide-page" data-index="5">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg"><div class="progress-fill" style="width: 90%;"></div></div>
+                    <span class="progress-text">5/6</span>
+                </div>
+
+                <div class="survey-title">（多选）你觉得你选择的那份解析，赢在哪里？</div>
+
+                <div style="overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;">
+                    <label class="survey-option" onclick="toggleSurvey(5, 'step')" id="opt5-step">
+                        <input type="checkbox" id="cb5-step" onchange="updateSurveyBtn(5)">
+                        <span class="survey-option-text">步骤不省略，逻辑过渡自然</span>
+                    </label>
+
+                    <label class="survey-option" onclick="toggleSurvey(5, 'layout')" id="opt5-layout">
+                        <input type="checkbox" id="cb5-layout" onchange="updateSurveyBtn(5)">
+                        <span class="survey-option-text">排版看着舒服，重点（加粗/变色）很清晰</span>
+                    </label>
+
+                    <label class="survey-option" onclick="toggleSurvey(5, 'skill')" id="opt5-skill">
+                        <input type="checkbox" id="cb5-skill" onchange="updateSurveyBtn(5)">
+                        <span class="survey-option-text">给出了很实用的"秒杀技巧"或"避坑指南"</span>
+                    </label>
+
+                    <label class="survey-option" onclick="toggleSurvey(5, 'tone')" id="opt5-tone">
+                        <input type="checkbox" id="cb5-tone" onchange="updateSurveyBtn(5)">
+                        <span class="survey-option-text">语言不死板，像老师在跟我说话</span>
+                    </label>
+
+                    <label class="survey-option" onclick="toggleSurvey(5, 'other')" id="opt5-other">
+                        <input type="checkbox" id="cb5-other" onchange="updateSurveyBtn(5)">
+                        <span class="survey-option-text" style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                            其他：
+                            <input type="text" class="survey-input" id="txt5-other" placeholder="请输入内容" onclick="event.stopPropagation()" style="min-width: 180px; flex: 1;">
+                        </span>
+                    </label>
+                </div>
+
+                <button id="btn5Submit" class="survey-submit" onclick="submitSurvey(5)" disabled>下一题 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第6页：问卷2 ==================== -->
+        <div class="slide-page" data-index="6">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg"><div class="progress-fill" style="width: 100%;"></div></div>
+                    <span class="progress-text">6/6</span>
+                </div>
+
+                <div class="survey-title">如果解析可以更懂你，你最希望它帮你点出本题的？</div>
+
+                <div style="overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;">
+                    <label class="survey-option" onclick="toggleSurvey(6, 'mistake')" id="opt6-mistake">
+                        <input type="checkbox" id="cb6-mistake" onchange="updateSurveyBtn(6)">
+                        <span class="survey-option-text">易错点</span>
+                    </label>
+
+                    <label class="survey-option" onclick="toggleSurvey(6, 'trap')" id="opt6-trap">
+                        <input type="checkbox" id="cb6-trap" onchange="updateSurveyBtn(6)">
+                        <span class="survey-option-text">解题陷阱</span>
+                    </label>
+
+                    <label class="survey-option" onclick="toggleSurvey(6, 'other')" id="opt6-other">
+                        <input type="checkbox" id="cb6-other" onchange="updateSurveyBtn(6)">
+                        <span class="survey-option-text" style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                            其他：
+                            <input type="text" class="survey-input" id="txt6-other" placeholder="请输入内容" onclick="event.stopPropagation()" style="min-width: 180px; flex: 1;">
+                        </span>
+                    </label>
+                </div>
+
+                <button id="btn6Submit" class="survey-submit" onclick="submitSurvey(6)" disabled>完成裁判任务 ✓</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第7页：完成页 ==================== -->
+        <div class="slide-page" data-index="7">
+            <div class="content-card result-card">
+                <div class="success-icon">
+                    <svg width="40" height="40" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                
+                <h1 class="result-title">你的裁判选择，</h1>
+                <h2 class="result-subtitle">已拯救题库质量！</h2>
+
+                <div class="stat-list">
+                    <div class="stat-item">
+                        <span class="stat-icon">⏱️</span>
+                        <div class="stat-content">
+                            <div class="stat-label">测评耗时</div>
+                            <div class="stat-value"><span id="finalTime">0</span> 秒</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-icon">✅</span>
+                        <div class="stat-content">
+                            <div class="stat-label">裁判选择</div>
+                            <div class="stat-value" style="font-size: 13px;" id="finalChoices">6题全完成</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-icon">🏆</span>
+                        <div class="stat-content">
+                            <div class="stat-label">题库贡献</div>
+                            <div class="stat-value">帮助优化 <span id="contribCount" style="color: #e11d48; font-size: 18px;">57</span> 道题</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-box">
+                    <div class="reward-text">🎁 专属福利已为您准备好</div>
+                    <button class="reward-btn" id="claimBtn" onclick="claimReward()">立即领取《2026冲刺模拟卷》</button>
+                    <div class="reward-success" id="claimSuccess">✅ 福利已领取</div>
+                </div>
+
+                <div style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                    您的反馈将帮助 10,000+ 考生获得更优质的学习体验
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 完成动画 -->
+    <div class="celebrate-overlay" id="celebrate">
+        <div class="celebrate-circle">🎉</div>
+        <div class="celebrate-text">裁判任务圆满完成！</div>
+        <div class="celebrate-sub">正在生成您的裁判报告...</div>
+    </div>
+
+    <script>
+        // ==================== 数据提交模块（新增）====================
+        const DataCollector = {
+            // API配置 - 修改为你的后端地址
+            API_ENDPOINT: 'http://localhost:3000/api/survey/submit',
+            
+            // 收集完整数据
+            collectData() {
+                const endTime = Date.now();
+                const totalTime = Math.floor((endTime - startTime) / 1000);
+                
+                // 计算各维度画像（A1-A7）
+                const dimensions = this.calculateDimensions();
+                
+                return {
+                    surveyId: 'judge_ab_test_2026',
+                    submitTime: new Date().toISOString(),
+                    totalDuration: totalTime,
+                    userAgent: navigator.userAgent,
+                    screenSize: `${window.innerWidth}x${window.innerHeight}`,
+                    
+                    // 核心选择数据
+                    choices: choices.map(c => ({
+                        questionId: c.q,
+                        type: c.type,
+                        choice: c.choice || null,
+                        answers: c.answers || null,
+                        timestamp: c.timestamp || null
+                    })),
+                    
+                    // 用户画像维度（对应图1看板）
+                    dimensions: dimensions,
+                    
+                    // 汇总统计
+                    summary: {
+                        questionPreference: this.getPreferenceStats('question'),
+                        analysisPreference: this.getPreferenceStats('analysis'),
+                        surveyFeedback: this.getSurveyFeedback()
+                    }
+                };
+            },
+            
+            // 计算A1-A7维度（匹配图1看板字段）
+            calculateDimensions() {
+                const s = this.getSurveyFeedback();
+                const qPref = this.getPreferenceStats('question');
+                const aPref = this.getPreferenceStats('analysis');
+                
+                return {
+                    // A1: 目标明确度 - 从答题稳定性判断
+                    A1_targetClarity: this.inferTargetClarity(qPref),
+                    
+                    // A2: 难度感知 - 从答题时长和选择模式
+                    A2_difficulty: this.inferDifficulty(),
+                    
+                    // A3: 情绪状态 - 从问卷反馈
+                    A3_emotion: s.q6?.includes('trap') ? '焦虑' : '平稳',
+                    
+                    // A4: 备考阶段 - 从解析偏好判断
+                    A4_stage: this.inferStage(aPref),
+                    
+                    // A5: 每日时长 - 从总耗时推断
+                    A5_dailyHours: this.inferStudyHours(),
+                    
+                    // A6: 核心痛点 - 从问卷q5
+                    A6_painPoint: s.q5 ? s.q5.join(',') : '未填写',
+                    
+                    // A7: 使用工具 - 固定或从UA推断
+                    A7_tool: 'H5调研'
+                };
+            },
+            
+            inferTargetClarity(qPref) {
+                // 如果A/B选择一致，说明目标明确
+                const total = (qPref.A || 0) + (qPref.B || 0);
+                if (total === 0) return '不明确';
+                const ratio = Math.max(qPref.A || 0, qPref.B || 0) / total;
+                return ratio > 0.7 ? '明确' : ratio > 0.4 ? '较明确' : '不明确';
+            },
+            
+            inferDifficulty() {
+                const avgTime = choices.length > 0 ? 
+                    choices.reduce((a, b) => a + (b.timestamp || 0), 0) / choices.length : 0;
+                if (avgTime > 30) return '困难';
+                if (avgTime > 15) return '中等';
+                return '简单';
+            },
+            
+            inferStage(aPref) {
+                // 偏好秒杀技巧=冲刺期，偏好详细分析=基础期
+                const total = (aPref.A || 0) + (aPref.B || 0);
+                if (total === 0) return '未知';
+                return (aPref.B || 0) > (aPref.A || 0) ? '冲刺期' : '基础期';
+            },
+            
+            inferStudyHours() {
+                const t = this.collectData ? 0 : 0; // 避免递归
+                const totalTime = Math.floor((Date.now() - startTime) / 1000);
+                if (totalTime < 30) return '1-2h';
+                if (totalTime < 60) return '2-4h';
+                if (totalTime < 120) return '4-6h';
+                return '6h+';
+            },
+            
+            getPreferenceStats(type) {
+                const typeChoices = choices.filter(c => c.type === type);
+                const stats = { A: 0, B: 0, same: 0, none: 0 };
+                typeChoices.forEach(c => { if(stats[c.choice] !== undefined) stats[c.choice]++; });
+                return stats;
+            },
+            
+            getSurveyFeedback() {
+                return choices
+                    .filter(c => c.type === 'survey')
+                    .reduce((acc, c) => { acc[`q${c.q}`] = c.answers; return acc; }, {});
+            },
+            
+            // 提交数据
+            async submit() {
+                const data = this.collectData();
+                console.log('提交数据:', data);
+                
+                this.showStatus('正在提交...', 'loading');
+                
+                try {
+                    const response = await fetch(this.API_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        const err = await response.text();
+                        throw new Error(err);
+                    }
+                    
+                    const result = await response.json();
+                    this.showStatus('提交成功！', 'success');
+                    
+                    // 更新参与人数显示
+                    if (result.totalParticipants) {
+                        document.getElementById('participantCount').textContent = 
+                            result.totalParticipants.toLocaleString();
+                    }
+                    
+                    return result;
+                    
+                } catch (error) {
+                    console.error('提交失败:', error);
+                    this.showStatus('提交失败，已本地保存', 'error');
+                    this.saveLocalBackup(data);
+                    // 即使失败也继续，不阻塞用户体验
+                    return { success: false, error: error.message };
+                }
+            },
+            
+            showStatus(msg, type) {
+                const el = document.getElementById('submitStatus');
+                el.textContent = msg;
+                el.className = `submit-status ${type} show`;
+                setTimeout(() => el.classList.remove('show'), 3000);
+            },
+            
+            saveLocalBackup(data) {
+                const backups = JSON.parse(localStorage.getItem('survey_backups') || '[]');
+                backups.push({ ...data, localId: Date.now(), synced: false });
+                localStorage.setItem('survey_backups', JSON.stringify(backups));
+            },
+            
+            // 同步本地备份
+            async syncBackups() {
+                const backups = JSON.parse(localStorage.getItem('survey_backups') || '[]');
+                const unsynced = backups.filter(b => !b.synced);
+                
+                for (const backup of unsynced) {
+                    try {
+                        const response = await fetch(this.API_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(backup)
+                        });
+                        if (response.ok) {
+                            backup.synced = true;
+                        }
+                    } catch (e) {
+                        console.error('同步失败:', e);
+                    }
+                }
+                
+                localStorage.setItem('survey_backups', JSON.stringify(backups));
+            }
+        };
+
+        // ==================== 原有逻辑（保留）====================
+        let currentPage = 0;
+        let startTime = 0;
+        let timerInterval = null;
+        let choices = [];
+        
+        const qState = {
+            1: { tab: 'A', viewedA: true, viewedB: false },
+            2: { tab: 'A', viewedA: true, viewedB: false },
+            3: { tab: 'A', viewedA: true, viewedB: false },
+            4: { tab: 'A', viewedA: true, viewedB: false }
+        };
+
+        function goToPage(index) {
+            if (index < 0 || index > 7) return;
+            currentPage = index;
+            
+            const slider = document.getElementById('slider');
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            
+            if (index === 1 && !startTime) {
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimers, 1000);
+            }
+        }
+
+        function updateTimers() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            [1, 2, 3, 4].forEach(n => {
+                const el = document.getElementById(`timer${n}`);
+                if (el) el.textContent = elapsed;
+            });
+        }
+
+        function startJudge() {
+            goToPage(1);
+        }
+
+        function selectOption(qNum, panel, element) {
+            const listId = 'options' + qNum + panel;
+            const list = document.getElementById(listId);
+            if (!list) return;
+            
+            const allOptions = list.querySelectorAll('.option-item');
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        function switchTab(n, tab) {
+            const s = qState[n];
+            if (tab === 'A') s.viewedA = true;
+            if (tab === 'B') s.viewedB = true;
+            s.tab = tab;
+            
+            if (tab === 'A') {
+                document.getElementById(`tab${n}A`).className = 'tab-btn active';
+                document.getElementById(`tab${n}B`).className = 'tab-btn inactive';
+                document.getElementById(`panel${n}A`).classList.add('show');
+                document.getElementById(`panel${n}B`).classList.remove('show');
+                updateChoiceButtons(n, false);
+            } else {
+                document.getElementById(`tab${n}B`).className = 'tab-btn active';
+                document.getElementById(`tab${n}A`).className = 'tab-btn inactive';
+                document.getElementById(`panel${n}B`).classList.add('show');
+                document.getElementById(`panel${n}A`).classList.remove('show');
+                updateChoiceButtons(n, true);
+                const contentBox = document.getElementById(`box${n}`);
+                if (contentBox) contentBox.scrollTop = 0;
+            }
+        }
+        
+        function updateChoiceButtons(n, enabled) {
+            const btns = n === 2 || n === 4 ? ['A', 'B', 'Same', 'None'] : ['A', 'B', 'Same'];
+            btns.forEach(b => {
+                const btn = document.getElementById(`btn${n}${b}`);
+                if (btn) {
+                    btn.disabled = !enabled;
+                    if (!enabled) {
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        btn.style.filter = 'grayscale(100%)';
+                    } else {
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                        btn.style.filter = 'none';
+                    }
+                }
+            });
+            
+            const guide = document.getElementById(`guide${n}`);
+            if (guide) {
+                if (enabled) {
+                    guide.className = 'guide-bar unlocked';
+                    guide.textContent = '✅ 请完成下题';
+                } else {
+                    guide.className = 'guide-bar locked';
+                    guide.textContent = n === 2 || n === 4 ? '📖 请查看解析B' : '📖 请查看题目B';
+                }
+            }
+        }
+
+        function makeChoice(n, choice) {
+            const btns = n === 2 || n === 4 ? ['A', 'B', 'Same', 'None'] : ['A', 'B', 'Same'];
+            btns.forEach(b => {
+                const btn = document.getElementById(`btn${n}${b}`);
+                if (btn) btn.classList.remove('selected');
+            });
+            
+            const map = { 'A': 'A', 'B': 'B', 'same': 'Same', 'none': 'None' };
+            document.getElementById(`btn${n}${map[choice]}`).classList.add('selected');
+            
+            const type = n === 1 || n === 3 ? 'question' : 'analysis';
+            choices.push({ 
+                q: n, 
+                choice: choice, 
+                type: type,
+                timestamp: Math.floor((Date.now() - startTime) / 1000)
+            });
+            
+            setTimeout(() => goToPage(n + 1), 400);
+        }
+
+        function toggleSurvey(n, opt) {
+            const cb = document.getElementById(`cb${n}-${opt}`);
+            cb.checked = !cb.checked;
+            
+            const item = document.getElementById(`opt${n}-${opt}`);
+            if (cb.checked) item.classList.add('selected');
+            else item.classList.remove('selected');
+            
+            updateSurveyBtn(n);
+        }
+
+        function updateSurveyBtn(n) {
+            const opts = n === 5 ? ['step', 'layout', 'skill', 'tone', 'other'] : ['mistake', 'trap', 'other'];
+            let has = false;
+            opts.forEach(o => {
+                if (document.getElementById(`cb${n}-${o}`).checked) has = true;
+            });
+            document.getElementById(`btn${n}Submit`).disabled = !has;
+        }
+
+        function submitSurvey(n) {
+            const opts = n === 5 ? 
+                [{id:'step',l:'步骤'},{id:'layout',l:'排版'},{id:'skill',l:'技巧'},{id:'tone',l:'语言'},{id:'other',l:'其他',inp:true}] :
+                [{id:'mistake',l:'易错点'},{id:'trap',l:'陷阱'},{id:'other',l:'其他',inp:true}];
+            
+            const ans = [];
+            opts.forEach(o => {
+                if (document.getElementById(`cb${n}-${o.id}`).checked) {
+                    let v = o.l;
+                    if (o.inp) {
+                        const txt = document.getElementById(`txt${n}-${o.id}`);
+                        if (txt && txt.value.trim()) v += ':' + txt.value.trim();
+                    }
+                    ans.push(v);
+                }
+            });
+            
+            choices.push({ 
+                q: n, 
+                type: 'survey', 
+                answers: ans,
+                timestamp: Math.floor((Date.now() - startTime) / 1000)
+            });
+            
+            if (n === 5) {
+                goToPage(6);
+            } else {
+                // 最后一题：先提交数据，再展示完成页
+                DataCollector.submit().then(() => {
+                    showComplete();
+                }).catch(() => {
+                    // 即使失败也展示完成页
+                    showComplete();
+                });
+            }
+        }
+
+        function showComplete() {
+            clearInterval(timerInterval);
+            const total = Math.floor((Date.now() - startTime) / 1000);
+            
+            document.getElementById('celebrate').classList.add('show');
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.style.cssText = `position:fixed;width:8px;height:8px;background:${['#f5576c','#ffd700','#4facfe'][Math.random()*3|0]};left:${Math.random()*100}vw;top:-10px;border-radius:50%;animation:fall 2s linear forwards;z-index:9999;`;
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 2000);
+                }, i * 50);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('celebrate').classList.remove('show');
+                goToPage(7);
+                
+                document.getElementById('finalTime').textContent = total;
+                document.getElementById('contribCount').textContent = Math.floor(Math.random() * 20) + 50;
+                
+                const sum = choices.map(c => {
+                    if (c.type === 'survey') return `[${c.q}]${c.answers.join('、')}`;
+                    const map = { 'A': '选A', 'B': '选B', 'same': '差不多', 'none': '不懂' };
+                    const p = c.type === 'analysis' ? '解' : '题';
+                    return `[${p}${c.q}]${map[c.choice]}`;
+                }).join(' ');
+                document.getElementById('finalChoices').textContent = sum;
+            }, 2000);
+        }
+
+        const st = document.createElement('style');
+        st.textContent = `@keyframes fall{to{transform:translateY(100vh) rotate(360deg);opacity:0}}`;
+        document.head.appendChild(st);
+
+        function claimReward() {
+            const btn = document.getElementById('claimBtn');
+            btn.disabled = true;
+            btn.textContent = '✅ 福利已领取';
+            btn.style.opacity = '0.7';
+            document.getElementById('claimSuccess').style.display = 'block';
+            window.open('https://work.weixin.qq.com/kfid/kfc123456789', '_blank');
+        }
+
+        let startX = 0;
+        document.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive: true});
+        document.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0 && currentPage < 7) {
+                    if (currentPage < 5 || choices.find(c => c.q === currentPage)) {
+                        goToPage(currentPage + 1);
+                    }
+                } else if (diff < 0 && currentPage > 0) {
+                    goToPage(currentPage - 1);
+                }
+            }
+        }, {passive: true});
+
+        // 页面加载时尝试同步备份
+        window.addEventListener('load', () => {
+            DataCollector.syncBackups();
+        });
+    </script>
+</body>
+</html>
