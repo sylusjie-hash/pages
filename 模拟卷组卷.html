@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行测模拟卷智能生成系统 - 全流程展示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        * { font-family: 'Noto Sans SC', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .phase-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .phase-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .phase-card.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5);
+        }
+        .flow-connector {
+            stroke-dasharray: 8;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        .detail-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .detail-panel.open {
+            max-height: 2000px;
+            opacity: 1;
+        }
+        .decision-diamond {
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+        .scroll-indicator {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stage-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        .stage-badge::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+       .table-content {
+    position: relative;
+    min-height: 200px;
+}
+
+.table-content:not(.hidden) {
+    display: block;
+    overflow: visible;
+}
+
+/* 确保阶段产出数据存储区域不被覆盖 */
+#phase-1 .bg-gradient-to-r {
+    position: relative;
+    z-index: 10;
+    margin-top: 2rem;
+}
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-20"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px;"></div>
+        
+        <div class="relative z-10 text-center px-4 max-w-6xl mx-auto">
+            <div class="mb-6 inline-block">
+                <span class="px-4 py-2 rounded-full bg-white/20 text-white text-sm font-medium backdrop-blur-sm border border-white/30">
+                    <i class="fas fa-robot mr-2"></i><strong>上岸仓智能化考试系统<strong>
+                </span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+                行测模拟卷<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">智能生成系统</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto font-light">
+                配置驱动 · 标签匹配 · 智能质检 · 全流程自动化
+            </p>
+            
+            <!-- 流程概览卡片 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                <div class="glass-panel rounded-2xl p-4 text-white cursor-pointer hover:scale-105 transition-transform" onclick="showPhase(1)">
+                    <div class="text-3xl font-bold text-blue-300">01</div>
+                    <div class="text-sm opacity-90">前置准备</div>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 text-white cursor-pointer hover:scale-105 transition-transform" onclick="showPhase(2)">
+                    <div class="text-3xl font-bold text-green-300">02</div>
+                    <div class="text-sm opacity-90">智能配置</div>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 text-white cursor-pointer hover:scale-105 transition-transform" onclick="showPhase(3)">
+                    <div class="text-3xl font-bold text-orange-300">03</div>
+                    <div class="text-sm opacity-90">质检阶段</div>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 text-white cursor-pointer hover:scale-105 transition-transform" onclick="showPhase(4)">
+                    <div class="text-3xl font-bold text-purple-300">04</div>
+                    <div class="text-sm opacity-90">封装入库</div>
+                </div>
+            </div>
+            
+            <button onclick="scrollToContent()" class="scroll-indicator inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+                <span>查看详细流程</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent"></div>
+    </header>
+
+    <!-- 主流程展示区域 -->
+    <main class="bg-gray-50 min-h-screen pb-20" id="main-content">
+        
+        <!-- 阶段导航 -->
+        <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-gray-800 hidden md:block">流程导航</h2>
+                    <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                        <button onclick="showPhase(1)" id="nav-1" class="phase-nav px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-medium text-sm whitespace-nowrap transition-all hover:bg-blue-200">
+                            <i class="fas fa-database mr-1"></i> 前置准备
+                        </button>
+                        <button onclick="showPhase(2)" id="nav-2" class="phase-nav px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-all hover:bg-green-100 hover:text-green-700">
+                            <i class="fas fa-cogs mr-1"></i> 智能配置
+                        </button>
+                        <button onclick="showPhase(3)" id="nav-3" class="phase-nav px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-all hover:bg-orange-100 hover:text-orange-700">
+                            <i class="fas fa-check-double mr-1"></i> 质检阶段
+                        </button>
+                        <button onclick="showPhase(4)" id="nav-4" class="phase-nav px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-all hover:bg-purple-100 hover:text-purple-700">
+                            <i class="fas fa-archive mr-1"></i> 封装入库
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- 流程可视化图谱 -->
+<div class="mb-12 bg-white rounded-3xl shadow-xl p-8">
+    <h3 class="text-2xl font-bold mb-8 text-center gradient-text">全流程可视化图谱</h3>
+    <div class="relative h-80 md:h-96" id="flow-canvas">
+        <svg class="w-full h-full" viewBox="0 0 1000 320">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#6366f1" />
+                </marker>
+                <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+                </marker>
+                <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b" />
+                </marker>
+                <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#8b5cf6" />
+                </marker>
+                <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+                </marker>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                    <stop offset="33%" style="stop-color:#10b981;stop-opacity:1" />
+                    <stop offset="66%" style="stop-color:#f59e0b;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- 正向流程箭头连接线 -->
+            <!-- 阶段1 -> 阶段2 -->
+            <path d="M 140 160 L 260 160" 
+                  stroke="#3b82f6" stroke-width="3" fill="none" 
+                  marker-end="url(#arrowhead-green)" class="flow-connector"/>
+            
+            <!-- 阶段2 -> 阶段3 -->
+            <path d="M 340 160 L 460 160" 
+                  stroke="#10b981" stroke-width="3" fill="none" 
+                  marker-end="url(#arrowhead-orange)" class="flow-connector"/>
+            
+            <!-- 阶段3 -> 阶段4 -->
+            <path d="M 540 160 L 660 160" 
+                  stroke="#f59e0b" stroke-width="3" fill="none" 
+                  marker-end="url(#arrowhead-purple)" class="flow-connector"/>
+            
+            <!-- 阶段4 -> 正式题库 -->
+            <path d="M 740 160 L 820 160" 
+                  stroke="#8b5cf6" stroke-width="3" fill="none" 
+                  marker-end="url(#arrowhead)" class="flow-connector"/>
+            
+            <!-- 回流线（质检不合格）- 虚线弧线 -->
+            <path d="M 500 200 Q 400 260 300 200" 
+                  stroke="#ef4444" stroke-width="2" fill="none" 
+                  stroke-dasharray="8,4" marker-end="url(#arrowhead-red)"/>
+            
+            <!-- 回流标注 -->
+            <text x="400" y="245" fill="#ef4444" font-size="12" text-anchor="middle" font-weight="bold">质检不合格回流调整</text>
+            
+            <!-- 节点 -->
+            <g class="flow-node" data-phase="1" style="cursor: pointer;">
+                <circle cx="100" cy="160" r="45" fill="#dbeafe" stroke="#3b82f6" stroke-width="3"/>
+                <text x="100" y="155" text-anchor="middle" fill="#1e40af" font-size="14" font-weight="bold">阶段1</text>
+                <text x="100" y="175" text-anchor="middle" fill="#1e40af" font-size="12">前置准备</text>
+            </g>
+            
+            <g class="flow-node" data-phase="2" style="cursor: pointer;">
+                <circle cx="300" cy="160" r="45" fill="#d1fae5" stroke="#10b981" stroke-width="3"/>
+                <text x="300" y="155" text-anchor="middle" fill="#065f46" font-size="14" font-weight="bold">阶段2</text>
+                <text x="300" y="175" text-anchor="middle" fill="#065f46" font-size="12">智能配置</text>
+            </g>
+            
+            <g class="flow-node" data-phase="3" style="cursor: pointer;">
+                <circle cx="500" cy="160" r="45" fill="#fef3c7" stroke="#f59e0b" stroke-width="3"/>
+                <text x="500" y="155" text-anchor="middle" fill="#92400e" font-size="14" font-weight="bold">阶段3</text>
+                <text x="500" y="175" text-anchor="middle" fill="#92400e" font-size="12">质检阶段</text>
+            </g>
+            
+            <g class="flow-node" data-phase="4" style="cursor: pointer;">
+                <circle cx="700" cy="160" r="45" fill="#ede9fe" stroke="#8b5cf6" stroke-width="3"/>
+                <text x="700" y="155" text-anchor="middle" fill="#5b21b6" font-size="14" font-weight="bold">阶段4</text>
+                <text x="700" y="175" text-anchor="middle" fill="#5b21b6" font-size="12">封装入库</text>
+            </g>
+            
+            <!-- 数据库图标 -->
+            <g transform="translate(830, 135)">
+                <ellipse cx="35" cy="12" rx="30" ry="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+                <rect x="5" y="12" width="60" height="35" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+                <path d="M 5 47 Q 35 57 65 47" fill="none" stroke="#6366f1" stroke-width="2"/>
+                <text x="35" y="35" text-anchor="middle" fill="#4338ca" font-size="11" font-weight="bold">正式题库</text>
+            </g>
+        </svg>
+    </div>
+</div>
+
+            <!-- 阶段1: 前置准备 -->
+<section id="phase-1" class="phase-section mb-16">
+    <div class="flex items-center gap-4 mb-8">
+        <div class="stage-badge w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+            01
+        </div>
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">前置准备阶段</h2>
+            <p class="text-gray-600 mt-1">基础数据层建设 · 标签体系构建 · 规律分析</p>
+        </div>
+    </div>
+
+    <!-- 步骤1.1：垂直排列，全宽展示 -->
+    <div class="mb-8">
+        <!-- 步骤1.1 -->
+        <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-blue-500 mb-6" onclick="toggleDetail('detail-1-1')">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">1.1 真题解构与标签化</h3>
+                            <span class="text-sm text-gray-500">数据预处理</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-1-1"></i>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i class="fas fa-check-circle text-blue-500"></i>
+                        <span>收集近5-10年国考/省考真题</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i class="fas fa-check-circle text-blue-500"></i>
+                        <span>建立六维+地域特色的标签体系</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">考点维度</span>
+                    <span class="px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200">考频维度</span>
+                    <span class="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-medium border border-orange-200">难度维度</span>
+                </div>
+            </div>
+            
+            <div id="detail-1-1" class="detail-panel bg-gray-50 px-6 pb-6">
+                <div class="pt-4 border-t border-gray-200">
+                    <h4 class="font-semibold mb-3 text-gray-800">标签体系详细说明</h4>
+                    <div class="space-y-3">
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <div class="font-medium text-blue-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-sitemap"></i>
+                                考点维度
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-2">
+                                <div class="flex items-center gap-2 text-xs bg-blue-50 p-2 rounded">
+                                    <span class="font-medium text-blue-800">结构：</span>
+                                    <span class="font-mono">模块 → 题型 → 考点 → 知识点 （有无地域特色）→ 考法 → 解题模型</span>
+                                </div>
+                                <div class="pl-2 border-l-2 border-blue-300 mt-2 space-y-1 text-xs">
+                                    <div><span class="font-medium text-gray-700">地域特色：</span>仅作为命题材料，不改变知识点本身（如"粤港澳大湾区"）</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+    <div class="font-medium text-green-700 mb-2 flex items-center gap-2">
+        <i class="fas fa-chart-bar"></i>
+        考频维度
+    </div>
+    <div class="text-sm text-gray-600 space-y-3">
+        <!-- 本省考频 -->
+        <div class="pl-2 border-l-2 border-green-300">
+            <div class="font-medium text-green-800 text-xs mb-1">本省考频</div>
+            <div class="text-xs text-gray-600">按「考点」统计，反映知识点在<strong>本省近5年所有试卷中的总考查频率</strong>，是「考点类型」标签（必考点/高频/低频）的<strong>唯一判定依据</strong>。</div>
+        </div>
+        
+        <!-- 地域特色标记 -->
+        <div class="pl-2 border-l-2 border-blue-300">
+            <div class="font-medium text-blue-800 text-xs mb-1">地域特色标记</div>
+            <div class="text-xs text-gray-600 mb-1">仅标记该考点在本省近5年中，<strong>是否出现过以本省地域材料为载体的考查</strong>：</div>
+            <div class="flex flex-wrap gap-1 mb-1">
+                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">有：至少出现过1次本省地域材料题</span>
+                <span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">无：从未使用本省地域材料</span>
+            </div>
+            <div class="text-xs text-gray-500">若标记为「有」，可补充地域考频（如「每2年1题」），用于指导模拟卷中地域特色题的配置节奏。</div>
+        </div>
+                   
+        <!-- 核心原则 -->
+        <div class="text-xs bg-blue-50 p-2 rounded border border-blue-200">
+            <span class="font-medium text-blue-800">核心原则：</span>
+            <span class="text-blue-700">本省考频决定考点在本省的整体重要性，地域特色标记仅补充命题偏好，<strong>不参与总考频的拆分计算</strong>。</span>
+        </div>
+    </div>
+</div>
+                        
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <div class="font-medium text-orange-700 mb-1">难度维度</div>
+                            <div class="text-sm text-gray-600">地域场景不直接影响难度，难度由知识点复杂度和考法决定</div>
+                            <div class="text-xs text-gray-500 mt-1">易（>70%）/ 中（40%-70%）/ 难（<40%）</div>
+                        </div>
+                        
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+    <div class="font-medium text-purple-700 mb-2">标签呈现示例</div>
+    <div class="space-y-2 text-xs">
+        <div class="p-2 bg-green-50 rounded border border-green-200">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-1 bg-green-500 text-white rounded font-bold">福建</span>
+                <span class="text-gray-500">常识判断 → 人文历史题 → 传统文化与地理特征（<span class="font-bold text-green-700">有</span>） → 常识判断 → 特征对应法
+            </div>
+            <div class="text-xs text-green-700 mt-1 pl-16">
+                考频：必考点（每年 1 题），地域特色：每两年 1 题
+            </div>
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 流转箭头 -->
+        <div class="flex justify-center mb-6">
+            <div class="flex flex-col items-center text-gray-400">
+                <i class="fas fa-arrow-down text-2xl mb-1 animate-bounce"></i>
+                <span class="text-xs">进入命题规律分析</span>
+            </div>
+        </div>
+
+        <!-- 步骤1.2：全宽展示，三表切换 -->
+<div class="bg-white rounded-2xl shadow-lg border-l-4 border-blue-500 relative">
+    <div class="p-6 pb-8">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg">1.2 命题规律分析</h3>
+                    <span class="text-sm text-gray-500">本省专属考频・总频定权重・地域补偏好</span>
+                </div>
+            </div>
+            <!-- 省份选择器 -->
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-600">当前省份：</span>
+                <select id="provinceSelector" onchange="switchProvince(this.value)" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                    <option value="fujian">福建省考</option>
+                    <option value="guangdong">广东省考</option>
+                    <option value="jiangsu">江苏省考</option>
+                    <option value="beijing">北京市考</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- 标签页导航 -->
+<div class="flex gap-2 mb-4 border-b border-gray-200 overflow-x-auto">
+    <button onclick="switchTable('overview')" id="tab-overview" class="px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50 rounded-t-lg whitespace-nowrap">
+        表1：模块-题型-题量总览
+    </button>
+    <button onclick="switchTable('detail')" id="tab-detail" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+        表2：考点总考频汇总
+    </button>
+    <button onclick="switchTable('rotation')" id="tab-rotation" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">
+        表3：考点轮换规律
+    </button>
+</div>
+        
+        <!-- 表1：模块-题型-题量总览表 -->
+        <div id="table-overview" class="table-content" style="min-height: 300px; overflow: auto;">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-blue-100">
+                        <tr>
+                            <th class="px-3 py-2 text-left">模块</th>
+                            <th class="px-3 py-2 text-left">题型</th>
+                            <th class="px-3 py-2 text-center">总题量</th>
+                            <th class="px-3 py-2 text-center">题型占比</th>
+                            <th class="px-3 py-2 text-center">易:中:难</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="bg-blue-50 font-medium">
+                            <td class="px-3 py-2" rowspan="3">政治理论</td>
+                            <td class="px-3 py-2">时政热点题</td>
+                            <td class="px-3 py-2 text-center">8</td>
+                            <td class="px-3 py-2 text-center">53.3%</td>
+                            <td class="px-3 py-2 text-center">2:4:2</td>
+                        </tr>
+                        <tr class="bg-blue-50">
+                            <td class="px-3 py-2">党史党建题</td>
+                            <td class="px-3 py-2 text-center">4</td>
+                            <td class="px-3 py-2 text-center">26.7%</td>
+                            <td class="px-3 py-2 text-center">1:2:1</td>
+                        </tr>
+                        <tr class="bg-blue-50">
+                            <td class="px-3 py-2">政策法规题</td>
+                            <td class="px-3 py-2 text-center">3</td>
+                            <td class="px-3 py-2 text-center">20.0%</td>
+                            <td class="px-3 py-2 text-center">1:2:0</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 font-bold" colspan="2">小计</td>
+                            <td class="px-3 py-2 text-center font-bold">15</td>
+                            <td class="px-3 py-2 text-center font-bold">100%</td>
+                            <td class="px-3 py-2 text-center font-bold">4:8:3</td>
+                        </tr>
+                        <tr class="bg-green-50 font-medium">
+                            <td class="px-3 py-2" rowspan="3">常识判断</td>
+                            <td class="px-3 py-2">科技成就题</td>
+                            <td class="px-3 py-2 text-center">4</td>
+                            <td class="px-3 py-2 text-center">40.0%</td>
+                            <td class="px-3 py-2 text-center">1:2:1</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2">法律常识题</td>
+                            <td class="px-3 py-2 text-center">3</td>
+                            <td class="px-3 py-2 text-center">30.0%</td>
+                            <td class="px-3 py-2 text-center">1:2:0</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2">人文历史题</td>
+                            <td class="px-3 py-2 text-center">3</td>
+                            <td class="px-3 py-2 text-center">30.0%</td>
+                            <td class="px-3 py-2 text-center">1:1:1</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 font-bold" colspan="2">小计</td>
+                            <td class="px-3 py-2 text-center font-bold">10</td>
+                            <td class="px-3 py-2 text-center font-bold">100%</td>
+                            <td class="px-3 py-2 text-center font-bold">3:5:2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 表2：考点总考频汇总 -->
+<div id="table-detail" class="table-content hidden">
+    <!-- 说明文字 -->
+    
+    <!-- 福建数据 -->
+    <div id="province-fujian" class="province-data">
+        <div class="mb-4">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">福建</span>
+                考点总考频汇总
+            </h5>
+            <div class="mb-2 text-xs text-purple-700 bg-purple-50 p-2 rounded border border-purple-200">
+                <i class="fas fa-lightbulb mr-1"></i>
+                <strong>配置示例：</strong>「绿色发展」总考频每年1题，地域特色每2年1题 → 平均每2套卷安排1道地域题即可
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-purple-100">
+                        <tr>
+                            <th class="px-3 py-2 text-left">模块</th>
+                            <th class="px-3 py-2 text-left">题型</th>
+                            <th class="px-3 py-2 text-left">考点名称</th>
+                            <th class="px-3 py-2 text-center">本省考频</th>
+                            <th class="px-3 py-2 text-center">考点类型</th>
+                            <th class="px-3 py-2 text-center">是否有地域性</th>
+                            <th class="px-3 py-2 text-center">地域特色</th>
+                            <th class="px-3 py-2 text-left">本省地域场景</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2">常识判断</td>
+                            <td class="px-3 py-2">人文历史题</td>
+                            <td class="px-3 py-2 font-medium">传统文化与地理特征</td>
+                            <td class="px-3 py-2 text-center font-medium">每年 1 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">必考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">有</span></td>
+                            <td class="px-3 py-2 text-center text-green-700 font-medium">每年 1 题</td>
+                            <td class="px-3 py-2">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">闽文化与土楼</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2">科技成就题</td>
+                            <td class="px-3 py-2">绿色发展</td>
+                            <td class="px-3 py-2 font-medium">绿色发展</td>
+                            <td class="px-3 py-2 text-center font-medium">每年 1 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">必考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">有</span></td>
+                            <td class="px-3 py-2 text-center text-green-700 font-medium">每 2 年 1 题</td>
+                            <td class="px-3 py-2">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">生态文明试验区</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="px-3 py-2">政治理论</td>
+                            <td class="px-3 py-2">时政热点题</td>
+                            <td class="px-3 py-2 font-medium">年度重大会议精神</td>
+                            <td class="px-3 py-2 text-center font-medium">每年 5-6 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">必考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">无</span></td>
+                            <td class="px-3 py-2 text-center text-gray-400">—</td>
+                            <td class="px-3 py-2">
+                                <span class="text-gray-500 italic">（无）</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-blue-50">
+                            <td class="px-3 py-2">政治理论</td>
+                            <td class="px-3 py-2">政策法规题</td>
+                            <td class="px-3 py-2 font-medium">区域发展战略</td>
+                            <td class="px-3 py-2 text-center font-medium">每 2 年 1 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">高频考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">无</span></td>
+                            <td class="px-3 py-2 text-center text-gray-400">—</td>
+                            <td class="px-3 py-2">
+                                <span class="text-gray-500 italic">（无）</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 广东数据（默认隐藏） -->
+    <div id="province-guangdong" class="province-data hidden">
+        <div class="mb-4">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">广东</span>
+                <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">表2</span>
+                考点总考频汇总（含地域特色）
+            </h5>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-purple-100">
+                        <tr>
+                            <th class="px-3 py-2 text-left">模块</th>
+                            <th class="px-3 py-2 text-left">题型</th>
+                            <th class="px-3 py-2 text-left">考点名称</th>
+                            <th class="px-3 py-2 text-center">本省总考频</th>
+                            <th class="px-3 py-2 text-center">考点类型</th>
+                            <th class="px-3 py-2 text-center">是否有地域性</th>
+                            <th class="px-3 py-2 text-center">地域考频</th>
+                            <th class="px-3 py-2 text-left">本省地域场景</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="bg-orange-50">
+                            <td class="px-3 py-2">常识判断</td>
+                            <td class="px-3 py-2">人文历史题</td>
+                            <td class="px-3 py-2 font-medium">传统文化与地理特征</td>
+                            <td class="px-3 py-2 text-center font-medium">每年 1 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">必考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">有</span></td>
+                            <td class="px-3 py-2 text-center text-orange-700 font-medium">每年 1 题</td>
+                            <td class="px-3 py-2">
+                                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">岭南文化</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-orange-50">
+                            <td class="px-3 py-2">政治理论</td>
+                            <td class="px-3 py-2">政策法规题</td>
+                            <td class="px-3 py-2 font-medium">区域发展战略</td>
+                            <td class="px-3 py-2 text-center font-medium">每年 2-3 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">高频考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">有</span></td>
+                            <td class="px-3 py-2 text-center text-orange-700 font-medium">每年 1 题</td>
+                            <td class="px-3 py-2">
+                                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">粤港澳大湾区</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="px-3 py-2">政治理论</td>
+                            <td class="px-3 py-2">时政热点题</td>
+                            <td class="px-3 py-2 font-medium">年度重大会议精神</td>
+                            <td class="px-3 py-2 text-center font-medium">每年 5-6 题</td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">必考点</span></td>
+                            <td class="px-3 py-2 text-center"><span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">无</span></td>
+                            <td class="px-3 py-2 text-center text-gray-400">—</td>
+                            <td class="px-3 py-2">
+                                <span class="text-gray-500 italic">（无地域材料）</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 其他省份数据占位 -->
+    <div id="province-jiangsu" class="province-data hidden">
+        <div class="p-8 text-center text-gray-500">
+            <i class="fas fa-database text-4xl mb-2 text-gray-300"></i>
+            <p>江苏省考考频数据表（独立存储）</p>
+            <p class="text-xs mt-1">结构同福建/广东表，仅包含本省考频数据</p>
+        </div>
+    </div>
+    <div id="province-beijing" class="province-data hidden">
+        <div class="p-8 text-center text-gray-500">
+            <i class="fas fa-database text-4xl mb-2 text-gray-300"></i>
+            <p>北京市考考频数据表（独立存储）</p>
+            <p class="text-xs mt-1">结构同福建/广东表，仅包含本省考频数据</p>
+        </div>
+    </div>
+</div>
+        
+        <!-- 表3：考点轮换规律表 -->
+        <div id="table-rotation" class="table-content hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-blue-100">
+                        <tr>
+                            <th class="px-3 py-2 text-left">模块</th>
+                            <th class="px-3 py-2 text-left">题型</th>
+                            <th class="px-3 py-2 text-left">必考点轮换规则</th>
+                            <th class="px-3 py-2 text-left">高频考点轮换规则</th>
+                            <th class="px-3 py-2 text-left">低频考点配置规则</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-3 py-2 font-medium" rowspan="3">政治理论</td>
+                            <td class="px-3 py-2">时政热点题</td>
+                            <td class="px-3 py-2 text-xs bg-red-50">每套卷必出：<br><strong>年度重大会议+重大民生/科技事件</strong></td>
+                            <td class="px-3 py-2 text-xs bg-orange-50">每套卷选1个：<br>国际形势/地方治理</td>
+                            <td class="px-3 py-2 text-xs bg-gray-50">每2套卷选1个：<br>地方治理创新</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2">党史党建题</td>
+                            <td class="px-3 py-2 text-xs bg-red-50">每套卷必出：<br><strong>党史关键节点+党的建设理论</strong></td>
+                            <td class="px-3 py-2 text-xs bg-orange-50">每套卷选1个：<br>红色精神谱系</td>
+                            <td class="px-3 py-2 text-xs bg-gray-50">每3套卷选1个：<br>地方党史人物</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2">政策法规题</td>
+                            <td class="px-3 py-2 text-xs bg-red-50">每套卷必出：<br><strong>新修订法律法规</strong></td>
+                            <td class="px-3 py-2 text-xs bg-orange-50">每套卷选1个：<br>部门规章</td>
+                            <td class="px-3 py-2 text-xs bg-gray-50">每2套卷选1个：<br>地方性法规</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2 font-medium" rowspan="3">常识判断</td>
+                            <td class="px-3 py-2">科技成就题</td>
+                            <td class="px-3 py-2 text-xs bg-red-50">每套卷必出：<br><strong>重大科技工程+基础科学常识</strong></td>
+                            <td class="px-3 py-2 text-xs bg-orange-50">每套卷选1个：<br>前沿科技概念</td>
+                            <td class="px-3 py-2 text-xs bg-gray-50">每2套卷选1个：<br>科技史人物</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2">法律常识题</td>
+                            <td class="px-3 py-2 text-xs bg-red-50">每套卷必出：<br><strong>宪法+民事/刑事基础</strong></td>
+                            <td class="px-3 py-2 text-xs bg-orange-50">每套卷选1个：<br>行政法</td>
+                            <td class="px-3 py-2 text-xs bg-gray-50">每3套卷选1个：<br>国际法常识</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="px-3 py-2">人文历史题</td>
+                            <td class="px-3 py-2 text-xs bg-red-50">每套卷必出：<br><strong>中国古代史</strong></td>
+                            <td class="px-3 py-2 text-xs bg-orange-50">每套卷选1-2个：<br>地方文化（闽/粤/苏轮换）</td>
+                            <td class="px-3 py-2 text-xs bg-gray-50">每2套卷选1个：<br>世界史</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 bg-green-50 rounded-lg p-3 border border-green-200">
+    <div class="flex items-center gap-2 mb-2">
+        <i class="fas fa-sync-alt text-green-600"></i>
+        <span class="font-bold text-green-800 text-sm">地方文化轮换规则（人文历史题）</span>
+    </div>
+    <div class="text-xs text-green-700 space-y-2">
+        <div>高频考点中「地方文化」按<strong>本省专属地域</strong>固定配置，地域考频与配置节奏联动：</div>
+        <div class="pl-2 space-y-1">
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">福建卷</span>
+                <span>固定使用「闽文化与土楼」场景，地域考频每年 1 题 → <strong>每套卷必出 1 道地域题</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs">广东卷</span>
+                <span>固定使用「岭南文化」场景，地域考频每年 1 题 → <strong>每套卷必出 1 道地域题</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">江苏卷</span>
+                <span>固定使用「吴越文化」场景，地域考频每 2 年 1 题 → <strong>每 2 套卷选 1 道地域题</strong></span>
+            </div>
+        </div>
+        <div class="text-gray-600 mt-2">每个地域场景考查周期约 2-3 年，确保本省考生稳定接触本地文化考点。</div>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- 数据存储展示 -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+        <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-database text-blue-600"></i>
+            阶段产出数据存储
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-archive text-blue-600 text-sm"></i>
+                    </div>
+                    <span class="font-semibold text-gray-800">母题库</span>
+                </div>
+                <p class="text-sm text-gray-600">存储标签化后的历年真题，支持多维度检索与调用</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-table text-green-600 text-sm"></i>
+                    </div>
+                    <span class="font-semibold text-gray-800">命题规律分析表</span>
+                </div>
+                <p class="text-sm text-gray-600">按省份分类的命题特征数据库，为生成提供配置基准</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript函数：切换表格 -->
+    <script>
+    function switchTable(tableName) {
+        // 隐藏所有表格
+        document.querySelectorAll('.table-content').forEach(table => {
+            table.classList.add('hidden');
+        });
+        
+        // 显示选中表格
+        document.getElementById('table-' + tableName).classList.remove('hidden');
+        
+        // 更新标签样式
+        document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+            tab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            tab.classList.add('text-gray-500');
+        });
+        
+        const activeTab = document.getElementById('tab-' + tableName);
+        activeTab.classList.remove('text-gray-500');
+        activeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+    }
+
+        // 省份切换函数
+function switchProvince(province) {
+    // 隐藏所有省份数据
+    document.querySelectorAll('.province-data').forEach(data => {
+        data.classList.add('hidden');
+    });
+    
+    // 显示选中省份数据
+    document.getElementById('province-' + province).classList.remove('hidden');
+}
+    </script>
+</section>
+
+            <!-- 流转箭头 -->
+            <div class="flex justify-center mb-16">
+                <div class="flex flex-col items-center text-gray-400">
+                    <i class="fas fa-arrow-down text-3xl mb-2 animate-bounce"></i>
+                    <span class="text-sm">进入智能配置阶段</span>
+                </div>
+            </div>
+
+
+            <!-- 阶段2: 智能配置 -->
+            <section id="phase-2" class="phase-section mb-16">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="stage-badge w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                        02
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">智能配置阶段</h2>
+                        <p class="text-gray-600 mt-1">核心引擎 · 配置驱动 · 标签匹配</p>
+                    </div>
+                </div>
+
+                <!-- 步骤卡片区域 - 改为2x2网格布局 -->
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <!-- 步骤2.1 -->
+                    <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-green-500" onclick="toggleDetail('detail-2-1')">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 font-bold">2.1</div>
+                                    <div>
+                                        <h3 class="font-bold text-lg text-gray-800">调取命题规律</h3>
+                                        <span class="text-sm text-gray-500">加载地域专属配置</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-2-1"></i>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-map-marker-alt text-green-500 w-4"></i>
+                                    <span>选择目标地域/省份</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-database text-green-500 w-4"></i>
+                                    <span>加载对应命题规律表</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-table text-green-500 w-4"></i>
+                                    <span>获取三表结构数据</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">模块-题型-题量</span>
+                                <span class="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-medium border border-purple-200">考点轮换规则</span>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-2-1" class="detail-panel bg-gray-50 px-6 pb-6">
+                            <div class="pt-4 border-t border-gray-200">
+                                <h4 class="font-semibold mb-3 text-gray-800">输入参数</h4>
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                        <div class="text-sm font-medium text-gray-700 mb-2">目标地域</div>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">国考</span>
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">福建省考</span>
+                                            <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">广东省考</span>
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">江苏省考</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                        <div class="text-sm font-medium text-gray-700 mb-2">加载数据</div>
+                                        <ul class="text-xs text-gray-600 space-y-1">
+                                            <li>• 表1：模块-题型-题量总览</li>
+                                            <li>• 表2：考点分层明细（含地域性标记）</li>
+                                            <li>• 表3：考点轮换规律</li>
+                                            <li>• 表4：地域-模块-考情映射</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤2.2 - 优化布局 -->
+                    <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-green-500" onclick="toggleDetail('detail-2-2')">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 font-bold">2.2</div>
+                                    <div>
+                                        <h3 class="font-bold text-lg text-gray-800">生成配置表</h3>
+                                        <span class="text-sm text-gray-500">双层匹配策略</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-2-2"></i>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-layer-group text-green-500 w-4"></i>
+                                    <span>第1层：考频类型筛选</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-map-marked-alt text-green-500 w-4"></i>
+                                    <span>第2层：地域特色匹配</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-sliders-h text-green-500 w-4"></i>
+                                    <span>执行智能配置策略</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-medium border border-red-200">必考点保底</span>
+                                <span class="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-medium border border-orange-200">高频轮换</span>
+                                <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">低频点缀</span>
+                                <span class="px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200">地域特色</span>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-2-2" class="detail-panel bg-gray-50 px-6 pb-6">
+                            <div class="pt-4 border-t border-gray-200 space-y-4">
+                                <!-- 双层策略可视化 -->
+                                <div class="bg-white rounded-xl p-4 border border-gray-200">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">双层匹配策略</span>
+                                        <span class="text-xs text-gray-500">考频类型 ⊥ 地域特色</span>
+                                    </div>
+                                    
+                                    <!-- 第一层 -->
+                                    <div class="mb-4">
+                                        <div class="text-xs font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-full bg-red-100 text-red-700 flex items-center justify-center text-xs">1</span>
+                                            考频类型 → 决定「考不考」
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div class="bg-red-50 rounded-lg p-2 text-center border border-red-200">
+                                                <div class="text-red-700 font-bold text-sm">必考点</div>
+                                                <div class="text-xs text-red-600">必须入选</div>
+                                            </div>
+                                            <div class="bg-orange-50 rounded-lg p-2 text-center border border-orange-200">
+                                                <div class="text-orange-700 font-bold text-sm">高频考点</div>
+                                                <div class="text-xs text-orange-600">按规则选N</div>
+                                            </div>
+                                            <div class="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
+                                                <div class="text-gray-700 font-bold text-sm">低频考点</div>
+                                                <div class="text-xs text-gray-600">每N套1个</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 第二层 -->
+                                    <div>
+                                        <div class="text-xs font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs">2</span>
+                                            地域特色 → 决定「怎么考」
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">查是否有地域性</span>
+                                                <i class="fas fa-arrow-right text-gray-400"></i>
+                                                <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded">查地域考频</span>
+                                                <i class="fas fa-arrow-right text-gray-400"></i>
+                                                <span class="px-2 py-1 bg-green-50 text-green-700 rounded">匹配场景</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 场景示例 -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-red-50 rounded-lg p-3 border-l-4 border-red-500">
+                                        <div class="text-xs font-bold text-red-800 mb-1">场景1：必考点+有地域</div>
+                                        <div class="text-xs text-red-700">传统文化（每年1题）→ 必出地域题</div>
+                                    </div>
+                                    <div class="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-500">
+                                        <div class="text-xs font-bold text-blue-800 mb-1">场景2：必考点+无地域</div>
+                                        <div class="text-xs text-blue-700">重大会议 → 出常规题</div>
+                                    </div>
+                                    <div class="bg-orange-50 rounded-lg p-3 border-l-4 border-orange-500">
+                                        <div class="text-xs font-bold text-orange-800 mb-1">场景3：高频+有地域</div>
+                                        <div class="text-xs text-orange-700">绿色发展（每2年1题）→ 按规则判断</div>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-lg p-3 border-l-4 border-gray-500">
+                                        <div class="text-xs font-bold text-gray-800 mb-1">场景4：低频+有地域</div>
+                                        <div class="text-xs text-gray-700">地方治理 → 偶出地域题</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤2.3 -->
+                    <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-green-500" onclick="toggleDetail('detail-2-3')">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 font-bold">2.3</div>
+                                    <div>
+                                        <h3 class="font-bold text-lg text-gray-800">智能抽题</h3>
+                                        <span class="text-sm text-gray-500">标签匹配算法</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-2-3"></i>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-tags text-green-500 w-4"></i>
+                                    <span>八维标签交叉验证</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-balance-scale text-green-500 w-4"></i>
+                                    <span>难度系数动态平衡</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-check-double text-green-500 w-4"></i>
+                                    <span>考点覆盖度检测</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200">标签匹配</span>
+                                <span class="px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium border border-yellow-200">难度平衡</span>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-2-3" class="detail-panel bg-gray-50 px-6 pb-6">
+                            <div class="pt-4 border-t border-gray-200">
+                                <h4 class="font-semibold mb-3 text-gray-800">匹配逻辑</h4>
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                        <div class="text-xs font-medium text-gray-700 mb-2">八维标签匹配</div>
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">模块</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">题型</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">考点</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">知识点</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">考法</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">模型</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">难度</span>
+                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">地域性</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                        <div class="text-xs font-medium text-gray-700 mb-2">动态平衡策略</div>
+                                        <ul class="text-xs text-gray-600 space-y-1">
+                                            <li>• 实时监测已选题目难度分布</li>
+                                            <li>• 动态调整后续抽题难度系数</li>
+                                            <li>• 确保易:中:难 = 3:5:2</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤2.4 -->
+                    <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-green-500" onclick="toggleDetail('detail-2-4')">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 font-bold">2.4</div>
+                                    <div>
+                                        <h3 class="font-bold text-lg text-gray-800">试卷组装</h3>
+                                        <span class="text-sm text-gray-500">生成最终产物</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-2-4"></i>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-file-alt text-green-500 w-4"></i>
+                                    <span>组装完整模拟卷（125题）</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-table text-green-500 w-4"></i>
+                                    <span>生成模拟卷基础信息表</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-barcode text-green-500 w-4"></i>
+                                    <span>每题完整标签属性</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-200">模拟卷</span>
+                                <span class="px-3 py-1 rounded-full bg-pink-50 text-pink-700 text-xs font-medium border border-pink-200">信息表</span>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-2-4" class="detail-panel bg-gray-50 px-6 pb-6">
+                            <div class="pt-4 border-t border-gray-200">
+                                <h4 class="font-semibold mb-3 text-gray-800">输出产物</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200 text-center">
+                                        <i class="fas fa-file-alt text-2xl text-blue-500 mb-2"></i>
+                                        <div class="text-sm font-medium text-gray-800">完整模拟卷</div>
+                                        <div class="text-xs text-gray-500">125题标准卷</div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200 text-center">
+                                        <i class="fas fa-table text-2xl text-green-500 mb-2"></i>
+                                        <div class="text-sm font-medium text-gray-800">基础信息表</div>
+                                        <div class="text-xs text-gray-500">含完整标签</div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200 text-center">
+                                        <i class="fas fa-chart-bar text-2xl text-purple-500 mb-2"></i>
+                                        <div class="text-sm font-medium text-gray-800">难度分布统计</div>
+                                        <div class="text-xs text-gray-500">易中难占比</div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200 text-center">
+                                        <i class="fas fa-link text-2xl text-orange-500 mb-2"></i>
+                                        <div class="text-sm font-medium text-gray-800">母题关联</div>
+                                        <div class="text-xs text-gray-500">溯源信息</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 配置表示例 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-green-200">
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-table text-green-600"></i>
+                            模拟卷配置表示例
+                        </h4>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">双层匹配结果</span>
+                    </div>
+                    
+                    <!-- 表格区域 -->
+                    <div class="overflow-x-auto rounded-xl border border-gray-200">
+                        <table class="w-full text-sm" id="configTable">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-12">题号</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-20">考点类型</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-24">题型</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200">考点</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200">知识点</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-24">考法</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-24">模型</th>
+                                    <th class="px-3 py-3 text-center font-semibold text-gray-700 border-b border-gray-200 w-20">题目类型</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-28">地域场景</th>
+                                    <th class="px-3 py-3 text-center font-semibold text-gray-700 border-b border-gray-200 w-20">难度</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-32">关联母题</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-gray-700 border-b border-gray-200 w-28">模型</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <!-- 场景1：必考点 + 无地域特色 -->
+                                <tr class="hover:bg-gray-50 bg-blue-50/20" data-row="2">
+                                    <td class="px-3 py-3 font-mono font-medium text-gray-900">002</td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded-md text-xs font-medium">必考点</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">政治理论</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-gray-700">时政热点题</td>
+                                    <td class="px-3 py-3 font-medium text-gray-800">年度重大会议精神</td>
+                                    <td class="px-3 py-3 text-gray-600">二十大报告核心部署</td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">关键词定位</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">常规题</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span class="text-gray-400">—</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        <select class="difficulty-select w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors text-green-700" onchange="updateDifficulty(this, 2)">
+                                            <option value="易" selected>易</option>
+                                            <option value="中">中</option>
+                                            <option value="难">难</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <select class="mother-select w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors" onchange="updateMother(this, 2)">
+                                            <option value="M-2024-001" selected>M-2024-001</option>
+                                            <option value="M-2024-018">M-2024-018</option>
+                                            <option value="M-2023-025">M-2023-025</option>
+                                            <option value="M-2024-通用-015">M-2024-通用-015</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <select class="model-select w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors" onchange="updateModel(this, 2)">
+                                            <option value="关键词定位" selected>关键词定位</option>
+                                            <option value="时间轴梳理">时间轴梳理</option>
+                                            <option value="对比分析">对比分析</option>
+                                            <option value="排除法">排除法</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <!-- 场景2：高频考点 + 有地域特色 + 本轮出地域题 -->
+                                <tr class="hover:bg-gray-50 bg-orange-50/20" data-row="3">
+                                    <td class="px-3 py-3 font-mono font-medium text-gray-900">003</td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-md text-xs font-medium">高频考点</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs">常识判断</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-gray-700">科技成就题</td>
+                                    <td class="px-3 py-3 font-medium text-gray-800">绿色发展</td>
+                                    <td class="px-3 py-3 text-gray-600">生态文明试验区</td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">案例分析</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">地域题</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs">生态文明试验区</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        <select class="difficulty-select w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors text-yellow-700" onchange="updateDifficulty(this, 3)">
+                                            <option value="易">易</option>
+                                            <option value="中" selected>中</option>
+                                            <option value="难">难</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <select class="mother-select w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors" onchange="updateMother(this, 3)">
+                                            <option value="M-2024-FJ-089" selected>M-2024-FJ-089</option>
+                                            <option value="M-2024-FJ-092">M-2024-FJ-092</option>
+                                            <option value="M-2023-FJ-045">M-2023-FJ-045</option>
+                                            <option value="M-2024-通用-078">M-2024-通用-078</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <select class="model-select w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors" onchange="updateModel(this, 3)">
+                                            <option value="案例分析" selected>案例分析</option>
+                                            <option value="概念辨析">概念辨析</option>
+                                            <option value="数据对比">数据对比</option>
+                                            <option value="政策解读">政策解读</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 操作提示 -->
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                        <span>提示：点击"难度"、"关联母题"、最后一列"模型"的下拉框可直接修改配置</span>
+                    </div>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="mt-6 bg-gradient-to-r from-gray-50 to-green-50 rounded-xl p-5 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-gray-800 flex items-center gap-2">
+                                <i class="fas fa-chart-pie text-green-600"></i>
+                                本卷题目类型分布统计
+                            </span>
+                            <span class="text-xs text-gray-500">考频类型与地域特色解耦统计</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-4 gap-4 mb-4">
+                            <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-red-100">
+                                <div class="text-3xl font-bold text-red-600 mb-1">12</div>
+                                <div class="text-sm text-gray-600 font-medium">必考点</div>
+                                <div class="text-xs text-red-600 mt-1">100%入选</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-orange-100">
+                                <div class="text-3xl font-bold text-orange-600 mb-1">28</div>
+                                <div class="text-sm text-gray-600 font-medium">高频考点</div>
+                                <div class="text-xs text-orange-600 mt-1">按规则入选</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-200">
+                                <div class="text-3xl font-bold text-gray-600 mb-1">8</div>
+                                <div class="text-sm text-gray-600 font-medium">低频考点</div>
+                                <div class="text-xs text-gray-600 mt-1">点缀配置</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-green-200">
+                                <div class="text-3xl font-bold text-green-600 mb-1">4</div>
+                                <div class="text-sm text-gray-600 font-medium">地域特色题</div>
+                                <div class="text-xs text-green-600 mt-1">按地域考频配置</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 border border-gray-200 space-y-2">
+                            <div class="text-xs font-medium text-gray-700 mb-2">匹配逻辑验证：</div>
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="fas fa-check-circle text-green-500"></i>
+                                <span class="text-gray-700">「传统文化」必考点 + 地域考频每年1题 → <span class="text-green-600 font-medium">出地域题 ✓</span></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="fas fa-check-circle text-green-500"></i>
+                                <span class="text-gray-700">「重大会议」必考点 + 无地域性 → <span class="text-blue-600 font-medium">出常规题 ✓</span></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="fas fa-check-circle text-green-500"></i>
+                                <span class="text-gray-700">「绿色发展」高频考点 + 本轮匹配地域考频 → <span class="text-green-600 font-medium">出地域题 ✓</span></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="fas fa-circle text-gray-300"></i>
+                                <span class="text-gray-500">「区域发展」高频考点 + 本轮不匹配地域考频 → 出常规题</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+<script>
+// 更新模型
+function updateModel(select, row) {
+    const value = select.value;
+    console.log(`第${row}题模型更新为: ${value}`);
+    // 添加视觉反馈
+    select.classList.add('bg-green-50', 'border-green-500');
+    setTimeout(() => {
+        select.classList.remove('bg-green-50', 'border-green-500');
+    }, 500);
+}
+
+// 更新难度
+function updateDifficulty(select, row) {
+    const value = select.value;
+    console.log(`第${row}题难度更新为: ${value}`);
+    // 根据难度改变文字颜色
+    select.className = 'difficulty-select w-full px-2 py-1.5 text-xs border rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-white transition-colors';
+    if (value === '易') {
+        select.classList.add('border-green-300', 'text-green-700');
+    } else if (value === '中') {
+        select.classList.add('border-yellow-300', 'text-yellow-700');
+    } else if (value === '难') {
+        select.classList.add('border-red-300', 'text-red-700');
+    }
+}
+
+// 更新关联母题
+function updateMother(select, row) {
+    const value = select.value;
+    console.log(`第${row}题关联母题更新为: ${value}`);
+    // 添加视觉反馈
+    select.classList.add('bg-blue-50', 'border-blue-500');
+    setTimeout(() => {
+        select.classList.remove('bg-blue-50', 'border-blue-500');
+    }, 500);
+}
+</script>
+
+            <!-- 流转箭头 -->
+            <div class="flex justify-center mb-16">
+                <div class="flex flex-col items-center text-gray-400">
+                    <i class="fas fa-arrow-down text-3xl mb-2 animate-bounce"></i>
+                    <span class="text-sm">进入质检阶段</span>
+                </div>
+            </div>
+
+            <!-- 阶段3: 质检阶段 -->
+            <section id="phase-3" class="phase-section mb-16">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="stage-badge w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                        03
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">质检阶段</h2>
+                        <p class="text-gray-600 mt-1">闭环质控 · 智能预警 · 动态调整</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <!-- 左侧：质检流程 -->
+                        <div class="flex-1 w-full">
+                            <div class="relative">
+                                <!-- 步骤3.1 -->
+                                <div class="flex gap-4 mb-6">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">3.1</div>
+                                        <div class="w-0.5 h-16 bg-orange-200"></div>
+                                    </div>
+                                    <div class="flex-1 pt-2">
+                                        <h3 class="font-bold text-gray-800">规则对比验证</h3>
+                                        <p class="text-sm text-gray-600 mt-1">模拟卷基础信息表 vs 命题规律分析表</p>
+                                        <div class="mt-2 flex gap-2">
+                                            <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">题量校验</span>
+                                            <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">考点覆盖</span>
+                                            <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">难度分布</span>
+                                            <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">地域特色</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 决策点 -->
+                                <div class="flex justify-center mb-6">
+                                    <div class="decision-diamond w-32 h-32 bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white font-bold shadow-lg">
+                                        <div class="text-center">
+                                            <div class="text-sm">是否符合</div>
+                                            <div class="text-xs opacity-90">命题规律?</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 分支：不符合 -->
+                                <div class="flex gap-4 mb-6 border-l-4 border-red-400 pl-4 bg-red-50 rounded-r-lg p-4">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-red-800 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            3.2 预警与调整
+                                        </h3>
+                                        <ul class="text-sm text-red-700 mt-2 space-y-1">
+                                            <li>• 输出详细预警报告</li>
+                                            <li>• 说明具体不符合原因</li>
+                                            <li>• 给出智能调整建议</li>
+                                            <li>• 自动/人工重新抽题</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 步骤3.3 -->
+                                <div class="flex gap-4">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">3.3</div>
+                                    </div>
+                                    <div class="flex-1 pt-2">
+                                        <h3 class="font-bold text-green-800">质检通过</h3>
+                                        <p class="text-sm text-gray-600 mt-1">确认试卷结构，锁定试题内容</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：质检报告示例 -->
+<div class="w-full lg:w-96">
+    <div class="bg-gray-900 rounded-xl p-4 text-green-400 font-mono text-xs shadow-2xl">
+    <div class="flex items-center gap-2 mb-3 border-b border-gray-700 pb-2">
+        <i class="fas fa-terminal"></i>
+        <span>质检报告 - 福建省考模拟卷A001</span>
+    </div>
+    <div class="space-y-2">
+        <div class="text-gray-500"># 开始校验...</div>
+        
+        <div class="text-white mt-2">【第1层】考频类型校验</div>
+        <div>> 必考点覆盖 <span class="text-green-400">[通过]</span> 12/12</div>
+        <div>> 高频考点覆盖 <span class="text-green-400">[通过]</span> 28/30</div>
+        <div>> 低频考点覆盖 <span class="text-green-400">[通过]</span> 8/10</div>
+        
+        <div class="text-white mt-2">【第2层】地域特色校验</div>
+        <div>> 「传统文化」必考点 + 地域考频每年1题 <span class="text-green-400">[出地域题]</span></div>
+        <div>> 「重大会议」必考点 + 无地域性 <span class="text-blue-400">[出常规题]</span></div>
+        <div>> 「绿色发展」高频考点 + 本轮匹配 <span class="text-green-400">[出地域题]</span></div>
+        <div>> 「区域发展」高频考点 + 本轮不匹配 <span class="text-blue-400">[出常规题]</span></div>
+        
+        <div class="text-purple-400 mt-2">> 题目类型统计 <span class="text-green-400">[通过]</span></div>
+        <div class="pl-4 text-purple-600">- 常规题: 44题 | 地域特色题: 4题</div>
+        
+        <div class="text-yellow-400 mt-2">[WARNING] 图形推理-空间重构考点缺失</div>
+        <div class="text-blue-400">[ACTION] 自动调整中...</div>
+        <div class="text-green-400">[SUCCESS] 质检通过</div>
+    </div>
+</div>
+</div>
+                    </div>
+                </div>
+
+                <!-- 质检维度详情 -->
+<div class="grid md:grid-cols-4 gap-4">
+    <!-- 卡片1: 题量分布校验  -->
+    <div class="bg-white rounded-xl p-5 shadow-md border-t-4 border-orange-400">
+        <div class="flex items-center gap-3 mb-3">
+            <i class="fas fa-list-ol text-orange-500 text-xl"></i>
+            <h4 class="font-bold">题量分布校验</h4>
+        </div>
+        <ul class="text-sm text-gray-600 space-y-2">
+            <li class="flex justify-between">
+                <span>政治理论</span>
+                <span class="font-mono">15题 ✓</span>
+            </li>
+            <li class="flex justify-between">
+                <span>常识判断</span>
+                <span class="font-mono">10题 ✓</span>
+            </li>
+            <li class="flex justify-between">
+                <span>言语理解</span>
+                <span class="font-mono">35题 ✓</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 卡片2: 难度梯度校验 -->
+    <div class="bg-white rounded-xl p-5 shadow-md border-t-4 border-orange-400">
+        <div class="flex items-center gap-3 mb-3">
+            <i class="fas fa-chart-pie text-orange-500 text-xl"></i>
+            <h4 class="font-bold">难度梯度校验</h4>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>易</span>
+                    <span class="text-green-600">38题 (30%)</span>
+                </div>
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: 30%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>中</span>
+                    <span class="text-yellow-600">62题 (50%)</span>
+                </div>
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 50%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>难</span>
+                    <span class="text-red-600">25题 (20%)</span>
+                </div>
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-red-500 h-2 rounded-full" style="width: 20%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片3: 考点覆盖校验 -->
+    <div class="bg-white rounded-xl p-5 shadow-md border-t-4 border-orange-400">
+        <div class="flex items-center gap-3 mb-3">
+            <i class="fas fa-tags text-orange-500 text-xl"></i>
+            <h4 class="font-bold">考点覆盖校验</h4>
+        </div>
+        <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between">
+                <span>必考考点</span>
+                <span class="text-green-600 font-medium">12/12 ✓</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span>高频考点</span>
+                <span class="text-green-600 font-medium">28/30 ✓</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span>低频考点</span>
+                <span class="text-yellow-600 font-medium">8/10 ⚠</span>
+            </div>
+            <div class="mt-3 p-2 bg-orange-50 rounded text-xs text-orange-700">
+                <i class="fas fa-info-circle mr-1"></i>
+                缺失：立体图形-空间重构
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片4: 地域特色校验 -->
+<div class="bg-white rounded-xl p-5 shadow-md border-t-4 border-orange-400">
+    <div class="flex items-center gap-3 mb-3">
+        <i class="fas fa-layer-group text-orange-500 text-xl"></i>
+        <h4 class="font-bold">双层校验</h4>
+    </div>
+    <div class="space-y-2 text-sm">
+        <div class="p-2 bg-red-50 rounded border-l-2 border-red-400">
+            <div class="font-medium text-red-800 text-xs mb-1">第1层：考频类型</div>
+            <div class="flex justify-between text-xs">
+                <span>必考点覆盖</span>
+                <span class="text-green-600 font-medium">12/12 ✓</span>
+            </div>
+            <div class="flex justify-between text-xs">
+                <span>高频考点覆盖</span>
+                <span class="text-green-600 font-medium">28/30 ✓</span>
+            </div>
+        </div>
+        <div class="p-2 bg-purple-50 rounded border-l-2 border-purple-400">
+            <div class="font-medium text-purple-800 text-xs mb-1">第2层：地域特色</div>
+            <div class="flex justify-between text-xs">
+                <span>应出地域题</span>
+                <span class="text-green-600 font-medium">4题 ✓</span>
+            </div>
+            <div class="flex justify-between text-xs">
+                <span>实际地域题</span>
+                <span class="text-green-600 font-medium">4题 ✓</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">考频与地域解耦，分别校验</div>
+        </div>
+    </div>
+</div>
+</div>
+            </section>
+
+            <!-- 流转箭头 -->
+            <div class="flex justify-center mb-16">
+                <div class="flex flex-col items-center text-gray-400">
+                    <i class="fas fa-arrow-down text-3xl mb-2 animate-bounce"></i>
+                    <span class="text-sm">进入封装入库阶段</span>
+                </div>
+            </div>
+
+            <!-- 阶段4: 封装入库 -->
+            <section id="phase-4" class="phase-section mb-16">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="stage-badge w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                        04
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">封装入库阶段</h2>
+                        <p class="text-gray-600 mt-1">标准化输出 · 版本管理 · 追溯机制</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <!-- 步骤4.1 -->
+                    <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-purple-500" onclick="toggleDetail('detail-4-1')">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg">4.1 试卷封装</h3>
+                                        <span class="text-sm text-gray-500">标准化输出</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-4-1"></i>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                                    <i class="fas fa-file-word text-blue-600"></i>
+                                    <div>
+                                        <div class="font-medium text-sm">标准卷面格式</div>
+                                        <div class="text-xs text-gray-500">A4排版，符合考试规范</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                                    <i class="fas fa-th-list text-green-600"></i>
+                                    <div>
+                                        <div class="font-medium text-sm">答题卡模板</div>
+                                        <div class="text-xs text-gray-500">机读卡格式，支持扫码阅卷</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                                    <i class="fas fa-book-open text-orange-600"></i>
+                                    <div>
+                                        <div class="font-medium text-sm">完整解析配套</div>
+                                        <div class="text-xs text-gray-500">考点说明+解题思路+易错警示</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-4-1" class="detail-panel bg-gray-50 px-6 pb-6">
+                            <div class="pt-4 border-t border-gray-200">
+                                <h4 class="font-semibold mb-3 text-gray-800">解析内容结构</h4>
+                                <div class="space-y-2">
+                                    <div class="bg-white p-3 rounded border border-gray-200">
+                                        <div class="text-xs font-bold text-purple-700 mb-1">【考点说明】</div>
+                                        <div class="text-xs text-gray-600">本题考查逻辑填空中的语境分析能力，要求根据上下文语义选择恰当的成语。</div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded border border-gray-200">
+                                        <div class="text-xs font-bold text-blue-700 mb-1">【解题思路】</div>
+                                        <div class="text-xs text-gray-600">第一步：分析语境色彩（褒贬/书面口语）；第二步：辨析近义成语差异；第三步：代入验证。</div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded border border-gray-200">
+                                        <div class="text-xs font-bold text-red-700 mb-1">【易错警示】</div>
+                                        <div class="text-xs text-gray-600">易混淆"耳濡目染"与"耳闻目睹"，前者强调潜移默化的影响，后者仅指看到听到。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤4.2 -->
+                    <div class="phase-card bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-purple-500" onclick="toggleDetail('detail-4-2')">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg">4.2 入库归档</h3>
+                                        <span class="text-sm text-gray-500">数据持久化</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-4-2"></i>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-check-circle text-purple-500"></i>
+                                    <span>存入正式题库系统</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-check-circle text-purple-500"></i>
+                                    <span>标记完整生成参数</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i class="fas fa-check-circle text-purple-500"></i>
+                                    <span>建立版本追溯机制</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 bg-gray-900 rounded-lg p-3 text-green-400 font-mono text-xs">
+    <div class="text-gray-500 mb-1">// 元数据</div>
+    <div>{</div>
+    <div class="pl-2">"version": "FJ-2025-001",</div>
+    <div class="pl-2">"province": "福建省",</div>
+    <div class="pl-2">"exam_config": {</div>
+    <div class="pl-4">"frequency_layer": {</div>
+    <div class="pl-6">"required": 12,</div>
+    <div class="pl-6">"high": 28,</div>
+    <div class="pl-6">"low": 8</div>
+    <div class="pl-4">},</div>
+    <div class="pl-4">"region_layer": {</div>
+    <div class="pl-6">"regular": 44,</div>
+    <div class="pl-6">"featured": 4,</div>
+    <div class="pl-6">"featured_topics": [</div>
+    <div class="pl-8">{"topic": "传统文化", "scene": "闽文化与土楼"},</div>
+    <div class="pl-8">{"topic": "绿色发展", "scene": "生态文明试验区"}</div>
+    <div class="pl-6">]</div>
+    <div class="pl-4">}</div>
+    <div class="pl-2">},</div>
+    <div class="pl-2">"create_time": "2025-03-23",</div>
+    <div class="pl-2">"status": "published"</div>
+    <div>}</div>
+</div>
+                        </div>
+                        
+                        <div id="detail-4-2" class="detail-panel bg-gray-50 px-6 pb-6">
+                            <div class="pt-4 border-t border-gray-200">
+                                <h4 class="font-semibold mb-3 text-gray-800">版本追溯机制</h4>
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="font-medium text-sm">版本链</span>
+                                            <span class="text-xs text-gray-500">支持历史回溯</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-xs">
+                                            <span class="px-2 py-1 bg-gray-100 rounded">v1.0</span>
+                                            <i class="fas fa-arrow-right text-gray-400"></i>
+                                            <span class="px-2 py-1 bg-gray-100 rounded">v1.1</span>
+                                            <i class="fas fa-arrow-right text-gray-400"></i>
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded font-medium">v1.2 (current)</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                        <div class="font-medium text-sm mb-2">生成参数记录</div>
+                                        <ul class="text-xs text-gray-600 space-y-1">
+                                            <li>• 基于命题规律表：FJ-2024-v3</li>
+                                            <li>• 配置表版本：config-20250320</li>
+                                            <li>• 抽题算法版本：matcher-v2.1</li>
+                                            <li>• 质检规则版本：qc-2025-standard</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最终产物展示 -->
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-box-open text-purple-600"></i>
+                        最终输出产物清单
+                    </h4>
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+                            <i class="fas fa-file-pdf text-3xl text-red-500 mb-2"></i>
+                            <div class="font-medium text-sm">模拟卷PDF</div>
+                            <div class="text-xs text-gray-500 mt-1">标准考试卷面</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+                            <i class="fas fa-th text-3xl text-blue-500 mb-2"></i>
+                            <div class="font-medium text-sm">答题卡PDF</div>
+                            <div class="text-xs text-gray-500 mt-1">机读卡格式</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+                            <i class="fas fa-book text-3xl text-green-500 mb-2"></i>
+                            <div class="font-medium text-sm">解析文档</div>
+                            <div class="text-xs text-gray-500 mt-1">逐题详解</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+                            <i class="fas fa-table text-3xl text-purple-500 mb-2"></i>
+                            <div class="font-medium text-sm">信息表Excel</div>
+                            <div class="text-xs text-gray-500 mt-1">完整标签数据</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 总结对比 -->
+            <section class="bg-white rounded-3xl shadow-xl p-8">
+                <h3 class="text-2xl font-bold text-center mb-8 gradient-text">全流程关键节点对比</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-3 text-left rounded-tl-lg">阶段</th>
+                                <th class="px-4 py-3 text-left">核心动作</th>
+                                <th class="px-4 py-3 text-left">关键产出</th>
+                                <th class="px-4 py-3 text-left">数据存储</th>
+                                <th class="px-4 py-3 text-left rounded-tr-lg">流转关系</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr class="hover:bg-blue-50">
+                                <td class="px-4 py-4">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">阶段1</span>
+                                </td>
+                                <td class="px-4 py-4">真题标签化、规律分析</td>
+                                <td class="px-4 py-4">命题规律分析表</td>
+                                <td class="px-4 py-4">母题库、规律表</td>
+                                <td class="px-4 py-4 text-gray-500">为阶段2提供配置基准</td>
+                            </tr>
+                            <tr class="hover:bg-green-50">
+                                <td class="px-4 py-4">
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">阶段2</span>
+                                </td>
+                                <td class="px-4 py-4">配置表生成、标签匹配抽题</td>
+                                <td class="px-4 py-4">模拟卷+基础信息表</td>
+                                <td class="px-4 py-4">模拟题库</td>
+                                <td class="px-4 py-4 text-gray-500">输出至阶段3质检</td>
+                            </tr>
+                            <tr class="hover:bg-orange-50">
+                                <td class="px-4 py-4">
+                                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full font-medium">阶段3</span>
+                                </td>
+                                <td class="px-4 py-4">规则对比、预警调整</td>
+                                <td class="px-4 py-4">质检报告、调整记录</td>
+                                <td class="px-4 py-4">-</td>
+                                <td class="px-4 py-4 text-gray-500">不合格回流至阶段2，合格进入阶段4</td>
+                            </tr>
+                            <tr class="hover:bg-purple-50">
+                                <td class="px-4 py-4">
+                                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">阶段4</span>
+                                </td>
+                                <td class="px-4 py-4">试卷封装、入库归档</td>
+                                <td class="px-4 py-4">全套考试材料+版本记录</td>
+                                <td class="px-4 py-4">正式题库</td>
+                                <td class="px-4 py-4 text-gray-500">流程终点，数据沉淀</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h3 class="text-2xl font-bold mb-4">行测模拟卷智能生成系统</h3>
+            <p class="text-gray-400 mb-6">基于配置驱动与标签匹配的智能化命题解决方案</p>
+            <div class="flex justify-center gap-4 text-sm text-gray-500">
+                <span><i class="fas fa-shield-alt mr-1"></i> 质量保证</span>
+                <span>•</span>
+                <span><i class="fas fa-sync mr-1"></i> 闭环控制</span>
+                <span>•</span>
+                <span><i class="fas fa-history mr-1"></i> 全程追溯</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化GSAP动画
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 阶段卡片入场动画
+        gsap.utils.toArray('.phase-card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse'
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.6,
+                delay: i * 0.1,
+                ease: 'power2.out'
+            });
+        });
+
+        // 流程节点交互动画
+        document.querySelectorAll('.flow-node').forEach(node => {
+            node.addEventListener('click', function() {
+                const phase = this.getAttribute('data-phase');
+                showPhase(parseInt(phase));
+            });
+            
+            node.addEventListener('mouseenter', function() {
+                gsap.to(this, { scale: 1.1, duration: 0.3 });
+            });
+            
+            node.addEventListener('mouseleave', function() {
+                gsap.to(this, { scale: 1, duration: 0.3 });
+            });
+        });
+
+        // 展开/收起详情
+        function toggleDetail(id) {
+            const detail = document.getElementById(id);
+            const iconId = 'icon-' + id.split('-')[1] + '-' + id.split('-')[2];
+            const icon = document.getElementById(iconId);
+            
+            if (detail.classList.contains('open')) {
+                detail.classList.remove('open');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                // 关闭其他已打开的详情
+                document.querySelectorAll('.detail-panel.open').forEach(panel => {
+                    panel.classList.remove('open');
+                });
+                document.querySelectorAll('.fa-chevron-down').forEach(chevron => {
+                    chevron.style.transform = 'rotate(0deg)';
+                });
+                
+                detail.classList.add('open');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 导航到指定阶段
+        function showPhase(phaseNum) {
+            // 更新导航按钮状态
+            document.querySelectorAll('.phase-nav').forEach((btn, index) => {
+                if (index + 1 === phaseNum) {
+                    btn.classList.remove('bg-gray-100', 'text-gray-600');
+                    const colors = ['bg-blue-100', 'bg-green-100', 'bg-orange-100', 'bg-purple-100'];
+                    const textColors = ['text-blue-700', 'text-green-700', 'text-orange-700', 'text-purple-700'];
+                    btn.classList.add(colors[index], textColors[index]);
+                } else {
+                    btn.className = 'phase-nav px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm whitespace-nowrap transition-all hover:bg-gray-200';
+                }
+            });
+
+            // 滚动到对应阶段
+            const phaseSection = document.getElementById('phase-' + phaseNum);
+            if (phaseSection) {
+                phaseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // 高亮阶段卡片
+            document.querySelectorAll('.phase-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                const cards = phaseSection.querySelectorAll('.phase-card');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('active');
+                        setTimeout(() => card.classList.remove('active'), 1000);
+                    }, index * 100);
+                });
+            }, 500);
+        }
+
+        // 滚动到内容区域
+        function scrollToContent() {
+            document.getElementById('main-content').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            gsap.from('header h1', {
+                y: 30,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out'
+            });
+            
+            gsap.from('header p', {
+                y: 20,
+                opacity: 0,
+                duration: 1,
+                delay: 0.3,
+                ease: 'power3.out'
+            });
+        });
+
+        // 滚动指示器自动隐藏
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const indicator = document.querySelector('.scroll-indicator');
+            
+            if (scrollTop > 100) {
+                if (indicator) indicator.style.opacity = '0';
+            } else {
+                if (indicator) indicator.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>
