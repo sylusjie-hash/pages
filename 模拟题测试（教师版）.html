@@ -947,7 +947,7 @@
                     </label>
                 </div>
 
-                <button id="btn1Next" class="survey-submit" onclick="nextPage()" disabled>下一页 →</button>
+                <button id="btn1Next" class="survey-submit" onclick="handlePage1Next()" disabled>下一页 →</button>
             </div>
         </div>
 
@@ -1702,155 +1702,187 @@
             2: { tab: 'A', viewedA: true, viewedB: false }
         };
 
-        // ==================== 盲测题目初始化 ====================
-function initBlindTest() {
-    // 1. 随机选择模块（只选有题目的模块）
-    const modules = Object.keys(QUESTION_BANK).filter(k => QUESTION_BANK[k].questions.length > 0);
-    const randomModuleKey = modules[Math.floor(Math.random() * modules.length)];
-    const moduleData = QUESTION_BANK[randomModuleKey];
+        // ==================== 盲测题目初始化（根据教研领域筛选） ====================
+        function initBlindTest() {
+            // 1. 获取用户选择的教研领域 (Q1)
+            const userField = surveyData.q1; // 'A'=行测文, 'B'=行测理, 'C'=公基, 'D'=其他
+            
+            // 2. 根据领域确定可选模块
+            let availableModules = [];
+            
+            switch(userField) {
+                case 'C': // 公基
+                    availableModules = ['commonSense', 'politicalTheory'];
+                    break;
+                case 'A': // 行测文
+                    availableModules = ['language', 'judgment'];
+                    break;
+                case 'B': // 行测理
+                    availableModules = ['quantitative', 'dataAnalysis'];
+                    break;
+                case 'D': // 其他
+                default: // 未选择或其他情况，全模块随机
+                    availableModules = Object.keys(QUESTION_BANK).filter(k => QUESTION_BANK[k].questions.length > 0);
+                    break;
+            }
+            
+            // 3. 过滤出有题目的模块
+            const validModules = availableModules.filter(key => 
+                QUESTION_BANK[key] && QUESTION_BANK[key].questions.length > 0
+            );
+            
+            // 如果没有有效模块（兜底），使用全模块
+            const modulesToUse = validModules.length > 0 ? validModules : 
+                Object.keys(QUESTION_BANK).filter(k => QUESTION_BANK[k].questions.length > 0);
+            
+            // 4. 随机选择模块
+            const randomModuleKey = modulesToUse[Math.floor(Math.random() * modulesToUse.length)];
+            const moduleData = QUESTION_BANK[randomModuleKey];
 
-    // 2. 随机选择该模块下的题目
-    const questions = moduleData.questions;
-    const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+            // 5. 随机选择该模块下的题目
+            const questions = moduleData.questions;
+            const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
 
-    // 3. 【修改】固定展示顺序：题A先，题B后，不再随机
-    const displayOrder = ['A', 'B'];  // 固定顺序，不再随机
+            // 6. 固定展示顺序：题A先，题B后
+            const displayOrder = ['A', 'B'];
 
-    // 4. 记录配置（关键：明确A和B实际对应的品牌）
-    currentBlindTest = {
-        questionId: randomQuestion.id,
-        module: randomQuestion.module,
-        moduleName: moduleData.name,
-        topic: randomQuestion.topic,
-        difficulty: randomQuestion.difficulty,
+            // 7. 记录配置（关键：明确A和B实际对应的品牌）
+            currentBlindTest = {
+                questionId: randomQuestion.id,
+                module: randomQuestion.module,
+                moduleName: moduleData.name,
+                topic: randomQuestion.topic,
+                difficulty: randomQuestion.difficulty,
+                userField: userField, // 记录用户领域，用于数据分析
 
-        // 【修改】版本映射：A固定为我方产品，B固定为竞品
-        versionMapping: {
-            A: 'ours',        // 【修改】题A = 我方产品
-            B: 'competitor'   // 【修改】题B = 竞品
-        },
-        brandNames: {
-            A: '我方产品',    // 【修改】
-            B: randomQuestion.versionA.brandName  // 竞品品牌名
-        },
+                // 版本映射：A固定为我方产品，B固定为竞品
+                versionMapping: {
+                    A: 'ours',
+                    B: 'competitor'
+                },
+                brandNames: {
+                    A: '我方产品',
+                    B: randomQuestion.versionA.brandName
+                },
 
-        // 展示顺序：题A先展示，题B后展示
-        displayOrder: displayOrder,
+                // 展示顺序：题A先展示，题B后展示
+                displayOrder: displayOrder,
 
-        // 题目数据
-        questionData: randomQuestion
-    };
+                // 题目数据
+                questionData: randomQuestion
+            };
 
-    // 5. 渲染题目到页面
-    renderBlindTestQuestions();
+            // 8. 渲染题目到页面
+            renderBlindTestQuestions();
 
-    // 6. 保存到surveyData（原始数据）
-    surveyData.blindTestConfig = currentBlindTest;
+            // 9. 保存到surveyData（原始数据）
+            surveyData.blindTestConfig = currentBlindTest;
 
-    console.log('✅ 盲测题目已抽取:', currentBlindTest);
-}
+            console.log('✅ 盲测题目已抽取:', currentBlindTest);
+            console.log('📊 用户领域:', userField, '可选模块:', modulesToUse, '选中模块:', randomModuleKey);
+        }
 
        // 渲染题目到第2页和第3页
-function renderBlindTestQuestions() {
-    if (!currentBlindTest) return;
+        function renderBlindTestQuestions() {
+            if (!currentBlindTest) return;
 
-    const q = currentBlindTest.questionData;
-    
-    // 【修改】题A使用versionB（我方产品），题B使用versionA（竞品）
-    const versionA = q.versionB;  // 【修改】题A = 我方产品（原versionB）
-    const versionB = q.versionA;  // 【修改】题B = 竞品（原versionA）
+            const q = currentBlindTest.questionData;
+            
+            // 题A使用versionB（我方产品），题B使用versionA（竞品）
+            const versionA = q.versionB;
+            const versionB = q.versionA;
 
-    // 渲染题A（我方产品）
-    document.getElementById('dynamic-question-A').innerHTML = `
-        <div style="font-size: 12px; color: #1e40af; font-weight: 700; margin-bottom: 8px;">【题A】${currentBlindTest.moduleName}·${currentBlindTest.topic}</div>
-        <div class="question-body">${versionA.question}</div>
-        <div class="options-list" id="options1A">
-            ${versionA.options.map((opt, i) => `<div class="option-item" onclick="selectOption(1, 'A', this)">${opt}</div>`).join('')}
-        </div>
-    `;
+            // 渲染题A（我方产品）
+            document.getElementById('dynamic-question-A').innerHTML = `
+                <div style="font-size: 12px; color: #1e40af; font-weight: 700; margin-bottom: 8px;">【题A】${currentBlindTest.moduleName}·${currentBlindTest.topic}</div>
+                <div class="question-body">${versionA.question}</div>
+                <div class="options-list" id="options1A">
+                    ${versionA.options.map((opt, i) => `<div class="option-item" onclick="selectOption(1, 'A', this)">${opt}</div>`).join('')}
+                </div>
+            `;
 
-    // 渲染题B（竞品）
-    document.getElementById('dynamic-question-B').innerHTML = `
-        <div style="font-size: 12px; color: #3b82f6; font-weight: 700; margin-bottom: 8px;">【题B】${currentBlindTest.moduleName}·${currentBlindTest.topic}</div>
-        <div class="question-body">${versionB.question}</div>
-        <div class="options-list" id="options1B">
-            ${versionB.options.map((opt, i) => `<div class="option-item" onclick="selectOption(1, 'B', this)">${opt}</div>`).join('')}
-        </div>
-    `;
+            // 渲染题B（竞品）
+            document.getElementById('dynamic-question-B').innerHTML = `
+                <div style="font-size: 12px; color: #3b82f6; font-weight: 700; margin-bottom: 8px;">【题B】${currentBlindTest.moduleName}·${currentBlindTest.topic}</div>
+                <div class="question-body">${versionB.question}</div>
+                <div class="options-list" id="options1B">
+                    ${versionB.options.map((opt, i) => `<div class="option-item" onclick="selectOption(1, 'B', this)">${opt}</div>`).join('')}
+                </div>
+            `;
 
-    // 渲染题A解析（我方产品）
-    document.getElementById('dynamic-analysis-A').innerHTML = `
-        <div style="font-size: 12px; color: #1e40af; font-weight: 700; margin-bottom: 8px;">【题A解析】</div>
-        <div class="analysis-body">${versionA.analysis}</div>
-    `;
+            // 渲染题A解析（我方产品）
+            document.getElementById('dynamic-analysis-A').innerHTML = `
+                <div style="font-size: 12px; color: #1e40af; font-weight: 700; margin-bottom: 8px;">【题A解析】</div>
+                <div class="analysis-body">${versionA.analysis}</div>
+            `;
 
-    // 渲染题B解析（竞品）
-    document.getElementById('dynamic-analysis-B').innerHTML = `
-        <div style="font-size: 12px; color: #3b82f6; font-weight: 700; margin-bottom: 8px;">【题B解析】</div>
-        <div class="analysis-body">${versionB.analysis}</div>
-    `;
+            // 渲染题B解析（竞品）
+            document.getElementById('dynamic-analysis-B').innerHTML = `
+                <div style="font-size: 12px; color: #3b82f6; font-weight: 700; margin-bottom: 8px;">【题B解析】</div>
+                <div class="analysis-body">${versionB.analysis}</div>
+            `;
 
-    // 恢复之前的选择状态
-    if (surveyData.blindSelections) {
-        setTimeout(() => {
-            ['A', 'B'].forEach(panel => {
-                if (surveyData.blindSelections[panel] !== undefined) {
-                    const listId = 'options1' + panel;
-                    const list = document.getElementById(listId);
-                    if (list) {
-                        const options = list.querySelectorAll('.option-item');
-                        const index = surveyData.blindSelections[panel];
-                        if (options[index]) {
-                            options[index].classList.add('selected');
+            // 恢复之前的选择状态
+            if (surveyData.blindSelections) {
+                setTimeout(() => {
+                    ['A', 'B'].forEach(panel => {
+                        if (surveyData.blindSelections[panel] !== undefined) {
+                            const listId = 'options1' + panel;
+                            const list = document.getElementById(listId);
+                            if (list) {
+                                const options = list.querySelectorAll('.option-item');
+                                const index = surveyData.blindSelections[panel];
+                                if (options[index]) {
+                                    options[index].classList.add('selected');
+                                }
+                            }
                         }
-                    }
-                }
-            });
-        }, 100);
-    }
-}
+                    });
+                }, 100);
+            }
+        }
 
         // 转换用户选择（A/B）为实际品牌选择
-function convertRawToActual() {
-    if (!currentBlindTest) return;
+        function convertRawToActual() {
+            if (!currentBlindTest) return;
 
-    // 【修改】简化映射逻辑，A固定为我方，B固定为竞品
-    const mapping = {
-        A: 'ours',
-        B: 'competitor'
-    };
+            // 简化映射逻辑，A固定为我方，B固定为竞品
+            const mapping = {
+                A: 'ours',
+                B: 'competitor'
+            };
 
-    // Q3: 题目质量评价
-    if (surveyData.q3) {
-        surveyData.q3_raw = surveyData.q3;
-        if (surveyData.q3 === 'A') surveyData.q3_actual = 'ours';        // 【修改】题A = 我方
-        else if (surveyData.q3 === 'B') surveyData.q3_actual = 'competitor';  // 【修改】题B = 竞品
-        else if (surveyData.q3 === 'C') surveyData.q3_actual = 'similar';
-        else if (surveyData.q3 === 'D') surveyData.q3_actual = 'neither';
-    }
+            // Q3: 题目质量评价
+            if (surveyData.q3) {
+                surveyData.q3_raw = surveyData.q3;
+                if (surveyData.q3 === 'A') surveyData.q3_actual = 'ours';
+                else if (surveyData.q3 === 'B') surveyData.q3_actual = 'competitor';
+                else if (surveyData.q3 === 'C') surveyData.q3_actual = 'similar';
+                else if (surveyData.q3 === 'D') surveyData.q3_actual = 'neither';
+            }
 
-    // Q5: 解析评价
-    if (surveyData.q5) {
-        surveyData.q5_raw = surveyData.q5;
-        if (surveyData.q5 === 'A') surveyData.q5_actual = 'ours';        // 【修改】
-        else if (surveyData.q5 === 'B') surveyData.q5_actual = 'competitor';  // 【修改】
-        else if (surveyData.q5 === 'C') surveyData.q5_actual = 'similar';
-        else if (surveyData.q5 === 'D') surveyData.q5_actual = 'neither';
-    }
+            // Q5: 解析评价
+            if (surveyData.q5) {
+                surveyData.q5_raw = surveyData.q5;
+                if (surveyData.q5 === 'A') surveyData.q5_actual = 'ours';
+                else if (surveyData.q5 === 'B') surveyData.q5_actual = 'competitor';
+                else if (surveyData.q5 === 'C') surveyData.q5_actual = 'similar';
+                else if (surveyData.q5 === 'D') surveyData.q5_actual = 'neither';
+            }
 
-    // Q7: 教学应用偏好
-    if (surveyData.q7) {
-        surveyData.q7_raw = surveyData.q7;
-        if (surveyData.q7 === 'A') surveyData.q7_actual = 'ours';        // 【修改】
-        else if (surveyData.q7 === 'B') surveyData.q7_actual = 'competitor';  // 【修改】
-        else if (surveyData.q7 === 'C') surveyData.q7_actual = 'both';
-        else if (surveyData.q7 === 'D') surveyData.q7_actual = 'neither';
-    }
+            // Q7: 教学应用偏好
+            if (surveyData.q7) {
+                surveyData.q7_raw = surveyData.q7;
+                if (surveyData.q7 === 'A') surveyData.q7_actual = 'ours';
+                else if (surveyData.q7 === 'B') surveyData.q7_actual = 'competitor';
+                else if (surveyData.q7 === 'C') surveyData.q7_actual = 'both';
+                else if (surveyData.q7 === 'D') surveyData.q7_actual = 'neither';
+            }
 
-    // 记录展示顺序信息
-    surveyData.displayOrder = ['A', 'B'];  // 【修改】固定顺序
-    surveyData.firstShownBrand = 'ours';   // 【修改】题A先展示，是我方产品
-}
+            // 记录展示顺序信息
+            surveyData.displayOrder = ['A', 'B'];
+            surveyData.firstShownBrand = 'ours';
+        }
 
         // ==================== 页面切换 ====================
         function goToPage(index) {
@@ -2040,8 +2072,16 @@ function convertRawToActual() {
         }
 
         function startSurvey() {
-            initBlindTest();  // 初始化盲测题目
+            // 不再在这里初始化盲测题目，移到Q1完成后
             goToPage(1);
+        }
+
+        // ==================== 第1页专用跳转 ====================
+        function handlePage1Next() {
+            // 根据Q1选择的领域初始化盲测题目
+            initBlindTest();
+            // 跳转到第2页（题目展示页）
+            goToPage(2);
         }
 
         // ==================== 单选逻辑（修复版） ====================
