@@ -1,0 +1,3181 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>模拟题产品调研 - 体验官招募</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --page-bg: #f1f0ee;
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --primary-1: #f6a79b;
+            --primary-2: #ee8b7f;
+            --primary-3: #df706d;
+            --cta-1: #ff8f7f;
+            --cta-2: #ff746f;
+            --cta-3: #f25f67;
+            --primary-soft: #fff6f3;
+            --primary-soft-2: #ffe8e3;
+            --accent-text: #d06d68;
+            --border-soft: #ddd7d3;
+            --border-strong: #4f5563;
+            --shadow-soft: 0 12px 36px rgba(65, 79, 96, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--page-bg);
+        }
+        
+        /* 横向滑动容器 */
+        .slider-container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+        
+        /* 每一页 */
+        .slide-page {
+            flex: 0 0 100%;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 内容卡片 */
+        .content-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        /* 首页特殊样式 */
+        .home-card {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .home-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1f2937;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+        
+        .home-subtitle {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .home-badge {
+            display: inline-block;
+            background: #fff1ec;
+            color: var(--accent-text);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            animation: pulse 2s infinite;
+            border: 1px solid #f1c9bf;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .home-desc {
+            color: #4b5563;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary-3));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(216, 101, 99, 0.28);
+            transition: transform 0.2s;
+        }
+        
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .home-stats {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        /* 进度条 */
+        .progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .progress-bg {
+            flex: 1;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-2), var(--primary-3));
+            border-radius: 4px;
+            transition: width 0.3s;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-text);
+            white-space: nowrap;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+        
+        /* 部分标签 */
+        .question-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .question-nav-btn {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .question-nav-btn.prev {
+            background: #f3f0ec;
+            color: #4b5563;
+            border: 1px solid var(--border-soft);
+        }
+
+        .question-nav-btn.next {
+            background: linear-gradient(135deg, var(--cta-1), var(--cta-2));
+            color: white;
+            box-shadow: 0 10px 22px rgba(242, 95, 103, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .question-nav-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .question-nav-btn.next:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(242, 95, 103, 0.34);
+        }
+        
+        /* Tab切换 - 顶部 */
+        .tab-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: white;
+            box-shadow: 0 6px 14px rgba(216, 101, 99, 0.2);
+        }
+
+        .tab-btn.inactive {
+            background: #f5f2ef;
+            color: #6b7280;
+            border: 1px solid var(--border-soft);
+        }
+        
+        /* 内容区 */
+        .content-box {
+            flex: 1;
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            min-height: 0;
+        }
+
+        @media (max-width: 480px) {
+            .slide-page {
+                padding: 12px;
+            }
+
+            .content-card {
+                max-width: none;
+                max-height: calc(100vh - 24px);
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .home-card {
+                padding: 24px 16px;
+            }
+
+            .home-title {
+                font-size: 24px;
+            }
+
+            .home-subtitle {
+                font-size: 20px;
+            }
+
+            .home-desc {
+                font-size: 15px;
+            }
+
+            .home-stats {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .progress-wrap {
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .progress-text {
+                font-size: 13px;
+            }
+
+            .question-nav {
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .question-nav-btn {
+                padding: 10px 12px;
+                font-size: 12px;
+                border-radius: 14px;
+            }
+
+            .tab-wrap {
+                gap: 8px;
+            }
+
+            .tab-btn {
+                padding: 11px 10px;
+                font-size: 13px;
+            }
+
+            .content-box {
+                padding: 14px;
+            }
+
+            .survey-option {
+                padding: 11px;
+            }
+
+            .survey-option-text {
+                font-size: 13px;
+            }
+        }
+        
+        .content-panel {
+            display: none;
+        }
+        
+        .content-panel.show {
+            display: block;
+        }
+        
+        /* 题目样式 */
+        .question-card {
+            background: #fffdfb;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e9e1dc;
+        }
+        
+        .question-body {
+            font-size: 14px;
+            color: #1f2937;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+        
+        .question-list {
+            margin: 12px 0;
+            padding-left: 0;
+        }
+        
+        .question-list-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        /* 选项点击交互效果 - 绿色选中状态 */
+        .option-item {
+            padding: 12px 14px;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 2px solid var(--border-soft);
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            user-select: none;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .option-item:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .option-item:active {
+            transform: scale(0.96) translateY(0);
+            transition: transform 0.1s;
+        }
+        
+        .option-item.selected {
+            background: linear-gradient(135deg, #fff4f1, #ffe2db) !important;
+            border-color: var(--border-strong) !important;
+            color: #9d4d4b !important;
+            box-shadow: 0 6px 14px rgba(216, 101, 99, 0.14);
+            transform: translateY(-1px);
+        }
+        
+        .option-item.selected::after {
+            content: "✓";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary-3);
+            animation: checkPop 0.3s ease-out;
+        }
+        
+        @keyframes checkPop {
+            0% { transform: translateY(-50%) scale(0); }
+            50% { transform: translateY(-50%) scale(1.3); }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+        
+        /* 引导条 */
+        .guide-bar {
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        
+        .guide-bar.locked {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .guide-bar.unlocked {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 2px solid #10b981;
+            color: #047857;
+        }
+        
+        /* 问题标题 */
+        .survey-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            text-align: center;
+            padding: 10px;
+            background: #f5f2ef;
+            border-radius: 8px;
+        }
+        
+        /* 选项按钮 */
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .choice-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .choice-btn {
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            background: #f9fafb;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            line-height: 1.3;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .choice-btn:not(:disabled):active {
+            transform: scale(0.95);
+        }
+        
+        .choice-btn-a:not(:disabled) {
+            background: linear-gradient(135deg, #fff8f5, #ffe9e3);
+            border-color: #efc8bc;
+            color: #a25e59;
+        }
+
+        .choice-btn-b:not(:disabled) {
+            background: linear-gradient(135deg, #fff7f4, #ffe5df);
+            border-color: #efc3bb;
+            color: #a25e59;
+        }
+        
+        .choice-btn-same:not(:disabled) {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-color: #7dd3fc;
+            color: #0369a1;
+        }
+        
+        .choice-btn.selected {
+            background: linear-gradient(135deg, var(--primary-2), var(--primary-3)) !important;
+            color: white !important;
+            border-color: transparent !important;
+            box-shadow: 0 8px 18px rgba(216, 101, 99, 0.26);
+        }
+        
+        .choice-btn-gray:not(:disabled) {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #4b5563;
+        }
+        
+        /* 解析样式 */
+        .analysis-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid;
+            border: 1px solid #e9e1dc;
+        }
+        
+        .analysis-card.a { border-left-color: var(--primary-2); }
+        .analysis-card.b { border-left-color: #e9a2b0; }
+        
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .analysis-tag {
+            margin-left: auto;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .analysis-tag.a { background: var(--primary-soft-2); color: var(--accent-text); }
+        .analysis-tag.b { background: #f8dde3; color: #b96a7b; }
+        
+        .analysis-origin {
+            font-size: 13px;
+            color: #6b7280;
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .analysis-body {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.7;
+        }
+        
+        /* 问卷样式 */
+        .single-choice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .multi-choice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .survey-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--border-soft);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .survey-option.selected {
+            background: linear-gradient(135deg, var(--primary-soft), var(--primary-soft-2));
+            border-color: var(--border-strong);
+            box-shadow: 0 6px 16px rgba(216, 101, 99, 0.12);
+        }
+        
+        .survey-option input[type="radio"],
+        .survey-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--border-strong);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        
+        .survey-option input:disabled {
+            opacity: 0.5;
+        }
+        
+        .survey-option-text {
+            flex: 1;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        .survey-input {
+            border: none;
+            border-bottom: 2px solid #e5e7eb;
+            background: transparent;
+            padding: 8px 4px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        .survey-input:focus {
+            border-bottom-color: var(--primary-2);
+        }
+        
+        .survey-input-full {
+            font-family: 'Noto Sans SC', sans-serif;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+        
+        .survey-textarea {
+            font-family: 'Noto Sans SC', sans-serif;
+            line-height: 1.6;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            resize: none;
+            outline: none;
+        }
+        
+        .survey-textarea:focus {
+            border-color: var(--primary-2);
+        }
+
+        .survey-submit {
+            width: 100%;
+            padding: 14px;
+            margin-top: 12px;
+            background: linear-gradient(135deg, var(--cta-1), var(--cta-2));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.55;
+            letter-spacing: 0.2px;
+        }
+        
+        .survey-submit:not(:disabled) {
+            opacity: 1;
+            box-shadow: 0 12px 24px rgba(242, 95, 103, 0.32);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+        }
+
+        .survey-submit:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(242, 95, 103, 0.36);
+        }
+        
+        .survey-submit:not(:disabled):active {
+            transform: scale(0.98);
+        }
+        
+        /* 排序列表 */
+        .sort-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .sort-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: move;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .sort-item:active {
+            transform: scale(1.02);
+        }
+        
+        .sort-rank {
+            margin-left: auto;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        /* 完成页 */
+        .result-card {
+            text-align: center;
+            padding: 24px 20px;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4ade80, #16a34a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3);
+        }
+        
+        .result-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .result-subtitle {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .stat-list {
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 15px;
+            color: #1f2937;
+            font-weight: 700;
+        }
+        
+        .reward-box {
+            background: linear-gradient(135deg, #fefce8, #ffedd5);
+            border-radius: 16px;
+            padding: 16px;
+            border: 2px solid #fcd34d;
+            margin-bottom: 16px;
+        }
+        
+        .reward-text {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .reward-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #f97316, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .reward-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+        }
+        
+        .reward-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* 导航点 */
+        .nav-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        /* 调试按钮 */
+        .debug-nav {
+            position: fixed;
+            bottom: 60px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 999;
+        }
+        
+        .debug-btn {
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        
+        /* 完成动画 */
+        .celebrate-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary-3));
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        
+        .celebrate-overlay.show {
+            display: flex;
+        }
+        
+        .celebrate-circle {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #ffd700, #ff6b6b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin-bottom: 20px;
+            animation: popIn 0.5s ease-out;
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.4);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-180deg); }
+            70% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        
+        .celebrate-text {
+            color: white;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .celebrate-sub {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        /* 撒花动画 */
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航点 -->
+    <div class="nav-dots" id="navDots">
+        <div class="dot active" onclick="goToPage(0)"></div>
+        <div class="dot" onclick="goToPage(1)"></div>
+        <div class="dot" onclick="goToPage(2)"></div>
+        <div class="dot" onclick="goToPage(3)"></div>
+        <div class="dot" onclick="goToPage(4)"></div>
+        <div class="dot" onclick="goToPage(5)"></div>
+        <div class="dot" onclick="goToPage(6)"></div>
+        <div class="dot" onclick="goToPage(7)"></div>
+        <div class="dot" onclick="goToPage(8)"></div>
+        <div class="dot" onclick="goToPage(9)"></div>
+        <div class="dot" onclick="goToPage(10)"></div>
+        <div class="dot" onclick="goToPage(11)"></div>
+        <div class="dot" onclick="goToPage(12)"></div>
+        <div class="dot" onclick="goToPage(13)"></div>
+        <div class="dot" onclick="goToPage(14)"></div>
+        <div class="dot" onclick="goToPage(15)"></div>
+        <div class="dot" onclick="goToPage(16)"></div>
+    </div>
+
+    <!-- 调试导航 -->
+    <div class="debug-nav">
+        <button class="debug-btn" onclick="goToPage(0)">导语</button>
+        <button class="debug-btn" onclick="goToPage(1)">画像1</button>
+        <button class="debug-btn" onclick="goToPage(2)">画像2</button>
+        <button class="debug-btn" onclick="goToPage(3)">题目</button>
+        <button class="debug-btn" onclick="goToPage(4)">解析</button>
+        <button class="debug-btn" onclick="goToPage(5)">Q5</button>
+        <button class="debug-btn" onclick="goToPage(6)">Q6</button>
+        <button class="debug-btn" onclick="goToPage(7)">Q7</button>
+        <button class="debug-btn" onclick="goToPage(8)">Q8</button>
+        <button class="debug-btn" onclick="goToPage(9)">Q9</button>
+        <button class="debug-btn" onclick="goToPage(10)">Q10</button>
+        <button class="debug-btn" onclick="goToPage(11)">Q11</button>
+        <button class="debug-btn" onclick="goToPage(12)">Q12</button>
+        <button class="debug-btn" onclick="goToPage(13)">Q13</button>
+        <button class="debug-btn" onclick="goToPage(14)">Q14</button>
+        <button class="debug-btn" onclick="goToPage(15)">Q15</button>
+        <button class="debug-btn" onclick="goToPage(16)">完成</button>
+    </div>
+
+    <!-- 滑动容器 -->
+    <div class="slider-container" id="slider">
+        
+        <!-- ==================== 第0页：导语页 ==================== -->
+        <div class="slide-page" data-index="0">
+            <div class="content-card home-card">
+                <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #e69aa9, var(--primary-2)); border-radius: 2px; margin: 0 auto 16px;"></div>
+                
+                <div class="home-badge">📋 产品打磨调研</div>
+                
+                <h1 class="home-title">模拟卷体验官招募</h1>
+                <h2 class="home-subtitle">您的建议，决定产品最终形态</h2>
+                
+                <div class="home-desc" style="text-align: left; font-size: 15px;">
+                    <div style="margin-bottom: 12px;"><strong>亲爱的考友：</strong></div>
+                    <div style="margin-bottom: 12px;">为了打磨出一套真正能提分的模拟卷，我们需要您的真实体感。</div>
+                    <div style="margin-bottom: 12px;">本次调研包含一个<strong>"试题盲测"</strong>环节，请根据您的直观感受作答。</div>
+                    <div>⏱️ 预计用时：3-4分钟</div>
+                </div>
+                
+                <button class="start-btn" onclick="startSurvey()">
+                    开始调研 →
+                </button>
+                
+                <div class="home-stats">
+                    <span>● <span id="participantCount">1,247</span> 人已参与</span>
+                    <span>|</span>
+                    <span>平均 3分20秒</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第1页：用户画像 Q1-Q2 ==================== -->
+        <div class="slide-page" data-index="1">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 8%;"></div>
+                    </div>
+                    <span class="progress-text">1/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="1">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <!-- Q1 -->
+                <div class="survey-title">1. 您目前准备的考试是？</div>
+                <div class="single-choice-list" style="margin-bottom: 20px;">
+                    <label class="survey-option" onclick="selectSingle(1, 'A')" id="q1-A">
+                        <input type="radio" name="q1" value="A">
+                        <span class="survey-option-text">A. 国考/省考</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(1, 'B')" id="q1-B">
+                        <input type="radio" name="q1" value="B">
+                        <span class="survey-option-text">B. 事业单位</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(1, 'C')" id="q1-C">
+                        <input type="radio" name="q1" value="C">
+                        <span class="survey-option-text">C. 其他编制（国企/银行/三支一扶）</span>
+                    </label>
+                </div>
+
+                <!-- Q2 -->
+                <div class="survey-title">2. 您目前的备考阶段是？</div>
+                <div class="single-choice-list">
+                    <label class="survey-option" onclick="selectSingle(2, 'A')" id="q2-A">
+                        <input type="radio" name="q2" value="A">
+                        <span class="survey-option-text">A. 基础起步（刚开始看教材）</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(2, 'B')" id="q2-B">
+                        <input type="radio" name="q2" value="B">
+                        <span class="survey-option-text">B. 强化提升（系统刷题中）</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(2, 'C')" id="q2-C">
+                        <input type="radio" name="q2" value="C">
+                        <span class="survey-option-text">C. 考前冲刺（模考演练阶段）</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(2, 'D')" id="q2-D">
+                        <input type="radio" name="q2" value="D">
+                        <span class="survey-option-text">D. 已经考过/二战</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 第2页：用户画像 Q3-Q4 ==================== -->
+        <div class="slide-page" data-index="2">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 17%;"></div>
+                    </div>
+                    <span class="progress-text">2/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="2">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <!-- Q3 - 多选限3 -->
+                <div class="survey-title">3. 在刷模拟题时，您最看重的三个因素是？<span style="color: var(--primary-2); font-size: 13px;">（多选，限3项）</span></div>
+                <div class="multi-choice-list" style="margin-bottom: 16px;" id="q3-list">
+                    <label class="survey-option" onclick="toggleMulti(3, 'difficulty')" id="q3-difficulty">
+                        <input type="checkbox" id="cb3-difficulty">
+                        <span class="survey-option-text">题目难度与真题的贴合度</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMulti(3, 'analysis')" id="q3-analysis">
+                        <input type="checkbox" id="cb3-analysis">
+                        <span class="survey-option-text">解析是否详尽（有无步骤、陷阱分析）</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMulti(3, 'logic')" id="q3-logic">
+                        <input type="checkbox" id="cb3-logic">
+                        <span class="survey-option-text">题目逻辑是否严谨（无错题、无歧义）</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMulti(3, 'coverage')" id="q3-coverage">
+                        <input type="checkbox" id="cb3-coverage">
+                        <span class="survey-option-text">考点覆盖的全面性</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMulti(3, 'skill')" id="q3-skill">
+                        <input type="checkbox" id="cb3-skill">
+                        <span class="survey-option-text">是否包含解题技巧/秒杀方法</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMulti(3, 'brand')" id="q3-brand">
+                        <input type="checkbox" id="cb3-brand">
+                        <span class="survey-option-text">品牌知名度</span>
+                    </label>
+                </div>
+                <div id="q3-hint" style="font-size: 12px; color: var(--primary-2); margin-bottom: 12px; display: none;">⚠️ 最多选择3项</div>
+
+                <!-- Q4 - 填空 -->
+                <div class="survey-title">4. 您目前主要使用的模拟题产品/品牌有哪些？</div>
+                <div style="background: white; border-radius: 12px; padding: 16px; border: 2px solid #e5e7eb; margin-bottom: 12px;">
+                    <input type="text" id="q4-input" class="survey-input-full" placeholder="如：粉笔、华图、中公等" oninput="checkPage2()" style="border: none; width: 100%; font-size: 14px; outline: none;">
+                </div>
+
+                <button id="btn2Next" class="survey-submit" onclick="nextPage()" disabled>进入盲测环节 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第3页：双盲实战-题目展示 ==================== -->
+        <div class="slide-page" data-index="3">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 25%;"></div>
+                    </div>
+                    <span class="progress-text">3/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="3">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+                
+                <div class="timer">⏱️ <span id="timer1">0</span>秒</div>
+
+                <!-- Tab切换 - 顶部 -->
+                <div class="tab-wrap">
+                    <button id="tab1A" class="tab-btn active" onclick="switchTab(1, 'A')">
+                        题A
+                    </button>
+                    <button id="tab1B" class="tab-btn inactive" onclick="switchTab(1, 'B')">
+                        题B
+                    </button>
+                </div>
+
+                <!-- 内容区 -->
+                <div class="content-box" id="box1">
+                    <!-- 题A -->
+                    <div id="panel1A" class="content-panel show">
+                        <div class="question-card" id="dynamic-question-A">
+                            <!-- 动态插入题目内容 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 题B -->
+                    <div id="panel1B" class="content-panel">
+                        <div class="question-card" id="dynamic-question-B">
+                            <!-- 动态插入题目内容 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide1" class="guide-bar locked">
+                    📖 先把两道题都看完
+                </div>
+
+                <button id="btnBlind1" class="survey-submit" onclick="nextPage()" disabled>查看解析对比 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第4页：双盲实战-解析展示 ==================== -->
+        <div class="slide-page" data-index="4">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 33%;"></div>
+                    </div>
+                    <span class="progress-text">4/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="4">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+                
+                <div class="timer">⏱️ <span id="timer2">0</span>秒</div>
+
+                <!-- Tab切换 - 顶部 -->
+                <div class="tab-wrap">
+                    <button id="tab2A" class="tab-btn active" onclick="switchTab(2, 'A')">
+                        解析A
+                    </button>
+                    <button id="tab2B" class="tab-btn inactive" onclick="switchTab(2, 'B')">
+                        解析B
+                    </button>
+                </div>
+
+                <!-- 内容区 -->
+                <div class="content-box" id="box2">
+                    <!-- 解析A -->
+                    <div id="panel2A" class="content-panel show">
+                        <div class="analysis-card a" id="dynamic-analysis-A">
+                            <!-- 动态插入解析内容 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 解析B -->
+                    <div id="panel2B" class="content-panel">
+                        <div class="analysis-card b" id="dynamic-analysis-B">
+                            <!-- 动态插入解析内容 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide2" class="guide-bar locked">
+                    📖 两份解析都看完后再继续
+                </div>
+
+                <button id="btnBlind2" class="survey-submit" onclick="nextPage()" disabled>进入评价环节 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第5页：题目质量评价 Q5 ==================== -->
+        <div class="slide-page" data-index="5">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 42%;"></div>
+                    </div>
+                    <span class="progress-text">5/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="5">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="survey-title">5. 通过对题目本身的对比，您认为哪道题的出题质量更高？</div>
+                
+                <div class="single-choice-list">
+                    <label class="survey-option" onclick="selectSingle(5, 'A')" id="q5-A">
+                        <input type="radio" name="q5" value="A">
+                        <span class="survey-option-text">A. 题A</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(5, 'B')" id="q5-B">
+                        <input type="radio" name="q5" value="B">
+                        <span class="survey-option-text">B. 题B</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(5, 'C')" id="q5-C">
+                        <input type="radio" name="q5" value="C">
+                        <span class="survey-option-text">C. 两者差不多</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(5, 'D')" id="q5-D">
+                        <input type="radio" name="q5" value="D">
+                        <span class="survey-option-text">D. 都不满意</span>
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== 第6页：质量归因 Q6 ==================== -->
+        <div class="slide-page" data-index="6">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 50%;"></div>
+                    </div>
+                    <span class="progress-text">6/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="6">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="survey-title" id="q6-title">6. 您认为该题出题质量更高，主要是因为（可多选）：</div>
+                
+                <div class="multi-choice-list" id="q6-list">
+                    <label class="survey-option" onclick="toggleMultiQ6('flexible')" id="q6-flexible">
+                        <input type="checkbox" id="cb6-flexible">
+                        <span class="survey-option-text">题目灵活性高，能考察深度</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ6('trap')" id="q6-trap">
+                        <input type="checkbox" id="cb6-trap">
+                        <span class="survey-option-text">陷阱设置精妙，防不胜防</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ6('difficulty')" id="q6-difficulty">
+                        <input type="checkbox" id="cb6-difficulty">
+                        <span class="survey-option-text">难度分布合理，更有区分度</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ6('language')" id="q6-language">
+                        <input type="checkbox" id="cb6-language">
+                        <span class="survey-option-text">语言表述规范，更接近真题</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ6('other')" id="q6-other" style="flex-wrap: wrap;">
+                        <input type="checkbox" id="cb6-other">
+                        <span class="survey-option-text" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            其他原因：
+                            <input type="text" id="q6-other-text" class="survey-input" placeholder="请输入" onclick="event.stopPropagation()" oninput="checkQ6Other()" style="min-width: 150px; flex: 1;">
+                        </span>
+                    </label>
+                </div>
+
+                <button id="btn6Next" class="survey-submit" onclick="nextPage()" disabled>下一题 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第7页：综合偏好 Q7 ==================== -->
+        <div class="slide-page" data-index="7">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 58%;"></div>
+                    </div>
+                    <span class="progress-text">7/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="7">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="survey-title">7. 【综合偏好】阅读完两者的"解析"后，如果您只能选择其中一份，您更倾向于哪道题？</div>
+                
+                <div class="single-choice-list" style="margin-bottom: 16px;">
+                    <label class="survey-option" onclick="selectSingle(7, 'A')" id="q7-A">
+                        <input type="radio" name="q7" value="A">
+                        <span class="survey-option-text">A. 题A的解析</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(7, 'B')" id="q7-B">
+                        <input type="radio" name="q7" value="B">
+                        <span class="survey-option-text">B. 题B的解析</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(7, 'C')" id="q7-C">
+                        <input type="radio" name="q7" value="C">
+                        <span class="survey-option-text">C. 两者差别不大，都符合要求</span>
+                    </label>
+                    <label class="survey-option" onclick="selectSingle(7, 'D')" id="q7-D">
+                        <input type="radio" name="q7" value="D">
+                        <span class="survey-option-text">D. 两者都不太满意</span>
+                    </label>
+                </div>
+
+                <div id="q7-text-wrap" style="display: none; margin-bottom: 12px;">
+                    <div style="font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600;">具体不满意的原因是？</div>
+                    <textarea id="q7-text" class="survey-textarea" placeholder="请输入您的意见..." oninput="checkPage7()" style="width: 100%; min-height: 80px; border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px; font-size: 14px; resize: none; outline: none;"></textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== 第8页：多维评价 Q8 ==================== -->
+        <div class="slide-page" data-index="8">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 67%;"></div>
+                    </div>
+                    <span class="progress-text">8/16</span>
+                </div>
+                
+                <div class="question-nav" data-page-nav="8">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="survey-title">8. 【多维评价】您选择该题的具体理由是？<span style="color: var(--primary-2); font-size: 13px;">（可多选）</span></div>
+                
+                <div class="multi-choice-list" id="q8-list">
+                    <label class="survey-option" onclick="toggleMultiQ8('logic')" id="q8-logic">
+                        <input type="checkbox" id="cb8-logic">
+                        <span class="survey-option-text"><strong>逻辑引导：</strong>讲解由浅入深，有推导过程，不直接抛答案</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ8('trap')" id="q8-trap">
+                        <input type="checkbox" id="cb8-trap">
+                        <span class="survey-option-text"><strong>干扰项分析：</strong>对错误选项的"陷阱"解释得非常透彻</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ8('tone')" id="q8-tone">
+                        <input type="checkbox" id="cb8-tone">
+                        <span class="survey-option-text"><strong>语言风格：</strong>用词通俗易懂，不绕口，像老师在面对面讲课</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ8('layout')" id="q8-layout">
+                        <input type="checkbox" id="cb8-layout">
+                        <span class="survey-option-text"><strong>排版视觉：</strong>重点内容加粗或分段清晰，一眼能抓到关键点</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ8('value')" id="q8-value">
+                        <input type="checkbox" id="cb8-value">
+                        <span class="survey-option-text"><strong>增值内容：</strong>附带了知识点总结、对比表格或记忆口诀</span>
+                    </label>
+                    <label class="survey-option" onclick="toggleMultiQ8('efficiency')" id="q8-efficiency">
+                        <input type="checkbox" id="cb8-efficiency">
+                        <span class="survey-option-text"><strong>效率导向：</strong>言简意赅，没有废话，适合快速刷题</span>
+                    </label>
+                </div>
+
+                <button id="btn8Next" class="survey-submit" onclick="nextPage()" disabled>下一题 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第9页：综合投票主问题 ==================== -->
+        <div class="slide-page" data-index="9">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+                    <span class="progress-text">9/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="9">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="survey-title">9. 【综合投票】在日常学习或模考训练中，如果让你二选一，你更倾向于用哪道题？</div>
+
+                <div class="single-choice-list" style="margin-bottom: 16px;">
+                    <label class="survey-option" onclick="selectQ9Main('A')" id="q9-A">
+                        <input type="radio" name="q9" value="A">
+                        <span class="survey-option-text"><strong>A. 题A</strong></span>
+                    </label>
+                    <label class="survey-option" onclick="selectQ9Main('B')" id="q9-B">
+                        <input type="radio" name="q9" value="B">
+                        <span class="survey-option-text"><strong>B. 题B</strong></span>
+                    </label>
+                    <label class="survey-option" onclick="selectQ9Main('C')" id="q9-C">
+                        <input type="radio" name="q9" value="C">
+                        <span class="survey-option-text"><strong>C. 两者差不多，我都可以</strong>（直接进入下一部分）</span>
+                    </label>
+                    <label class="survey-option" onclick="selectQ9Main('D')" id="q9-D">
+                        <input type="radio" name="q9" value="D">
+                        <span class="survey-option-text"><strong>D. 都不太满意</strong>（感觉偏离了考试重点）</span>
+                    </label>
+                </div>
+
+                <div id="q9-text-wrap" style="display: none; margin-bottom: 12px;">
+                    <div style="font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600;">具体原因是？</div>
+                    <textarea id="q9-text" class="survey-textarea" placeholder="请简述..." oninput="checkPage9()" style="width: 100%; min-height: 80px; border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px; font-size: 14px; resize: none; outline: none;"></textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== 第10页：核心归因 ==================== -->
+        <div class="slide-page" data-index="10">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 83%;"></div>
+                    </div>
+                    <span class="progress-text">10/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="10">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <!-- 题目区域 - 可滚动 -->
+                <div class="content-box" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; padding: 16px;">
+                    <div class="survey-title" style="margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">10. 【核心原因】你选择该题的最主要原因是？<span style="color: var(--primary-2); font-size: 13px;">（可多选，限选3项）</span></div>
+
+                    <div class="multi-choice-list" id="q9-1-list">
+                        <label class="survey-option" onclick="toggleQ9_1('real')" id="q9-1-real">
+                            <input type="checkbox" id="cb9-1-real">
+                            <span class="survey-option-text"><strong>更有"真题感"：</strong>感觉题干表述、考察重点和我平时做的真题很像</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('trap')" id="q9-1-trap">
+                            <input type="checkbox" id="cb9-1-trap">
+                            <span class="survey-option-text"><strong>陷阱设得好：</strong>感觉到了出题人的意图，能帮我发现自己平时容易忽略的盲区</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('difficulty')" id="q9-1-difficulty">
+                            <input type="checkbox" id="cb9-1-difficulty">
+                            <span class="survey-option-text"><strong>难度很适中：</strong>既不觉得太简单，也没有刻意刁难，做题体感很顺</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('logic')" id="q9-1-logic">
+                            <input type="checkbox" id="cb9-1-logic">
+                            <span class="survey-option-text"><strong>解析逻辑清晰：</strong>顺着解析走能很快理解，没有看不懂、绕弯子的地方</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('avoid')" id="q9-1-avoid">
+                            <input type="checkbox" id="cb9-1-avoid">
+                            <span class="survey-option-text"><strong>"避坑"很管用：</strong>详细解释了错误选项为什么错，能帮我下次精准避雷</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('tips')" id="q9-1-tips">
+                            <input type="checkbox" id="cb9-1-tips">
+                            <span class="survey-option-text"><strong>有干货/大招：</strong>解析里带了口诀、技巧或知识点总结，能让我举一反三</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('concise')" id="q9-1-concise">
+                            <input type="checkbox" id="cb9-1-concise">
+                            <span class="survey-option-text"><strong>言简意赅：</strong>没废话，直击要点，能让我花最少的时间弄懂这道题</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('layout')" id="q9-1-layout">
+                            <input type="checkbox" id="cb9-1-layout">
+                            <span class="survey-option-text"><strong>排版看着爽：</strong>重点内容加粗或分段很明确，一眼就能抓到关键信息</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_1('other')" id="q9-1-other" style="flex-wrap: wrap;">
+                            <input type="checkbox" id="cb9-1-other">
+                            <span class="survey-option-text" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <strong>其他：</strong>
+                                <input type="text" id="q9-1-other-text" class="survey-input" placeholder="请简述" onclick="event.stopPropagation()" oninput="checkQ9_1Other()" style="min-width: 200px; flex: 1;">
+                            </span>
+                        </label>
+                    </div>
+                    <div id="q9-1-hint" style="font-size: 12px; color: var(--primary-2); margin-top: 8px; display: none;">⚠️ 最多选择3项</div>
+                </div>
+
+                <button id="btn9-1Next" class="survey-submit" onclick="handlePostPreferenceNext()" disabled>继续填写 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第11页：不满意反馈 ==================== -->
+        <div class="slide-page" data-index="11">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 83%;"></div>
+                    </div>
+                    <span class="progress-text">11/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="11">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <!-- 题目区域 - 可滚动 -->
+                <div class="content-box" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; padding: 16px;">
+                    <div class="survey-title" style="margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">11. 【吐槽/建议】你觉得这两道题都不太好，主要是因为？<span style="color: var(--primary-2); font-size: 13px;">（可多选）</span></div>
+
+                    <div class="multi-choice-list" id="q9-2-list">
+                        <label class="survey-option" onclick="toggleQ9_2('outdated')" id="q9-2-outdated">
+                            <input type="checkbox" id="cb9-2-outdated">
+                            <span class="survey-option-text"><strong>题目太老套：</strong>感觉这种考点或套路已经过时了，现在的考试不怎么考</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_2('awkward')" id="q9-2-awkward">
+                            <input type="checkbox" id="cb9-2-awkward">
+                            <span class="survey-option-text"><strong>逻辑很别扭：</strong>题目读着不顺，或者感觉答案解释得不够服众，有歧义</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_2('perfunctory')" id="q9-2-perfunctory">
+                            <input type="checkbox" id="cb9-2-perfunctory">
+                            <span class="survey-option-text"><strong>解析太敷衍：</strong>只是在重复题目的意思，没讲清楚到底该怎么推导、怎么解</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_2('weird')" id="q9-2-weird">
+                            <input type="checkbox" id="cb9-2-weird">
+                            <span class="survey-option-text"><strong>难度太畸形：</strong>感觉为了出题而出题，设置了一些没意义的脑筋急转弯</span>
+                        </label>
+                        <label class="survey-option" onclick="toggleQ9_2('other')" id="q9-2-other" style="flex-wrap: wrap;">
+                            <input type="checkbox" id="cb9-2-other">
+                            <span class="survey-option-text" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <strong>其他：</strong>
+                                <input type="text" id="q9-2-other-text" class="survey-input" placeholder="请简述" onclick="event.stopPropagation()" oninput="checkQ9_2Other()" style="min-width: 200px; flex: 1;">
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="btn9-2Next" class="survey-submit" onclick="handlePostPreferenceNext()" disabled>继续填写 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第12页：成绩报告需求 ==================== -->
+        <div class="slide-page" data-index="12">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+                    <span class="progress-text">12/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="12">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="content-box" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; padding: 16px;">
+                    <div class="survey-title" style="margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">12. 完成全套模拟卷/真题测验后，您最想在成绩报告中看到哪些分析报告？<span style="color: var(--primary-2); font-size: 13px;">（可多选）</span></div>
+                    <div class="multi-choice-list" id="q10-list">
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q10', 'radar')" id="q10-radar">
+                            <input type="checkbox" id="cb10-radar">
+                            <span class="survey-option-text"><strong>六维能力雷达（平衡度）：</strong>明确一眼看出政治理论、言语、判断、数量、资料、常识中哪块是短板。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q10', 'ranking')" id="q10-ranking">
+                            <input type="checkbox" id="cb10-ranking">
+                            <span class="survey-option-text"><strong>全库排名（竞争力）：</strong>知道自己的分数在全省或全库考生中的真实位次。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q10', 'priority')" id="q10-priority">
+                            <input type="checkbox" id="cb10-priority">
+                            <span class="survey-option-text"><strong>提分优先级建议：</strong>系统告诉我先攻哪一块更容易让我总分过线。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q10', 'growth')" id="q10-growth">
+                            <input type="checkbox" id="cb10-growth">
+                            <span class="survey-option-text"><strong>阶段性成长曲线：</strong>自动对比上周、上月的模拟数据，看我的提升是否有效。</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="btn10Next" class="survey-submit" onclick="nextPage()" disabled>下一题 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第13页：作答效率分析 ==================== -->
+        <div class="slide-page" data-index="13">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 81%;"></div>
+                    </div>
+                    <span class="progress-text">13/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="13">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="content-box" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; padding: 16px;">
+                    <div class="survey-title" style="margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">13. 行测是“时间战”，以下哪种关于“作答效率”的深度分析能有效缓解您的考场焦虑？<span style="color: var(--primary-2); font-size: 13px;">（可多选）</span></div>
+                    <div class="multi-choice-list" id="q11-list">
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q11', 'moduleTime')" id="q11-moduleTime">
+                            <input type="checkbox" id="cb11-moduleTime">
+                            <span class="survey-option-text"><strong>模块用时红黑榜：</strong>统计哪些模块我花了超额时间却得分不高。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q11', 'hesitation')" id="q11-hesitation">
+                            <input type="checkbox" id="cb11-hesitation">
+                            <span class="survey-option-text"><strong>单题“犹豫”监测：</strong>标注我修改过答案或停留时间极长才做对的题。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q11', 'sequence')" id="q11-sequence">
+                            <input type="checkbox" id="cb11-sequence">
+                            <span class="survey-option-text"><strong>黄金作答顺序推荐：</strong>基于我的得分效率，建议下次先做哪块、后做哪块。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q11', 'abandon')" id="q11-abandon">
+                            <input type="checkbox" id="cb11-abandon">
+                            <span class="survey-option-text"><strong>放弃策略复盘：</strong>分析我蒙对和乱涂的题，评估“断舍离”能力。</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="btn11Next" class="survey-submit" onclick="nextPage()" disabled>下一题 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第14页：错因穿透分析 ==================== -->
+        <div class="slide-page" data-index="14">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 88%;"></div>
+                    </div>
+                    <span class="progress-text">14/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="14">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="content-box" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; padding: 16px;">
+                    <div class="survey-title" style="margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">14. 针对全行测的所有错题，您希望系统如何帮您“穿透”错误背后的本质原因？<span style="color: var(--primary-2); font-size: 13px;">（可多选）</span></div>
+                    <div class="multi-choice-list" id="q12-list">
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q12', 'logicModel')" id="q12-logicModel">
+                            <input type="checkbox" id="cb12-logicModel">
+                            <span class="survey-option-text"><strong>逻辑模型识别：</strong>自动分析我是不是在某类题型上总容易跳坑。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q12', 'knowledge')" id="q12-knowledge">
+                            <input type="checkbox" id="cb12-knowledge">
+                            <span class="survey-option-text"><strong>知识盲区扫描：</strong>直接指出我是知识点没背熟，还是概念没理解。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q12', 'distractor')" id="q12-distractor">
+                            <input type="checkbox" id="cb12-distractor">
+                            <span class="survey-option-text"><strong>干扰项路径分析：</strong>告诉我是不是总被某种固定陷阱诱导。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q12', 'calcThinking')" id="q12-calcThinking">
+                            <input type="checkbox" id="cb12-calcThinking">
+                            <span class="survey-option-text"><strong>计算 vs 思维识别：</strong>明确错题到底是找数慢、公式错，还是思路出了问题。</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="btn12Next" class="survey-submit" onclick="nextPage()" disabled>下一题 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第15页：专项训练安排 ==================== -->
+        <div class="slide-page" data-index="15">
+            <div class="content-card">
+                <div class="progress-wrap">
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 94%;"></div>
+                    </div>
+                    <span class="progress-text">15/16</span>
+                </div>
+
+                <div class="question-nav" data-page-nav="15">
+                    <button class="question-nav-btn prev" type="button" onclick="goPrevPage()">← 上一题</button>
+                    <button class="question-nav-btn next" type="button" onclick="goNextPageFromTop()">下一题 →</button>
+                </div>
+
+                <div class="content-box" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; padding: 16px;">
+                    <div class="survey-title" style="margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">15. 测验结束后，您最渴望系统如何利用这些数据为您安排接下来的“专项训练”？<span style="color: var(--primary-2); font-size: 13px;">（可多选）</span></div>
+                    <div class="multi-choice-list" id="q13-list">
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q13', 'weakSet')" id="q13-weakSet">
+                            <input type="checkbox" id="cb13-weakSet">
+                            <span class="survey-option-text"><strong>“消灭弱项”自动组卷：</strong>立即生成一套只针对我薄弱且高分值考点的专项卷。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q13', 'sameError')" id="q13-sameError">
+                            <input type="checkbox" id="cb13-sameError">
+                            <span class="survey-option-text"><strong>“错因同类项”推送：</strong>如果我总在同类逻辑点丢分，就推送同类题集中练习。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q13', 'adaptive')" id="q13-adaptive">
+                            <input type="checkbox" id="cb13-adaptive">
+                            <span class="survey-option-text"><strong>难度动态调节：</strong>如果某模块已稳定高正确率，下次模拟自动调高难度。</span>
+                        </label>
+                        <label class="survey-option" onclick="togglePostSurveyMulti('q13', 'aiLesson')" id="q13-aiLesson">
+                            <input type="checkbox" id="cb13-aiLesson">
+                            <span class="survey-option-text"><strong>AI 考点“补课”：</strong>针对我最密集出错的考点，自动匹配短视频或干货笔记。</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="btn13Next" class="survey-submit" onclick="submitFinal()" disabled>提交问卷 →</button>
+            </div>
+        </div>
+
+        <!-- ==================== 第16页：完成页 ==================== -->
+        <div class="slide-page" data-index="16">
+            <div class="content-card result-card">
+                <div class="success-icon">
+                    <svg width="40" height="40" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                
+                <h1 class="result-title">感谢您的参与！</h1>
+                <h2 class="result-subtitle">您的建议将帮助我们打磨更好的产品</h2>
+
+                <div class="stat-list">
+                    <div class="stat-item">
+                        <span class="stat-icon">⏱️</span>
+                        <div class="stat-content">
+                            <div class="stat-label">调研耗时</div>
+                            <div class="stat-value"><span id="finalTime">0</span> 秒</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-icon">✅</span>
+                        <div class="stat-content">
+                            <div class="stat-label">完成题目</div>
+                            <div class="stat-value">16/16</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-icon">🎯</span>
+                        <div class="stat-content">
+                            <div class="stat-label">产品贡献值</div>
+                            <div class="stat-value" style="color: var(--primary-2); font-size: 18px;">+100 分</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-box">
+                    <div class="reward-text">🎁 感谢您的宝贵时间</div>
+                    <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">我们将根据您的反馈优化模拟卷产品</div>
+                    <button class="reward-btn" onclick="closeSurvey()">
+                        完成并关闭
+                    </button>
+                </div>
+
+                <div style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                    如有后续问题，请联系：research@example.com
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 完成动画 -->
+    <div class="celebrate-overlay" id="celebrate">
+        <div class="celebrate-circle">🎉</div>
+        <div class="celebrate-text">问卷提交成功！</div>
+        <div class="celebrate-sub">正在生成您的反馈报告...</div>
+    </div>
+
+    <script>
+        // ==================== 题库数据（行测六大模块） ====================
+        const LEGACY_QUESTION_BANK = {};
+
+        const QUESTION_BANK = {
+            commonSense: {
+                name: '常识判断',
+                questions: []
+            },
+            quantitative: {
+                name: '数量关系',
+                questions: []
+            },
+            judgment: {
+                name: '判断推理',
+                questions: []
+            },
+            language: {
+                name: '言语理解',
+                questions: []
+            },
+            dataAnalysis: {
+                name: '资料分析',
+                questions: []
+            },
+            politicalTheory: {
+                name: '政治理论',
+                questions: [
+                    {
+                        id: 'ZZ_001',
+                        module: 'politicalTheory',
+                        topic: '海南自贸港与高水平开放',
+                        difficulty: 'medium',
+                        versionA: {
+                            brand: 'competitor',
+                            brandName: '竞品题库',
+                            question: '党的二十届四中全会提出，完善高水平对外开放体制机制，要求统筹国内国际两个大局，完善对外投资管理和服务体系。根据相关政策文件，下列说法错误的是：',
+                            options: [
+                                'A、深化共建“一带一路”合作，以基础设施“硬联通”为核心合作纽带',
+                                'B、完善多元化、可持续、风险可控的投融资体系，加强海外利益保护',
+                                'C、有效实施对外投资管理，引导产业链供应链合理有序跨境布局',
+                                'D、推进人民币国际化，提升资本项目开放水平，建设自主可控的人民币跨境支付体系'
+                            ],
+                            analysis: '【解析】<br><br>A项错误。官方表述是以基础设施“硬联通”为重要基础，以规则标准“软联通”为重要支撑，以共建国家人民“心联通”为重要纽带，不能把“硬联通”表述为“核心合作纽带”。<br><br>B、C、D项均符合完善高水平对外开放体制机制的政策要求。<br><br><strong>答案：A</strong>'
+                        },
+                        versionB: {
+                            brand: 'ours',
+                            brandName: '我方产品',
+                            question: '2025年12月18日，海南自由贸易港正式启动全岛封关，这是我国扩大高水平对外开放的标志性举措。下列关于海南自贸港全岛封关及建设的表述正确的是（）。',
+                            options: [
+                                'A、全岛封关是将海南岛划定为封闭管理岛屿，实施严格的进出境管控',
+                                'B、海南自贸港建设的战略目标是打造全国新质生产力发展的核心示范区',
+                                'C、“三区一中心”是党中央赋予海南的战略定位，包含国家生态文明试验区',
+                                'D、高标准建设海南自由贸易港的主要目的是单独提升海南经济总量，打造区域经济标杆'
+                            ],
+                            analysis: '本题考查新思想。<br><br>A项错误，全岛封关是将海南全岛建成海关监管特殊区域，实施“‘一线’放开、‘二线’管住、岛内自由”的制度安排，并非封闭管理岛屿。<br><br>B项错误，海南自贸港建设的战略目标是打造引领我国新时代对外开放的重要门户。<br><br>C项正确，“三区一中心”包含全面深化改革开放试验区、国家生态文明试验区、国际旅游消费中心、国家重大战略服务保障区。<br><br>D项错误，建设海南自由贸易港的主要目的是促进高质量发展、服务新发展格局。<br><br><strong>故正确答案为C。</strong>'
+                        }
+                    },
+                    {
+                        id: 'ZZ_002',
+                        module: 'politicalTheory',
+                        topic: '以人民为中心与党的自我革命',
+                        difficulty: 'medium',
+                        versionA: {
+                            brand: 'competitor',
+                            brandName: '竞品题库',
+                            question: '习近平总书记强调，党的自我革命永远在路上，推进党的自我革命必须落实系列核心举措。关于推进党的自我革命的举措，下列表述不正确的是：',
+                            options: [
+                                'A、增强党性要求重在铸牢理想信念、厚植为民情怀，保持清正廉洁',
+                                'B、需在提高认识、增强党性、履行管党治党责任等方面落实',
+                                'C、推进自我革命需在规范权力运行、从严监督执纪层面落实到位',
+                                'D、推进自我革命必须坚持正本清源、强化约束，聚焦制度完善'
+                            ],
+                            analysis: '【解析】<br><br>A、B、C项均符合习近平总书记关于党的自我革命的重要论述。<br><br>D项错误。正确表述是推进自我革命要坚持正本清源、强化约束，聚焦解决问题。制度完善是重要保障，但不是这里的核心聚焦点。<br><br><strong>答案：D</strong>'
+                        },
+                        versionB: {
+                            brand: 'ours',
+                            brandName: '我方产品',
+                            question: '习近平总书记指出，中国共产党把为民办事、为民造福作为最重要的政绩，把为老百姓办了多少好事实事作为检验政绩的重要标准。下列相关表述正确的有几项？<br><br>①中国式现代化，民生为大。党和政府的一切工作，都是为了老百姓过上更加幸福的生活<br>②创新社会治理，要以最广大人民根本利益为根本坐标，从人民群众最关心最直接最现实的利益问题入手<br>③带领人民创造幸福生活，是我们党始终不渝的奋斗目标。我们要坚持以人民为中心的发展思想，以扩大内需为重点<br>④幸福生活都是奋斗出来的，共同富裕要靠勤劳智慧来创造，要坚持在发展中保障和改善民生，把促进高质量充分就业放在首位',
+                            options: [
+                                'A、1项',
+                                'B、2项',
+                                'C、3项',
+                                'D、4项'
+                            ],
+                            analysis: '本题考查新思想。<br><br>①正确。习近平总书记指出“中国式现代化，民生为大”。<br><br>②正确。创新社会治理要以最广大人民根本利益为根本坐标。<br><br>③错误。原文是“以保障和改善民生为重点”，不是“以扩大内需为重点”。<br><br>④错误。原文强调“把推动高质量发展放在首位”，不是“把促进高质量充分就业放在首位”。<br><br>因此正确的是①②，共2项。<br><br><strong>故正确答案为B。</strong>'
+                        }
+                    },
+                    {
+                        id: 'ZZ_003',
+                        module: 'politicalTheory',
+                        topic: '系统思维与问题导向',
+                        difficulty: 'medium',
+                        versionA: {
+                            brand: 'competitor',
+                            brandName: '竞品题库',
+                            question: '习近平总书记指出：“问题是时代的声音，回答并指导解决问题是理论的根本任务。”关于“坚持问题导向”，下列举措恰当的有：<br><br>①聚焦实践遇到的新问题、改革发展稳定存在的深层次问题<br>②聚焦人民群众急难愁盼问题、国际变局中的重大问题<br>③聚焦党的建设面临的突出问题，不断提出真正解决问题的新理念新思路新办法<br>④坚持以解决具体问题为理论创新的归宿，确保现有矛盾得到一次性解决',
+                            options: [
+                                'A、①②③',
+                                'B、①②④',
+                                'C、①③④',
+                                'D、②③④'
+                            ],
+                            analysis: '【解析】<br><br>①②③均正确，均属于党的二十大报告中关于坚持问题导向的权威表述。<br><br>④错误。理论创新的归宿是指导实践，且矛盾不会被“一次性解决”。<br><br><strong>答案：A</strong>'
+                        },
+                        versionB: {
+                            brand: 'ours',
+                            brandName: '我方产品',
+                            question: '习近平总书记高度重视系统思维，并娴熟运用于对问题及工作的分析研究。关于习近平总书记系统思维在治国理政中的运用，下列表述正确的有几项？<br><br>①改革开放是一个系统工程，必须坚持全面改革，在各项改革协同配合中推进<br>②只有用普遍联系的、全面系统的、发展变化的观点观察事物，才能把握事物发展规律<br>③坚持创新发展，既要坚持全面系统的观点，又要抓住关键，以重要领域和关键环节的突破带动全局<br>④构建新发展格局是一个系统工程，既要“操其要于上”，加强战略谋划和顶层设计，也要“分其详于下”，把握工作着力点',
+                            options: [
+                                'A、1项',
+                                'B、2项',
+                                'C、3项',
+                                'D、4项'
+                            ],
+                            analysis: '本题考查新思想。<br><br>①正确，改革开放是系统工程，必须坚持全面改革。<br><br>②正确，只有用普遍联系、全面系统、发展变化的观点观察事物，才能把握规律。<br><br>③正确，坚持创新发展既要全面系统，也要抓关键突破。<br><br>④正确，构建新发展格局既要加强顶层设计，也要把握工作着力点。<br><br>综上，①②③④均正确，共4项。<br><br><strong>故正确答案为D。</strong>'
+                        }
+                    },
+                    {
+                        id: 'ZZ_004',
+                        module: 'politicalTheory',
+                        topic: '中央企业与三农工作',
+                        difficulty: 'medium',
+                        versionA: {
+                            brand: 'competitor',
+                            brandName: '竞品题库',
+                            question: '2025年12月，中央农村工作会议在北京召开。会议强调要学习运用“千万工程”经验，集中力量抓好办成一批群众可感可及的实事。下列有关表述正确的是：',
+                            options: [
+                                'A、统筹优化乡村国土空间布局，持续改善农村人居环境',
+                                'B、坚持城乡融合发展，加快实现城乡基础设施与公共服务一体化',
+                                'C、以发展乡村新质生产力为首要任务，全面构建智慧农业生产体系',
+                                'D、建立健全乡村振兴投入保障机制，实现农村集体经济收入全面覆盖'
+                            ],
+                            analysis: '【解析】<br><br>A项正确，符合中央农村工作会议关于优化乡村国土空间布局、改善农村人居环境的表述。<br><br>B项错误，会议强调的是基础设施和公共服务向农村延伸，而非已经实现一体化。<br><br>C项错误，乡村振兴的首要任务不是发展乡村新质生产力。<br><br>D项错误，政策表述是壮大农村集体经济，不是“收入全面覆盖”。<br><br><strong>答案：A</strong>'
+                        },
+                        versionB: {
+                            brand: 'ours',
+                            brandName: '我方产品',
+                            question: '党的十八大以来，中央企业在国民经济中发挥了骨干和支柱作用。关于新时代党中央对中央企业工作的重要指示，下列表述正确的是（）。<br><br>①加强企业领导班子建设，促进党建工作与生产经营深度融合<br>②健全公司治理结构，着力解决制约企业发展的深层次问题<br>③要立足实体经济，强化关键核心技术攻关，推动科技创新和产业创新深度融合<br>④全方位推进中央企业发挥指挥棒作用，加强国内国际全覆盖的全面品牌管理',
+                            options: [
+                                'A、①②④',
+                                'B、②③④',
+                                'C、①③④',
+                                'D、①②③'
+                            ],
+                            analysis: '本题考查新思想。<br><br>①正确，党中央强调加强企业领导班子建设，推动党建工作与生产经营深度融合。<br><br>②③正确，要求完善中国特色现代企业制度，健全公司治理结构，立足实体经济，强化关键核心技术攻关。<br><br>④错误，正确表述应为“发挥品牌引领作用”，不是“指挥棒作用”。<br><br>因此正确的是①②③。<br><br><strong>故正确答案为D。</strong>'
+                        }
+                    },
+                    {
+                        id: 'ZZ_005',
+                        module: 'politicalTheory',
+                        topic: '八项规定与纠治四风',
+                        difficulty: 'medium',
+                        versionA: {
+                            brand: 'competitor',
+                            brandName: '竞品题库',
+                            question: '习近平总书记强调，要锲而不舍落实中央八项规定精神，持续深化纠治“四风”。关于纠治“四风”的要求，下列对应正确的是：',
+                            options: [
+                                'A、把纠治形式主义官僚主义摆在更加突出位置',
+                                'B、对享乐主义奢靡之风坚持分类甄别、审慎处置',
+                                'C、基层干部带头改进作风，领导干部抓好贯彻落实',
+                                'D、对“四风”隐形变异新动向坚持常态关注、逐步处置'
+                            ],
+                            analysis: '【解析】<br><br>A项正确，官方明确要求把纠治形式主义官僚主义摆在更加突出位置。<br><br>B项错误，正确表述是对享乐主义奢靡之风要盯紧不放、寸步不让。<br><br>C项错误，正确表述是领导干部带头改进作风、抓好贯彻落实。<br><br>D项错误，正确表述是对“四风”隐形变异新动向要时刻防范、露头就打。<br><br><strong>答案：A</strong>'
+                        },
+                        versionB: {
+                            brand: 'ours',
+                            brandName: '我方产品',
+                            question: '习近平总书记指出：“中央八项规定是党中央徙木立信之举，是新时代管党治党的标志性措施。”关于管党治党，下列说法正确的是（）。',
+                            options: [
+                                'A、党中央以八项规定开局破题，开展集中教育和一系列专项整治，不正之风和腐败现象存量虽然已尽，但增量仍然易发多发',
+                                'B、要严格标准，将党风党纪硬要求变为硬举措、让铁规矩长出铁牙齿，加大风腐同查同治力度，通过揭开“腐”的盖子揪出“风”的真面目',
+                                'C、针对腐败案件反映的地区性、行业性、领域性作风顽疾，以治“腐”带动治“风”铲除风腐共性根源',
+                                'D、各级领导干部作为“关键少数”，要以爱党、忧党、护党、兴党的政治忠诚，坚决扛起管党治党责任，严于律己、严负其责、严管所辖'
+                            ],
+                            analysis: '本题考查新思想。<br><br>A项错误，应为“不正之风和腐败现象存量未尽、增量仍然易发多发”。<br><br>B项错误，应为“通过揭开‘风’的盖子揪出‘腐’的真面目”。<br><br>C项错误，应为以“同治”铲除风腐共性根源。<br><br>D项正确，符合习近平总书记关于各级领导干部扛起管党治党责任的重要要求。<br><br><strong>故正确答案为D。</strong>'
+                        }
+                    }
+                ]
+            }
+        };
+        // 当前抽中的题目配置（全局）
+        let currentBlindTest = null;
+
+        // ==================== 数据库模块（内嵌） ====================
+        const DB_NAME = 'SurveyDB_v2';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'responses';
+        
+        let db = null;
+        
+        // 初始化数据库
+        async function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, { 
+                            keyPath: 'id', 
+                            autoIncrement: true 
+                        });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                        store.createIndex('date', 'date', { unique: false });
+                    }
+                };
+            });
+        }
+        
+        // 保存测评数据
+        async function saveSurvey(data) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const record = {
+                    ...data,
+                    userId: 'USER_' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                    timestamp: Date.now(),
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                const request = store.add(record);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        // 通知其他页面数据更新（支持 BroadcastChannel + localStorage 备选）
+function notifyDataUpdate(data) {
+    // 方案1：BroadcastChannel（现代浏览器，除 Safari）
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            const channel = new BroadcastChannel('survey_updates_v2');
+            channel.postMessage({ type: 'NEW_SURVEY', data });
+            console.log('📡 BroadcastChannel 通知已发送');
+        } catch (e) {
+            console.warn('BroadcastChannel 发送失败:', e);
+        }
+    }
+    
+    // 方案2：localStorage 事件（兼容 Safari 和所有浏览器）
+    try {
+        const timestamp = Date.now();
+        localStorage.setItem('survey_last_update', timestamp.toString());
+        localStorage.setItem('survey_latest_data', JSON.stringify(data));
+        console.log('💾 localStorage 通知已发送');
+    } catch (e) {
+        console.warn('localStorage 发送失败:', e);
+    }
+}
+        
+        // 页面加载时初始化数据库
+        initDB().then(() => {
+            console.log('✅ 数据库已初始化');
+        }).catch(err => {
+            console.error('❌ 数据库初始化失败:', err);
+        });
+        
+        // ==================== 全局状态 ====================
+        let currentPage = 0;
+        let startTime = 0;
+        let timerInterval = null;
+        let surveyData = {
+            q1: null, q2: null, q3: [], q4: '',
+            q5: null, q6: [], q6Text: '', q7: null, q7Text: '',
+            q8: [], q9: null, q9Text: '',
+            q9_1: [], q9_1Text: '', q9_2: [], q9_2Text: '',
+            q10: [], q11: [], q12: [], q13: []
+        };
+
+        // Tab状态
+        const qState = {
+            1: { tab: 'A', viewedA: true, viewedB: false },
+            2: { tab: 'A', viewedA: true, viewedB: false }
+        };
+
+        // ==================== 盲测题目初始化 ====================
+        function initBlindTest() {
+            try {
+                // 1. 随机选择模块（只选有题目的模块）
+                const modules = Object.keys(QUESTION_BANK).filter(k => QUESTION_BANK[k].questions.length > 0);
+                if (modules.length === 0) {
+                    console.error('题库为空');
+                    return;
+                }
+                
+                const randomModuleKey = modules[Math.floor(Math.random() * modules.length)];
+                const moduleData = QUESTION_BANK[randomModuleKey];
+                
+                // 2. 随机选择该模块下的题目
+                const questions = moduleData.questions;
+                if (questions.length === 0) {
+                    console.error('模块内无题目');
+                    return;
+                }
+                
+                const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+                
+                // 3. 固定展示顺序：A先（我方产品），B后（竞品）
+                const displayOrder = ['A', 'B'];
+                
+                // 4. 记录配置
+                currentBlindTest = {
+                    questionId: randomQuestion.id,
+                    module: randomQuestion.module,
+                    moduleName: moduleData.name,
+                    topic: randomQuestion.topic,
+                    difficulty: randomQuestion.difficulty,
+                    
+                    versionMapping: {
+                        A: 'ours',
+                        B: 'competitor'
+                    },
+                    brandNames: {
+                        A: randomQuestion.versionB.brandName,
+                        B: randomQuestion.versionA.brandName
+                    },
+                    
+                    displayOrder: displayOrder,
+                    questionData: randomQuestion
+                };
+                
+                // 5. 渲染题目到页面
+                renderBlindTestQuestions();
+                
+                // 6. 保存到surveyData
+                surveyData.blindTestConfig = currentBlindTest;
+                
+                console.log('✅ 盲测题目已抽取:', currentBlindTest);
+            } catch (error) {
+                console.error('❌ initBlindTest 出错:', error);
+                // 即使出错也不阻塞，使用默认题目或继续
+            }
+        }
+
+        // 渲染题目到第3页和第4页
+        function renderBlindTestQuestions() {
+            if (!currentBlindTest || !currentBlindTest.questionData) {
+                console.error('没有可用的盲测题目数据');
+                return;
+            }
+            
+            const q = currentBlindTest.questionData;
+            
+            // 检查必要的DOM元素是否存在
+            const containerA = document.getElementById('dynamic-question-A');
+            const containerB = document.getElementById('dynamic-question-B');
+            const analysisA = document.getElementById('dynamic-analysis-A');
+            const analysisB = document.getElementById('dynamic-analysis-B');
+            
+            if (!containerA || !containerB || !analysisA || !analysisB) {
+                console.error('盲测题目容器未找到');
+                return;
+            }
+            
+            // 题A显示我方产品（versionB）
+            const versionA = q.versionB;
+            containerA.innerHTML = `
+                <div class="question-body">${versionA.question}</div>
+                <div class="options-list" id="options1A">
+                    ${versionA.options.map((opt, i) => `<div class="option-item" onclick="selectOption(1, 'A', this)">${opt}</div>`).join('')}
+                </div>
+            `;
+            
+            // 题B显示竞品（versionA）
+            const versionB = q.versionA;
+            containerB.innerHTML = `
+                <div class="question-body">${versionB.question}</div>
+                <div class="options-list" id="options1B">
+                    ${versionB.options.map((opt, i) => `<div class="option-item" onclick="selectOption(1, 'B', this)">${opt}</div>`).join('')}
+                </div>
+            `;
+            
+            // 渲染解析A（我方产品）
+            analysisA.innerHTML = `
+                <div class="analysis-body">${versionA.analysis}</div>
+            `;
+            
+            // 渲染解析B（竞品）
+            analysisB.innerHTML = `
+                <div class="analysis-body">${versionB.analysis}</div>
+            `;
+        }
+
+        // 转换用户选择（A/B）为实际品牌选择
+        function convertRawToActual() {
+            if (!currentBlindTest) return;
+            
+            // 固定映射：A=我方产品(ours)，B=竞品(competitor)
+            
+            // Q5: 题目质量评价
+            if (surveyData.q5) {
+                surveyData.q5_raw = surveyData.q5;
+                if (surveyData.q5 === 'A') surveyData.q5_actual = 'ours';
+                else if (surveyData.q5 === 'B') surveyData.q5_actual = 'competitor';
+                else if (surveyData.q5 === 'C') surveyData.q5_actual = 'similar';
+                else if (surveyData.q5 === 'D') surveyData.q5_actual = 'neither';
+            }
+            
+            // Q7: 综合偏好
+            if (surveyData.q7) {
+                surveyData.q7_raw = surveyData.q7;
+                if (surveyData.q7 === 'A') surveyData.q7_actual = 'ours';
+                else if (surveyData.q7 === 'B') surveyData.q7_actual = 'competitor';
+                else if (surveyData.q7 === 'C') surveyData.q7_actual = 'similar';
+                else if (surveyData.q7 === 'D') surveyData.q7_actual = 'neither';
+            }
+            
+            // Q9: 综合投票
+            if (surveyData.q9) {
+                surveyData.q9_raw = surveyData.q9;
+                if (surveyData.q9 === 'A') surveyData.q9_actual = 'ours';
+                else if (surveyData.q9 === 'B') surveyData.q9_actual = 'competitor';
+                else if (surveyData.q9 === 'C') surveyData.q9_actual = 'similar';
+                else if (surveyData.q9 === 'D') surveyData.q9_actual = 'neither';
+            }
+            
+            // 记录展示顺序信息
+            surveyData.displayOrder = ['A', 'B']; // 固定顺序
+            surveyData.firstShownBrand = 'ours'; // 先显示我方产品
+        }
+
+        // ==================== 页面切换 ====================
+        function goToPage(index) {
+            if (index < 0 || index > 16) return;
+            currentPage = index;
+            
+            const slider = document.getElementById('slider');
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            
+            // 更新导航点
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            updateTopNavState(index);
+            
+            // 启动计时器
+            if (index === 1 && !startTime) {
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimers, 1000);
+            }
+        }
+
+        function nextPage() {
+            goToPage(currentPage + 1);
+        }
+
+        function goPrevPage() {
+            if (currentPage === 12) {
+                if (surveyData.q9 === 'A' || surveyData.q9 === 'B') {
+                    goToPage(10);
+                    return;
+                }
+                if (surveyData.q9 === 'D') {
+                    goToPage(11);
+                    return;
+                }
+                if (surveyData.q9 === 'C') {
+                    goToPage(9);
+                    return;
+                }
+            }
+            if (currentPage > 0) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        function goNextPageFromTop() {
+            if (!checkCanProceed(currentPage)) return;
+
+            if (currentPage === 9) {
+                handleQ9Next();
+                return;
+            }
+
+            if (currentPage === 10 || currentPage === 11) {
+                handlePostPreferenceNext();
+                return;
+            }
+
+            if (currentPage === 15) {
+                submitFinal();
+                return;
+            }
+
+            if (currentPage < 16) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        function updateTopNavState(page) {
+            const nav = document.querySelector(`.question-nav[data-page-nav="${page}"]`);
+            if (!nav) return;
+
+            const prevBtn = nav.querySelector('.question-nav-btn.prev');
+            const nextBtn = nav.querySelector('.question-nav-btn.next');
+
+            if (prevBtn) {
+                prevBtn.disabled = page <= 0;
+            }
+
+            if (nextBtn) {
+                nextBtn.disabled = !checkCanProceed(page);
+            }
+        }
+
+        function queueAutoAdvance(handler) {
+            window.setTimeout(() => {
+                if (typeof handler === 'function') {
+                    handler();
+                }
+            }, 180);
+        }
+
+        function shouldAutoAdvanceSingle(qNum, val) {
+            if ((qNum === 1 || qNum === 2) && !!surveyData.q1 && !!surveyData.q2) return true;
+            if (qNum === 5) return true;
+            if (qNum === 7) return val !== 'D';
+            return false;
+        }
+
+        function updateTimers() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            [1, 2].forEach(n => {
+                const el = document.getElementById(`timer${n}`);
+                if (el) el.textContent = elapsed;
+            });
+        }
+
+        function startSurvey() {
+            initBlindTest();  // 初始化盲测题目
+            goToPage(1);      // 跳转到第一页
+        }
+
+        // ==================== 单选逻辑 ====================
+        function selectSingle(qNum, val) {
+            console.log(`[selectSingle] Q${qNum} = ${val}`);
+            
+            // 更新数据模型
+            surveyData[`q${qNum}`] = val;
+            
+            // 更新radio状态
+            const radios = document.querySelectorAll(`input[name="q${qNum}"]`);
+            radios.forEach(radio => {
+                radio.checked = (radio.value === val);
+            });
+            
+            // 视觉反馈：移除所有选中状态，添加当前选中
+            document.querySelectorAll(`[id^="q${qNum}-"]`).forEach(el => {
+                el.classList.remove('selected');
+            });
+            const selectedEl = document.getElementById(`q${qNum}-${val}`);
+            if (selectedEl) selectedEl.classList.add('selected');
+            
+            // Q7特殊处理
+            if (qNum === 7) {
+                const textWrap = document.getElementById('q7-text-wrap');
+                if (val === 'D') {
+                    textWrap.style.display = 'block';
+                } else {
+                    textWrap.style.display = 'none';
+                    surveyData.q7Text = '';
+                    const textarea = document.getElementById('q7-text');
+                    if (textarea) textarea.value = '';
+                }
+            }
+            
+            // 立即更新按钮状态
+            updateButtonState(qNum);
+
+            if (shouldAutoAdvanceSingle(qNum, val) && checkCanProceed(currentPage)) {
+                queueAutoAdvance(() => {
+                    if ((qNum === 1 || qNum === 2) && currentPage === 1 && checkCanProceed(currentPage)) {
+                        goToPage(2);
+                        return;
+                    }
+
+                    if (currentPage === qNum && checkCanProceed(currentPage)) {
+                        goToPage(currentPage + 1);
+                    }
+                });
+            }
+        }
+
+        // ==================== 多选逻辑 ====================
+        function toggleMulti(qNum, optId) {
+            const cb = document.getElementById(`cb${qNum}-${optId}`);
+            const list = document.getElementById(`q${qNum}-list`);
+            const allChecked = list.querySelectorAll('input[type="checkbox"]:checked');
+            const maxLimit = qNum === 3 ? 3 : 10; // Q3限3项，其他不限
+            
+            // 如果已选满且当前未选中，则提示
+            if (allChecked.length >= maxLimit && !cb.checked) {
+                document.getElementById(`q${qNum}-hint`).style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById(`q${qNum}-hint`).style.display = 'none';
+                }, 2000);
+                return;
+            }
+            
+            cb.checked = !cb.checked;
+            
+            const item = document.getElementById(`q${qNum}-${optId}`);
+            if (cb.checked) item.classList.add('selected');
+            else item.classList.remove('selected');
+            
+            // 更新数据
+            const key = `q${qNum}`;
+            if (!surveyData[key]) surveyData[key] = [];
+            
+            const labelMap = {
+                difficulty: '题目难度与真题的贴合度',
+                analysis: '解析是否详尽',
+                logic: '题目逻辑是否严谨',
+                coverage: '考点覆盖的全面性',
+                skill: '解题技巧/秒杀方法',
+                brand: '品牌知名度',
+                trap: '干扰项分析',
+                tone: '语言风格',
+                layout: '排版视觉',
+                value: '增值内容',
+                efficiency: '效率导向'
+            };
+            
+            if (cb.checked) {
+                if (!surveyData[key].includes(labelMap[optId])) {
+                    surveyData[key].push(labelMap[optId]);
+                }
+            } else {
+                surveyData[key] = surveyData[key].filter(x => x !== labelMap[optId]);
+            }
+            
+            // 更新禁用状态（仅Q3）
+            if (qNum === 3) {
+                const allOptions = list.querySelectorAll('input[type="checkbox"]');
+                allOptions.forEach(opt => {
+                    if (!opt.checked && allChecked.length >= maxLimit) {
+                        opt.disabled = true;
+                        opt.parentElement.style.opacity = '0.5';
+                    } else {
+                        opt.disabled = false;
+                        opt.parentElement.style.opacity = '1';
+                    }
+                });
+            }
+            
+            updateButtonState(qNum);
+        }
+
+        // ==================== 更新按钮状态（统一入口） ====================
+        function updateButtonState(qNum) {
+            let enabled = false;
+            let btnId = '';
+            
+            switch(qNum) {
+                case 1:
+                case 2:
+                    enabled = !!surveyData.q1 && !!surveyData.q2;
+                    break;
+                case 3:
+                    const q3Count = surveyData.q3?.length || 0;
+                    enabled = q3Count > 0 && q3Count <= 3 && surveyData.q4?.length > 0;
+                    btnId = 'btn2Next';
+                    break;
+                case 5:
+                    enabled = !!surveyData.q5;
+                    break;
+                case 6:
+                    const hasQ6Text = document.getElementById('q6-other-text')?.value?.trim().length > 0;
+                    enabled = surveyData.q6 && surveyData.q6.length > 0;
+                    if (surveyData.q6 && surveyData.q6.includes('其他原因') && !hasQ6Text) {
+                        enabled = false;
+                    }
+                    btnId = 'btn6Next';
+                    break;
+                case 7:
+                    const hasQ7Text = document.getElementById('q7-text')?.value?.trim().length > 0;
+                    enabled = !!surveyData.q7;
+                    if (surveyData.q7 === 'D' && !hasQ7Text) {
+                        enabled = false;
+                    }
+                    break;
+                case 8:
+                    enabled = surveyData.q8 && surveyData.q8.length > 0;
+                    btnId = 'btn8Next';
+                    break;
+            }
+            
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.disabled = !enabled;
+                console.log(`[updateButtonState] ${btnId}: disabled=${!enabled}`);
+            }
+
+            updateTopNavState(currentPage);
+        }
+
+        // ==================== 页面特定检查函数 ====================
+        function checkPage2() {
+            surveyData.q4 = document.getElementById('q4-input').value.trim();
+            updateButtonState(3);
+        }
+
+        function checkPage7() {
+            surveyData.q7Text = document.getElementById('q7-text').value.trim();
+            updateButtonState(7);
+        }
+
+        function checkPage9() {
+            surveyData.q9Text = document.getElementById('q9-text').value.trim();
+            updateTopNavState(currentPage);
+        }
+
+        // ==================== Tab切换逻辑 ====================
+        function switchTab(n, tab) {
+            const s = qState[n];
+            if (!s) {
+                console.error(`qState[${n}] 不存在`);
+                return;
+            }
+            
+            // 更新查看状态
+            if (tab === 'A') s.viewedA = true;
+            if (tab === 'B') s.viewedB = true;
+            s.tab = tab;
+            
+            console.log(`[switchTab] n=${n}, tab=${tab}, viewedA=${s.viewedA}, viewedB=${s.viewedB}`);
+            
+            // 获取DOM元素
+            const tabA = document.getElementById(`tab${n}A`);
+            const tabB = document.getElementById(`tab${n}B`);
+            const panelA = document.getElementById(`panel${n}A`);
+            const panelB = document.getElementById(`panel${n}B`);
+            const btn = document.getElementById(`btnBlind${n}`);
+            const guide = document.getElementById(`guide${n}`);
+            
+            // 检查必要元素是否存在
+            if (!tabA || !tabB || !panelA || !panelB) {
+                console.error(`Tab元素未找到: tab${n}A, tab${n}B, panel${n}A, panel${n}B`);
+                return;
+            }
+            
+            if (tab === 'A') {
+                // 切换到A面板
+                tabA.className = 'tab-btn active';
+                tabB.className = 'tab-btn inactive';
+                panelA.classList.add('show');
+                panelB.classList.remove('show');
+                
+                // 锁定按钮（必须看B才能解锁）
+                if (btn) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    console.log(`[switchTab] 按钮 btnBlind${n} 已禁用`);
+                }
+                
+                // 更新引导条
+                if (guide) {
+                    guide.className = 'guide-bar locked';
+                    guide.textContent = n === 1 ? '📖 先把两道题都看完，再进入下一步判断' : '📖 两份解析都看完后，再继续作答';
+                }
+                
+            } else {
+                // 切换到B面板 - 这里解锁按钮！
+                tabB.className = 'tab-btn active';
+                tabA.className = 'tab-btn inactive';
+                panelB.classList.add('show');
+                panelA.classList.remove('show');
+                
+                // 【修复核心】解锁按钮并添加视觉反馈
+                if (btn) {
+                    btn.disabled = false;  // 启用按钮
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    console.log(`[switchTab] 按钮 btnBlind${n} 已启用`);
+                }
+                
+                // 更新引导条为解锁状态
+                if (guide) {
+                    guide.className = 'guide-bar unlocked';
+                    guide.textContent = '✅ 已完成本步，请继续下一页';
+                }
+                
+                // 滚动到顶部
+                const contentBox = document.getElementById(`box${n}`);
+                if (contentBox) contentBox.scrollTop = 0;
+            }
+
+            updateTopNavState(currentPage);
+        }
+
+        // ==================== 选项选择交互 ====================
+        function selectOption(qNum, panel, element) {
+            const listId = 'options' + qNum + panel;
+            const list = document.getElementById(listId);
+            if (!list) return;
+            
+            const allOptions = list.querySelectorAll('.option-item');
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        // ==================== Q6多选逻辑 ====================
+        function toggleMultiQ6(optId) {
+            const cb = document.getElementById(`cb6-${optId}`);
+            const list = document.getElementById('q6-list');
+
+            // 切换选中状态
+            cb.checked = !cb.checked;
+
+            // 更新视觉样式
+            const item = document.getElementById(`q6-${optId}`);
+            if (cb.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+
+            // 更新数据
+            if (!surveyData.q6) surveyData.q6 = [];
+
+            const labelMap = {
+                flexible: '题目灵活性高，能考察深度',
+                trap: '陷阱设置精妙，防不胜防',
+                difficulty: '难度分布合理，更有区分度',
+                language: '语言表述规范，更接近真题',
+                other: '其他原因'
+            };
+
+            if (cb.checked) {
+                if (!surveyData.q6.includes(labelMap[optId])) {
+                    surveyData.q6.push(labelMap[optId]);
+                }
+            } else {
+                surveyData.q6 = surveyData.q6.filter(x => x !== labelMap[optId]);
+            }
+
+            // 处理"其他"选项的文本输入
+            if (optId === 'other') {
+                if (cb.checked) {
+                    setTimeout(() => document.getElementById('q6-other-text').focus(), 100);
+                } else {
+                    surveyData.q6Text = '';
+                    document.getElementById('q6-other-text').value = '';
+                }
+            }
+
+            // 更新按钮状态
+            updateQ6ButtonState();
+        }
+
+        function checkQ6Other() {
+            surveyData.q6Text = document.getElementById('q6-other-text').value.trim();
+            updateQ6ButtonState();
+        }
+
+        function updateQ6ButtonState() {
+            const hasSelection = surveyData.q6 && surveyData.q6.length > 0;
+            const hasOther = surveyData.q6 && surveyData.q6.includes('其他原因');
+            const hasOtherText = surveyData.q6Text && surveyData.q6Text.length > 0;
+
+            let enabled = hasSelection;
+            if (hasOther && !hasOtherText) {
+                enabled = false;
+            }
+
+            const btn = document.getElementById('btn6Next');
+            if (btn) {
+                btn.disabled = !enabled;
+            }
+
+            updateTopNavState(currentPage);
+        }
+
+        // ==================== Q8多选逻辑 ====================
+        function toggleMultiQ8(optId) {
+            const cb = document.getElementById(`cb8-${optId}`);
+            const item = document.getElementById(`q8-${optId}`);
+
+            // 切换选中状态
+            cb.checked = !cb.checked;
+
+            // 更新视觉样式
+            if (cb.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+
+            // 更新数据
+            if (!surveyData.q8) surveyData.q8 = [];
+
+            const labelMap = {
+                logic: '逻辑引导：讲解由浅入深，有推导过程，不直接抛答案',
+                trap: '干扰项分析：对错误选项的"陷阱"解释得非常透彻',
+                tone: '语言风格：用词通俗易懂，不绕口，像老师在面对面讲课',
+                layout: '排版视觉：重点内容加粗或分段清晰，一眼能抓到关键点',
+                value: '增值内容：附带了知识点总结、对比表格或记忆口诀',
+                efficiency: '效率导向：言简意赅，没有废话，适合快速刷题'
+            };
+
+            if (cb.checked) {
+                if (!surveyData.q8.includes(labelMap[optId])) {
+                    surveyData.q8.push(labelMap[optId]);
+                }
+            } else {
+                surveyData.q8 = surveyData.q8.filter(x => x !== labelMap[optId]);
+            }
+
+            // 更新按钮状态
+            updateButtonState(8);
+        }
+
+        // ==================== Q9跳转逻辑 ====================
+        let q9MainSelection = null;
+
+        function selectQ9Main(val) {
+            q9MainSelection = val;
+            surveyData.q9 = val;
+
+            // 更新radio状态
+            const radios = document.querySelectorAll('input[name="q9"]');
+            radios.forEach(radio => {
+                radio.checked = (radio.value === val);
+            });
+
+            // 视觉反馈
+            document.querySelectorAll('[id^="q9-"]').forEach(el => {
+                if (el.id !== 'q9-text' && el.id !== 'q9-text-wrap') el.classList.remove('selected');
+            });
+            const selectedEl = document.getElementById(`q9-${val}`);
+            if (selectedEl) selectedEl.classList.add('selected');
+
+            // 显示/隐藏文本框
+            const textWrap = document.getElementById('q9-text-wrap');
+            if (textWrap) {
+                textWrap.style.display = (val === 'D') ? 'block' : 'none';
+            }
+
+            updateTopNavState(currentPage);
+
+            if (val !== 'D' && checkCanProceed(currentPage)) {
+                queueAutoAdvance(() => {
+                    if (currentPage === 9 && checkCanProceed(currentPage)) {
+                        handleQ9Next();
+                    }
+                });
+            }
+        }
+
+        function handleQ9Next() {
+            if (!q9MainSelection) {
+                console.warn('请先选择一个选项');
+                return;
+            }
+
+            // 根据选择跳转到不同页面
+            if (q9MainSelection === 'A' || q9MainSelection === 'B') {
+                // 选中A或B，跳转到第10页（核心归因）
+                goToPage(10);
+            } else if (q9MainSelection === 'C') {
+                // 选中C，跳过分支页，进入测后需求部分
+                goToPage(16);
+            } else if (q9MainSelection === 'D') {
+                // 选中D，跳转到第11页（不满意反馈）
+                goToPage(11);
+            }
+        }
+
+        function handlePostPreferenceNext() {
+            goToPage(12);
+        }
+
+        // ==================== Q9-1核心归因逻辑 ====================
+        function toggleQ9_1(optId) {
+            const cb = document.getElementById(`cb9-1-${optId}`);
+            const item = document.getElementById(`q9-1-${optId}`);
+
+            // 检查已选数量
+            const allChecked = document.querySelectorAll('#q9-1-list input:checked');
+            const maxLimit = 3;
+
+            if (allChecked.length >= maxLimit && !cb.checked) {
+                document.getElementById('q9-1-hint').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('q9-1-hint').style.display = 'none';
+                }, 2000);
+                return;
+            }
+
+            // 切换选中状态
+            cb.checked = !cb.checked;
+
+            // 更新视觉样式
+            if (cb.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+
+            // 更新数据
+            if (!surveyData.q9_1) surveyData.q9_1 = [];
+
+            const labelMap = {
+                real: '更有"真题感"：感觉题干表述、考察重点和我平时做的真题很像',
+                trap: '陷阱设得好：感觉到了出题人的意图，能帮我发现自己平时容易忽略的盲区',
+                difficulty: '难度很适中：既不觉得太简单，也没有刻意刁难，做题体感很顺',
+                logic: '解析逻辑清晰：顺着解析走能很快理解，没有看不懂、绕弯子的地方',
+                avoid: '"避坑"很管用：详细解释了错误选项为什么错，能帮我下次精准避雷',
+                tips: '有干货/大招：解析里带了口诀、技巧或知识点总结，能让我举一反三',
+                concise: '言简意赅：没废话，直击要点，能让我花最少的时间弄懂这道题',
+                layout: '排版看着爽：重点内容加粗或分段很明确，一眼就能抓到关键信息',
+                other: '其他'
+            };
+
+            if (cb.checked) {
+                if (!surveyData.q9_1.includes(labelMap[optId])) {
+                    surveyData.q9_1.push(labelMap[optId]);
+                }
+            } else {
+                surveyData.q9_1 = surveyData.q9_1.filter(x => x !== labelMap[optId]);
+            }
+
+            // 处理"其他"选项
+            if (optId === 'other') {
+                if (cb.checked) {
+                    setTimeout(() => document.getElementById('q9-1-other-text').focus(), 100);
+                } else {
+                    surveyData.q9_1Text = '';
+                    document.getElementById('q9-1-other-text').value = '';
+                }
+            }
+
+            updateQ9_1ButtonState();
+        }
+
+        function checkQ9_1Other() {
+            surveyData.q9_1Text = document.getElementById('q9-1-other-text').value.trim();
+            updateQ9_1ButtonState();
+        }
+
+        function updateQ9_1ButtonState() {
+            const hasSelection = surveyData.q9_1 && surveyData.q9_1.length > 0;
+            const hasOther = surveyData.q9_1 && surveyData.q9_1.includes('其他');
+            const hasOtherText = surveyData.q9_1Text && surveyData.q9_1Text.length > 0;
+
+            let enabled = hasSelection;
+            if (hasOther && !hasOtherText) {
+                enabled = false;
+            }
+
+            const btn = document.getElementById('btn9-1Next');
+            if (btn) btn.disabled = !enabled;
+            updateTopNavState(currentPage);
+        }
+
+        // ==================== Q9-2不满意反馈逻辑 ====================
+        function toggleQ9_2(optId) {
+            const cb = document.getElementById(`cb9-2-${optId}`);
+            const item = document.getElementById(`q9-2-${optId}`);
+
+            // 切换选中状态
+            cb.checked = !cb.checked;
+
+            // 更新视觉样式
+            if (cb.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+
+            // 更新数据
+            if (!surveyData.q9_2) surveyData.q9_2 = [];
+
+            const labelMap = {
+                outdated: '题目太老套：感觉这种考点或套路已经过时了，现在的考试不怎么考',
+                awkward: '逻辑很别扭：题目读着不顺，或者感觉答案解释得不够服众，有歧义',
+                perfunctory: '解析太敷衍：只是在重复题目的意思，没讲清楚到底该怎么推导、怎么解',
+                weird: '难度太畸形：感觉为了出题而出题，设置了一些没意义的脑筋急转弯',
+                other: '其他'
+            };
+
+            if (cb.checked) {
+                if (!surveyData.q9_2.includes(labelMap[optId])) {
+                    surveyData.q9_2.push(labelMap[optId]);
+                }
+            } else {
+                surveyData.q9_2 = surveyData.q9_2.filter(x => x !== labelMap[optId]);
+            }
+
+            // 处理"其他"选项
+            if (optId === 'other') {
+                if (cb.checked) {
+                    setTimeout(() => document.getElementById('q9-2-other-text').focus(), 100);
+                } else {
+                    surveyData.q9_2Text = '';
+                    document.getElementById('q9-2-other-text').value = '';
+                }
+            }
+
+            updateQ9_2ButtonState();
+        }
+
+        function checkQ9_2Other() {
+            surveyData.q9_2Text = document.getElementById('q9-2-other-text').value.trim();
+            updateQ9_2ButtonState();
+        }
+
+        function updateQ9_2ButtonState() {
+            const hasSelection = surveyData.q9_2 && surveyData.q9_2.length > 0;
+            const hasOther = surveyData.q9_2 && surveyData.q9_2.includes('其他');
+            const hasOtherText = surveyData.q9_2Text && surveyData.q9_2Text.length > 0;
+
+            let enabled = hasSelection;
+            if (hasOther && !hasOtherText) {
+                enabled = false;
+            }
+
+            const btn = document.getElementById('btn9-2Next');
+            if (btn) btn.disabled = !enabled;
+            updateTopNavState(currentPage);
+        }
+
+        const POST_SURVEY_OPTION_MAPS = {
+            q10: {
+                radar: '六维能力雷达（平衡度）',
+                ranking: '全库排名（竞争力）',
+                priority: '提分优先级建议',
+                growth: '阶段性成长曲线'
+            },
+            q11: {
+                moduleTime: '模块用时红黑榜',
+                hesitation: '单题“犹豫”监测',
+                sequence: '黄金作答顺序推荐',
+                abandon: '放弃策略复盘'
+            },
+            q12: {
+                logicModel: '逻辑模型识别',
+                knowledge: '知识盲区扫描',
+                distractor: '干扰项路径分析',
+                calcThinking: '计算 vs 思维识别'
+            },
+            q13: {
+                weakSet: '“消灭弱项”自动组卷',
+                sameError: '“错因同类项”推送',
+                adaptive: '难度动态调节',
+                aiLesson: 'AI 考点“补课”'
+            }
+        };
+
+        function togglePostSurveyMulti(questionKey, optId) {
+            const questionNum = questionKey.replace('q', '');
+            const cb = document.getElementById(`cb${questionNum}-${optId}`);
+            const item = document.getElementById(`${questionKey}-${optId}`);
+            const labelMap = POST_SURVEY_OPTION_MAPS[questionKey] || {};
+
+            cb.checked = !cb.checked;
+
+            if (cb.checked) item.classList.add('selected');
+            else item.classList.remove('selected');
+
+            if (!Array.isArray(surveyData[questionKey])) {
+                surveyData[questionKey] = [];
+            }
+
+            const label = labelMap[optId];
+            if (!label) return;
+
+            if (cb.checked) {
+                if (!surveyData[questionKey].includes(label)) {
+                    surveyData[questionKey].push(label);
+                }
+            } else {
+                surveyData[questionKey] = surveyData[questionKey].filter(x => x !== label);
+            }
+
+            updatePostSurveyButtonState(questionKey);
+        }
+
+        function updatePostSurveyButtonState(questionKey) {
+            const btnMap = {
+                q10: 'btn10Next',
+                q11: 'btn11Next',
+                q12: 'btn12Next',
+                q13: 'btn13Next'
+            };
+
+            const btn = document.getElementById(btnMap[questionKey]);
+            if (btn) {
+                btn.disabled = !(Array.isArray(surveyData[questionKey]) && surveyData[questionKey].length > 0);
+            }
+            updateTopNavState(currentPage);
+        }
+
+        // ==================== 最终提交 ====================
+        async function submitFinal() {
+            clearInterval(timerInterval);
+            const total = Math.floor((Date.now() - startTime) / 1000);
+            
+            // 转换A/B选择为实际品牌选择
+            convertRawToActual();
+            
+            const finalData = {
+                duration: total,
+                ...surveyData,
+                submitTime: new Date().toISOString()
+            };
+            
+            console.log('📦 准备提交数据:', finalData);
+            
+            try {
+                // 尝试保存到数据库
+                if (db) {
+                    const id = await saveSurvey(finalData);
+                    console.log('✅ 数据已保存，ID:', id);
+                    notifyDataUpdate(finalData);
+                } else {
+                    console.warn('数据库未初始化，跳过本地保存');
+                }
+            } catch (error) {
+                console.error('❌ 保存失败:', error);
+                // 继续显示完成页面，不阻塞用户体验
+            }
+            
+            // 无论保存成功与否，都显示完成页面
+            showComplete(total);
+        }
+
+        function showComplete(total) {
+            const celebrate = document.getElementById('celebrate');
+            if (celebrate) {
+                celebrate.classList.add('show');
+            }
+            
+            // 撒花效果
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.style.cssText = `position:fixed;width:8px;height:8px;background:${['#f5576c','#ffd700','#4facfe'][Math.floor(Math.random()*3)]};left:${Math.random()*100}vw;top:-10px;border-radius:50%;animation:fall 2s linear forwards;z-index:9999;pointer-events:none;`;
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 2000);
+                }, i * 50);
+            }
+            
+            // 延迟跳转到完成页
+            setTimeout(() => {
+                if (celebrate) {
+                    celebrate.classList.remove('show');
+                }
+                goToPage(12);
+                const finalTimeEl = document.getElementById('finalTime');
+                if (finalTimeEl) {
+                    finalTimeEl.textContent = total;
+                }
+            }, 2000);
+        }
+
+        function closeSurvey() {
+            window.location.reload();
+        }
+
+        // 手势滑动
+        let startX = 0;
+        document.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive: true});
+        document.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0 && currentPage < 16) {
+                    const canProceed = checkCanProceed(currentPage);
+                    if (canProceed) goToPage(currentPage + 1);
+                } else if (diff < 0 && currentPage > 0) {
+                    goToPage(currentPage - 1);
+                }
+            }
+        }, {passive: true});
+
+        function checkCanProceed(page) {
+            if (page === 3) return !document.getElementById('btnBlind1')?.disabled;
+            if (page === 4) return !document.getElementById('btnBlind2')?.disabled;
+            if (page === 1) {
+                return !!surveyData.q1 && !!surveyData.q2;
+            }
+            if (page === 2) {
+                const btn = document.getElementById('btn2Next');
+                return btn ? !btn.disabled : (!!(surveyData.q3?.length) && !!surveyData.q4);
+            }
+            if (page === 5) {
+                return !!surveyData.q5;
+            }
+            if (page === 6) {
+                const btn = document.getElementById('btn6Next');
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 7) {
+                if (!surveyData.q7) return false;
+                if (surveyData.q7 === 'D') {
+                    return !!(surveyData.q7Text && surveyData.q7Text.trim().length > 0);
+                }
+                return true;
+            }
+            if (page === 8) {
+                const btn = document.getElementById(`btn${page}Next`);
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 9) {
+                if (!surveyData.q9) return false;
+                if (surveyData.q9 === 'D') {
+                    return !!(surveyData.q9Text && surveyData.q9Text.trim().length > 0);
+                }
+                return true;
+            }
+            if (page === 10) {
+                const btn = document.getElementById('btn9-1Next');
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 11) {
+                const btn = document.getElementById('btn9-2Next');
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 12) {
+                const btn = document.getElementById('btn10Next');
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 13) {
+                const btn = document.getElementById('btn11Next');
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 14) {
+                const btn = document.getElementById('btn12Next');
+                return btn ? !btn.disabled : true;
+            }
+            if (page === 15) {
+                const btn = document.getElementById('btn13Next');
+                return btn ? !btn.disabled : true;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
