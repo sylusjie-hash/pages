@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>试卷评分录入</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./评分工具样式.css" />
+  </head>
+  <body>
+    <main class="review-shell">
+      <form id="paper-review-form" class="content-grid">
+        <input type="hidden" name="total_score" value="0" />
+
+        <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">基础信息</h2>
+            </div>
+            <span class="badge primary">页面 1</span>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="batch">批次</label>
+              <select id="batch" name="batch">
+                <option value="">请选择批次</option>
+                <option value="第一批">第一批</option>
+                <option value="第二批">第二批</option>
+                <option value="第三批">第三批</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="paper_id">编号</label>
+              <input id="paper_id" name="paper_id" required />
+            </div>
+            <div class="field">
+              <label for="module">学科模块</label>
+              <select id="module" name="module">
+                <option value="">请选择模块</option>
+                <option value="文科">文科</option>
+                <option value="理科">理科</option>
+              </select>
+              <div class="hint hint-placeholder">占位</div>
+            </div>
+            <div class="field">
+              <label for="reviewer">审核人员</label>
+              <input id="reviewer" name="reviewer" required />
+              <div class="hint">浏览器会记住你上一次填写的审核人。</div>
+            </div>
+            <div class="field">
+              <label for="review_date">审核日期</label>
+              <input id="review_date" name="review_date" type="date" required />
+              <div class="hint hint-placeholder">占位</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">分项评分</h2>
+            </div>
+            <span class="badge primary">页面 2</span>
+          </div>
+          <div class="score-grid">
+            <article class="score-card">
+              <table class="score-table">
+                <tr>
+                  <th class="module-title" colspan="3">1. 试题质量 30</th>
+                </tr>
+                <tr>
+                  <th class="table-head range-cell">分数区间</th>
+                  <th class="table-head">判定标准</th>
+                  <th class="table-head input-cell">实际得分</th>
+                </tr>
+                <tr>
+                  <td class="range-cell">26 - 30 分</td>
+                  <td class="criteria-cell">题目整体质量高，考点设置合理，符合考试要求，无明显偏题怪题，训练价值强。</td>
+                  <td class="input-cell" rowspan="4">
+                    <input class="score-score-input" name="question_quality_score" type="number" min="0" max="30" step="0.5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="range-cell">20 - 25 分</td>
+                  <td class="criteria-cell">总体合格，个别题目在考点选择、设问方式或区分度上存在轻微问题，但不影响整卷使用。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">10 - 19 分</td>
+                  <td class="criteria-cell">存在较明显问题，如部分题目偏题、设问价值不高、考查点不典型，影响卷面质量。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">0 - 9 分</td>
+                  <td class="criteria-cell">题目整体质量较差，明显偏离模拟卷要求，不建议使用。</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>问题具体说明（说明扣分点在哪。如果个题出现问题，可明确标注）：</strong>
+                    <textarea class="score-textarea" name="question_quality_comment"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>【评分关注点】</strong>
+                    <ol class="focus-list">
+                      <li>是否符合考试大纲和命题范围。</li>
+                      <li>是否考查核心能力，而非偏题、怪题、冷门题。</li>
+                      <li>是否具备合理区分度。</li>
+                      <li>是否能够体现选拔性或训练价值。</li>
+                      <li>是否与目标考试风格一致。</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="score-card">
+              <table class="score-table">
+                <tr>
+                  <th class="module-title" colspan="3">2. 解析质量 25</th>
+                </tr>
+                <tr>
+                  <th class="table-head range-cell">分数区间</th>
+                  <th class="table-head">判定标准</th>
+                  <th class="table-head input-cell">实际得分</th>
+                </tr>
+                <tr>
+                  <td class="range-cell">21 - 25 分</td>
+                  <td class="criteria-cell">解析完整清晰，逻辑严密，能准确呈现解题过程与命题意图，具有较强教学价值。</td>
+                  <td class="input-cell" rowspan="4">
+                    <input class="score-score-input" name="analysis_quality_score" type="number" min="0" max="25" step="0.5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="range-cell">16 - 20 分</td>
+                  <td class="criteria-cell">整体较好，个别解析略简略或层次不够充分，但能够支撑正常使用。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">8 - 15 分</td>
+                  <td class="criteria-cell">解析存在明显缺漏，推导不充分，部分题目解释不到位，影响理解和教学使用。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">0 - 7 分</td>
+                  <td class="criteria-cell">解析质量较差，仅给出结论或存在错误说明，无法满足使用要求。</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>问题具体说明（说明扣分点在哪。如果个题出现问题，可明确标注）：</strong>
+                    <textarea class="score-textarea" name="analysis_quality_comment"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>【评分关注点】</strong>
+                    <ol class="focus-list">
+                      <li>是否有完整的分析过程，而非只给答案。</li>
+                      <li>是否能够解释错误选项或常见误区。</li>
+                      <li>表述是否准确、易懂、适合教学使用。</li>
+                      <li>是否能体现方法总结与思路迁移。</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="score-card">
+              <table class="score-table">
+                <tr>
+                  <th class="module-title" colspan="3">3. 规范性 15</th>
+                </tr>
+                <tr>
+                  <th class="table-head range-cell">分数区间</th>
+                  <th class="table-head">判定标准</th>
+                  <th class="table-head input-cell">实际得分</th>
+                </tr>
+                <tr>
+                  <td class="range-cell">13 - 15 分</td>
+                  <td class="criteria-cell">题干、选项、解析、标点和格式整体规范统一，无明显书写或排版错误。</td>
+                  <td class="input-cell" rowspan="4">
+                    <input class="score-score-input" name="standardization_score" type="number" min="0" max="15" step="0.5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="range-cell">10 - 12 分</td>
+                  <td class="criteria-cell">整体较规范，存在少量格式或表述小问题，但不影响整体使用。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">5 - 9 分</td>
+                  <td class="criteria-cell">存在较明显格式、术语或排版问题，降低整体专业感和使用体验。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">0 - 4 分</td>
+                  <td class="criteria-cell">规范性较差，格式混乱或错误较多，不建议直接使用。</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>问题具体说明（说明扣分点在哪。如果个题出现问题，可明确标注）：</strong>
+                    <textarea class="score-textarea" name="standardization_comment"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>【评分关注点】</strong>
+                    <ol class="focus-list">
+                      <li>题干和选项格式是否统一。</li>
+                      <li>术语、标点、数字及符号使用是否规范。</li>
+                      <li>解析排版是否整齐，编号是否清楚。</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="score-card">
+              <table class="score-table">
+                <tr>
+                  <th class="module-title" colspan="3">4. 难度设计 10</th>
+                </tr>
+                <tr>
+                  <th class="table-head range-cell">分数区间</th>
+                  <th class="table-head">判定标准</th>
+                  <th class="table-head input-cell">实际得分</th>
+                </tr>
+                <tr>
+                  <td class="range-cell">9 - 10 分</td>
+                  <td class="criteria-cell">整体难度定位准确，题目梯度合理，能够体现训练层次和区分效果。</td>
+                  <td class="input-cell" rowspan="4">
+                    <input class="score-score-input" name="difficulty_score" type="number" min="0" max="10" step="0.5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="range-cell">7 - 8 分</td>
+                  <td class="criteria-cell">难度总体可接受，但局部存在偏易或偏难情况，影响不大。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">4 - 6 分</td>
+                  <td class="criteria-cell">难度设计不够平衡，存在明显断层或局部失衡，影响整体体验。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">0 - 3 分</td>
+                  <td class="criteria-cell">难度设计明显失真，不符合目标使用场景。</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>问题具体说明（说明扣分点在哪。如果个题出现问题，可明确标注）：</strong>
+                    <textarea class="score-textarea" name="difficulty_comment"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>【评分关注点】</strong>
+                    <ol class="focus-list">
+                      <li>整体难度是否符合目标考试或训练定位。</li>
+                      <li>题目梯度是否自然，是否有断层。</li>
+                      <li>是否兼顾基础、中档和提升层次。</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="score-card">
+              <table class="score-table">
+                <tr>
+                  <th class="module-title" colspan="3">5. 结构合理性 10</th>
+                </tr>
+                <tr>
+                  <th class="table-head range-cell">分数区间</th>
+                  <th class="table-head">判定标准</th>
+                  <th class="table-head input-cell">实际得分</th>
+                </tr>
+                <tr>
+                  <td class="range-cell">9 - 10 分</td>
+                  <td class="criteria-cell">题型分布、顺序安排和整体编排合理，卷面结构完整自然。</td>
+                  <td class="input-cell" rowspan="4">
+                    <input class="score-score-input" name="structure_score" type="number" min="0" max="10" step="0.5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="range-cell">7 - 8 分</td>
+                  <td class="criteria-cell">整体结构较合理，局部编排略可优化，但不影响正常使用。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">4 - 6 分</td>
+                  <td class="criteria-cell">结构存在不协调问题，如题型排序、数量分布或节奏感不佳。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">0 - 3 分</td>
+                  <td class="criteria-cell">结构混乱，整体逻辑不顺，明显影响使用体验。</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>问题具体说明（说明扣分点在哪。如果个题出现问题，可明确标注）：</strong>
+                    <textarea class="score-textarea" name="structure_comment"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>【评分关注点】</strong>
+                    <ol class="focus-list">
+                      <li>模块顺序是否合理。</li>
+                      <li>题型、题量和节奏分布是否协调。</li>
+                      <li>整卷结构是否符合常规使用习惯。</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+            </article>
+
+            <article class="score-card">
+              <table class="score-table">
+                <tr>
+                  <th class="module-title" colspan="3">6. 仿真度 10</th>
+                </tr>
+                <tr>
+                  <th class="table-head range-cell">分数区间</th>
+                  <th class="table-head">判定标准</th>
+                  <th class="table-head input-cell">实际得分</th>
+                </tr>
+                <tr>
+                  <td class="range-cell">9 - 10 分</td>
+                  <td class="criteria-cell">题感、材料、设问和风格高度贴近目标考试，仿真效果好。</td>
+                  <td class="input-cell" rowspan="4">
+                    <input class="score-score-input" name="simulation_score" type="number" min="0" max="10" step="0.5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="range-cell">7 - 8 分</td>
+                  <td class="criteria-cell">整体较贴近真题风格，个别题目或材料存在轻微偏差。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">4 - 6 分</td>
+                  <td class="criteria-cell">仿真度一般，部分题目题感偏离目标考试，真实感不足。</td>
+                </tr>
+                <tr>
+                  <td class="range-cell">0 - 3 分</td>
+                  <td class="criteria-cell">明显偏离目标考试风格，不具备较好的模拟训练价值。</td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>问题具体说明（说明扣分点在哪。如果个题出现问题，可明确标注）：</strong>
+                    <textarea class="score-textarea" name="simulation_comment"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <strong>【评分关注点】</strong>
+                    <ol class="focus-list">
+                      <li>是否贴近目标考试风格。</li>
+                      <li>材料与设问是否有真实考试质感。</li>
+                      <li>是否具备较强模拟和训练价值。</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+            </article>
+          </div>
+          <div id="mobile-score-grid" class="mobile-score-grid"></div>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">审核结论</h2>
+              <p class="panel-desc">一票否决选“是”时，系统会自动把审核结论改为“不合格”。</p>
+            </div>
+            <span class="badge primary">页面 3</span>
+          </div>
+          <div class="decision-layout">
+            <div class="decision-stack">
+              <div class="field">
+                <label>是否合格</label>
+                <select name="is_pass">
+                  <option value="合格">合格</option>
+                  <option value="待修改">待修改</option>
+                  <option value="不合格">不合格</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>是否一票否决</label>
+                <select name="veto">
+                  <option value="false">否</option>
+                  <option value="true">是</option>
+                </select>
+              </div>
+            </div>
+              <div class="veto-note">
+                <strong>无论总分高低，出现以下任一情况，均可直接判定该题或该卷不合格：</strong>
+                <ol>
+                  <li>答案错误；</li>
+                  <li>解析错误；</li>
+                  <li>存在多解或无解；</li>
+                  <li>明显超纲或偏离考试要求；</li>
+                  <li>出现严重表述错误，导致题目无法正常作答。</li>
+                </ol>
+              </div>
+          </div>
+          <div class="decision-grid" style="margin-top: 16px;">
+            <div class="field full">
+              <label for="suggestion">修改建议</label>
+              <textarea id="suggestion" name="suggestion" placeholder="填写整体修改建议"></textarea>
+            </div>
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <div class="footer-bar">
+      <div class="footer-inner">
+        <div class="total-box">
+          <strong data-total-score>0</strong>
+          <span>总分 / 100</span>
+        </div>
+        <div class="action-row">
+            <a class="btn secondary" href="./评分管理后台.html">查看管理后台</a>
+          <button class="btn secondary" type="button" data-action="clear-draft">清空本地草稿</button>
+          <button class="btn secondary" type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">返回顶部</button>
+          <button class="btn primary" type="submit" form="paper-review-form">提交评分</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-status" class="status-banner info" style="max-width: 1180px; margin: 16px auto 0; padding-left: 16px; padding-right: 16px;">
+      页面已就绪，填写过程中会自动保存本地草稿。
+    </div>
+
+    <script src="./评分工具接口配置.js"></script>
+    <script src="./评分工具脚本.js"></script>
+  </body>
+</html>
