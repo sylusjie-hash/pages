@@ -1,2 +1,0 @@
-window.SURVEY_API_BASE = window.SURVEY_API_BASE || "http://YOUR_LINUX_SERVER_IP:8765";
-window.SURVEY_API_TOKEN = window.SURVEY_API_TOKEN || "";
