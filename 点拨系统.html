@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>点拨系统需求文档（V1）</title>
+  <style>
+    :root {
+      --bg: #f5efe3;
+      --bg-soft: #fbf7ef;
+      --paper: rgba(255, 252, 245, 0.9);
+      --paper-strong: #fffdf8;
+      --ink: #1f2a2e;
+      --muted: #5e6b6b;
+      --line: rgba(77, 97, 95, 0.18);
+      --brand: #0f5c5b;
+      --brand-soft: #d8ece8;
+      --accent: #b86a2e;
+      --accent-soft: #f7e2cf;
+      --success: #3b7b53;
+      --shadow: 0 24px 60px rgba(45, 56, 58, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --content-width: 1200px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(184, 106, 46, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(15, 92, 91, 0.14), transparent 24%),
+        linear-gradient(180deg, #f8f2e8 0%, #f5efe3 45%, #f1ebdf 100%);
+      line-height: 1.75;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.32), transparent 72%);
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 32px), var(--content-width));
+      margin: 24px auto 72px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.45fr 0.95fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-card,
+    .summary-card,
+    .toc,
+    .section-card,
+    .callout,
+    .mini-card,
+    .flow-step,
+    .tag-panel {
+      background: var(--paper);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+      min-height: 360px;
+      background:
+        linear-gradient(145deg, rgba(255, 250, 240, 0.92), rgba(255, 255, 255, 0.88)),
+        var(--paper);
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -90px;
+      top: -60px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 92, 91, 0.18), rgba(15, 92, 91, 0) 70%);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(15, 92, 91, 0.08);
+      color: var(--brand);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(184, 106, 46, 0.12);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      font-family: "STZhongsong", "Songti SC", "SimSun", serif;
+      line-height: 1.3;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      margin-top: 18px;
+      font-size: clamp(32px, 5vw, 52px);
+      max-width: 11ch;
+    }
+
+    .hero-lead {
+      max-width: 64ch;
+      margin: 20px 0 28px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mini-card {
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248, 0.92);
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: 24px;
+      color: var(--brand);
+      margin-bottom: 6px;
+      font-family: "Georgia", "Times New Roman", serif;
+    }
+
+    .mini-card span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .summary-card {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+      background:
+        linear-gradient(180deg, rgba(15, 92, 91, 0.96), rgba(17, 75, 75, 0.92));
+      color: #f4f8f6;
+    }
+
+    .summary-card h2 {
+      font-size: 26px;
+    }
+
+    .summary-card p,
+    .summary-card li {
+      color: rgba(244, 248, 246, 0.86);
+    }
+
+    .summary-card ul {
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    .summary-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .summary-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 13px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      padding: 22px;
+    }
+
+    .toc h2 {
+      font-size: 18px;
+      margin-bottom: 14px;
+    }
+
+    .toc nav {
+      display: grid;
+      gap: 10px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(15, 92, 91, 0.08);
+      transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .toc a:hover {
+      transform: translateX(4px);
+      color: var(--brand);
+      border-color: rgba(15, 92, 91, 0.24);
+      background: rgba(216, 236, 232, 0.56);
+    }
+
+    .content {
+      display: grid;
+      gap: 20px;
+    }
+
+    .section-card {
+      padding: 28px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head p {
+      margin: 10px 0 0;
+      max-width: 64ch;
+      color: var(--muted);
+    }
+
+    .section-tag {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .callout {
+      padding: 18px 18px 16px;
+      border-radius: var(--radius-lg);
+      background: var(--paper-strong);
+      box-shadow: none;
+      border-color: rgba(15, 92, 91, 0.1);
+    }
+
+    .callout h3 {
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .callout p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .callout ol,
+    .callout ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .callout li + li {
+      margin-top: 6px;
+    }
+
+    .people-grid,
+    .feature-grid,
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .boundary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tag-panel {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 251, 243, 0.94));
+    }
+
+    .tag-panel h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .tag-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .scenario-strip {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .scenario-item {
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: rgba(247, 226, 207, 0.55);
+    }
+
+    .scenario-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+    }
+
+    .flow {
+      display: grid;
+      gap: 14px;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 18px;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248, 0.92);
+    }
+
+    .flow-index {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--brand), #154b4b);
+      color: #fff;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 24px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .flow-step h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .flow-step p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .matrix .callout {
+      height: 100%;
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      padding: 20px 22px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(90deg, rgba(15, 92, 91, 0.08), rgba(184, 106, 46, 0.08));
+      color: var(--ink);
+      border: 1px solid rgba(15, 92, 91, 0.1);
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(15, 92, 91, 0.08);
+      color: var(--brand);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 1024px) {
+      .hero,
+      .layout,
+      .section-grid,
+      .people-grid,
+      .feature-grid,
+      .boundary-grid,
+      .matrix {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .hero-card {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(calc(100% - 20px), var(--content-width));
+        margin: 12px auto 48px;
+      }
+
+      .hero-card,
+      .summary-card,
+      .toc,
+      .section-card {
+        padding: 22px;
+      }
+
+      .hero-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-index {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <section class="hero-card">
+        <span class="eyebrow">教育诊断场景 · 点拨系统 V1</span>
+        <h1>点拨系统需求文档</h1>
+        <p class="hero-lead">
+          这是一份将“行为诊断结果”转成“教学干预动作”的结构化需求稿。页面围绕背景与目标、用户与场景、功能与流程、约束与边界四大模块展开，适合用作方案对齐、汇报展示和产品落地参考。
+        </p>
+        <div class="hero-metrics">
+          <article class="mini-card">
+            <strong>4</strong>
+            <span>核心需求章节</span>
+          </article>
+          <article class="mini-card">
+            <strong>5+</strong>
+            <span>点拨输出状态与类型</span>
+          </article>
+          <article class="mini-card">
+            <strong>1</strong>
+            <span>诊断到干预的闭环目标</span>
+          </article>
+        </div>
+      </section>
+
+      <aside class="summary-card">
+        <div>
+          <h2>系统定位</h2>
+          <p>
+            点拨系统不是重新判错的模块，而是基于已确认错误模式，生成提醒、资源和下一步动作建议的后置决策层。
+          </p>
+        </div>
+        <div class="summary-strip">
+          <span class="summary-pill">读取诊断快照</span>
+          <span class="summary-pill">匹配点拨策略</span>
+          <span class="summary-pill">检索资源库</span>
+          <span class="summary-pill">输出结构化点拨</span>
+        </div>
+        <ul>
+          <li>先诊断，再点拨，避免泛化讲题。</li>
+          <li>只消费结构化数据，不直接回查原题或 Excel。</li>
+          <li>为 APP 前端提供可展示、可追踪、可承接的输出结果。</li>
+        </ul>
+      </aside>
+    </header>
+
+    <div class="layout">
+      <aside class="toc">
+        <h2>页面导航</h2>
+        <nav>
+          <a href="#background">背景与目标</a>
+          <a href="#users">用户与场景</a>
+          <a href="#features">功能与流程</a>
+          <a href="#constraints">约束与边界</a>
+          <a href="#conclusion">需求结论</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <section id="background" class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">01 / Background &amp; Goals</span>
+              <h2>背景与目标</h2>
+              <p>明确为什么要做点拨系统，以及 V1 需要真正解决的业务问题。</p>
+            </div>
+          </div>
+
+          <div class="section-grid">
+            <article class="callout">
+              <h3>背景</h3>
+              <p>
+                当前系统已经具备行为诊断和错误模式识别能力，能够判断学生在解题过程中的某一步动作是否完成，并在动作未完成时进一步识别错误模式。
+              </p>
+              <p>
+                但诊断结果仍停留在“识别问题”层，尚未形成针对错误的标准化点拨输出，系统还没有完成“诊断后干预”的真正闭环。
+              </p>
+            </article>
+
+            <article class="callout">
+              <h3>建设目标</h3>
+              <ol>
+                <li>在错误模式已确认的前提下，自动生成与当前错误相匹配的点拨结果。</li>
+                <li>将点拨结果标准化输出给 APP 或上层业务系统。</li>
+                <li>通过“对话点拨 + 资源推荐 + 下一步动作建议”形成干预闭环。</li>
+                <li>让点拨逻辑可配置、可维护、可扩展，而不是依赖临时人工编写。</li>
+              </ol>
+            </article>
+          </div>
+
+          <div class="matrix">
+            <article class="tag-panel">
+              <h3>业务目标</h3>
+              <div class="tag-list">
+                <span class="tag">提高纠错效率</span>
+                <span class="tag">减少无效讲解</span>
+                <span class="tag">沉淀标准映射</span>
+                <span class="tag">支撑统一接口</span>
+              </div>
+            </article>
+
+            <article class="tag-panel">
+              <h3>一句话概括</h3>
+              <p>
+                将“诊断结果”转化为“可执行的教学干预动作”，让系统从会发现问题，升级到会推动纠偏。
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="users" class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">02 / Users &amp; Scenarios</span>
+              <h2>用户与场景</h2>
+              <p>明确点拨系统服务谁、出现在哪些关键节点，以及它在业务流里的作用方式。</p>
+            </div>
+          </div>
+
+          <div class="people-grid">
+            <article class="tag-panel">
+              <h3>学生 / 考生</h3>
+              <p>在做题过程中出现动作错误或思路偏差时，接收针对性点拨、卡片、课程或练习建议。</p>
+            </article>
+            <article class="tag-panel">
+              <h3>教研 / 内容运营</h3>
+              <p>维护点拨策略库和资源库，配置不同错误模式下的点拨目标、方式和资源内容。</p>
+            </article>
+            <article class="tag-panel">
+              <h3>APP / 业务系统</h3>
+              <p>调用点拨接口，获取结构化结果，并完成前端展示、推荐和后续动作承接。</p>
+            </article>
+          </div>
+
+          <div class="callout" style="margin-top: 16px;">
+            <h3>核心使用场景</h3>
+            <ol>
+              <li>学生在某一步解题动作中被判定为未完成。</li>
+              <li>系统进一步识别并确认学生当前属于某个错误模式。</li>
+              <li>诊断结果写入运行时快照后，点拨系统被触发。</li>
+              <li>系统根据错误模式、动作类型和题型，匹配最合适的点拨策略。</li>
+              <li>输出点拨话术、资源卡片、专项练习和下一步建议。</li>
+              <li>APP 展示结果，学生据此重试、补学或专项训练。</li>
+            </ol>
+          </div>
+
+          <div class="scenario-strip">
+            <article class="scenario-item">
+              <strong>场景 A：过早看选项</strong>
+              学生没有完成“识别题干关键判断对象”，系统确认其错误模式为“过早看选项”，此时应提示其先回到题干圈出判断对象，并推荐对应点拨卡片与验证练习。
+            </article>
+            <article class="scenario-item">
+              <strong>场景 B：理解偏差但未完全错误</strong>
+              学生表现为理解偏差但未完全错误时，系统应优先返回轻量对话点拨，而不是直接推送整段课程内容。
+            </article>
+            <article class="scenario-item">
+              <strong>场景 C：无可用策略或资源</strong>
+              当错误模式明确，但当前没有可用策略或资源时，系统应返回“无匹配策略”或“暂不点拨”状态，避免输出不准确内容。
+            </article>
+          </div>
+        </section>
+
+        <section id="features" class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">03 / Features &amp; Flow</span>
+              <h2>功能与流程</h2>
+              <p>定义点拨系统要做哪些事，以及它如何从诊断快照走到结构化点拨输出。</p>
+            </div>
+          </div>
+
+          <div class="feature-grid">
+            <article class="callout">
+              <h3>功能 1：点拨触发判断</h3>
+              <p>根据诊断快照中的 <code>ready_for_hint</code> 判断当前是否进入点拨环节。</p>
+            </article>
+            <article class="callout">
+              <h3>功能 2：点拨策略匹配</h3>
+              <p>根据 <code>error_mode_id + action_id + question_type</code> 组合匹配点拨策略。</p>
+            </article>
+            <article class="callout">
+              <h3>功能 3：点拨资源检索</h3>
+              <p>根据策略中的 <code>resource_refs</code> 获取课程、卡片、练习或文章等资源。</p>
+            </article>
+            <article class="callout">
+              <h3>功能 4：点拨结果组装</h3>
+              <p>将策略内容与资源内容组装为统一输出，包括点拨类型、提醒内容、资源、验证计划、下一步建议和追踪信息。</p>
+            </article>
+          </div>
+
+          <div class="callout" style="margin-top: 16px;">
+            <h3>点拨结果输出字段</h3>
+            <div class="tag-list">
+              <span class="tag"><code>decision_type</code></span>
+              <span class="tag"><code>summary_blocks</code></span>
+              <span class="tag"><code>dialogue_hints</code></span>
+              <span class="tag"><code>resource_blocks</code></span>
+              <span class="tag"><code>verification_plan</code></span>
+              <span class="tag"><code>next_step</code></span>
+              <span class="tag"><code>trace</code></span>
+            </div>
+          </div>
+
+          <div class="callout" style="margin-top: 16px;">
+            <h3>支持的点拨输出状态 / 类型</h3>
+            <div class="tag-list">
+              <span class="tag">dialogue</span>
+              <span class="tag">card</span>
+              <span class="tag">course</span>
+              <span class="tag">exercise</span>
+              <span class="tag">mixed</span>
+              <span class="tag">not_ready</span>
+              <span class="tag">no_policy_found</span>
+            </div>
+          </div>
+
+          <div class="callout" style="margin-top: 16px;">
+            <h3>主流程</h3>
+            <div class="flow">
+              <article class="flow-step">
+                <div class="flow-index">1</div>
+                <div>
+                  <h3>诊断与确认</h3>
+                  <p>上游系统先完成动作判定；若动作未完成，则进入错误模式识别，并将结果写入最新诊断快照。</p>
+                </div>
+              </article>
+
+              <article class="flow-step">
+                <div class="flow-index">2</div>
+                <div>
+                  <h3>触发点拨</h3>
+                  <p>点拨系统读取快照；若 <code>ready_for_hint=false</code>，返回“暂不点拨”；若为 true，则继续执行匹配。</p>
+                </div>
+              </article>
+
+              <article class="flow-step">
+                <div class="flow-index">3</div>
+                <div>
+                  <h3>匹配策略与资源</h3>
+                  <p>按错误模式、动作和题型匹配点拨策略，再根据资源引用列表获取对应资源内容。</p>
+                </div>
+              </article>
+
+              <article class="flow-step">
+                <div class="flow-index">4</div>
+                <div>
+                  <h3>组装并返回结果</h3>
+                  <p>系统输出结构化点拨结果，前端据此引导学生进行重试、补学、进入下一步或专项验证。</p>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="matrix">
+            <article class="callout">
+              <h3>策略匹配规则</h3>
+              <ol>
+                <li>优先按 <code>confirmed_error_mode_id</code> 精确匹配。</li>
+                <li>必须同时匹配 <code>action_id</code> 与 <code>question_type</code>。</li>
+                <li>命中多条策略时，按 <code>priority</code> 选择主策略。</li>
+                <li>仅允许使用已发布状态的策略与资源。</li>
+                <li>若引用资源缺失，应返回受控异常状态，而不是输出不完整点拨。</li>
+              </ol>
+            </article>
+
+            <article class="callout">
+              <h3>输出承接规则</h3>
+              <ol>
+                <li><code>dialogue</code> 类型优先在 <code>dialogue_hints</code> 中输出轻量提醒。</li>
+                <li><code>card</code>、<code>video</code> 或 <code>material</code> 类型应进入 <code>resource_blocks</code>。</li>
+                <li>需要后续验证时，补充 <code>verification_plan</code>。</li>
+                <li><code>next_step</code> 必须明确告知后续动作，如重试、进入下一步或专项训练。</li>
+              </ol>
+            </article>
+          </div>
+        </section>
+
+        <section id="constraints" class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">04 / Constraints &amp; Boundaries</span>
+              <h2>约束与边界</h2>
+              <p>明确点拨系统该做什么、不该做什么，以及 V1 的范围控制。</p>
+            </div>
+          </div>
+
+          <div class="boundary-grid">
+            <article class="callout">
+              <h3>系统边界</h3>
+              <ol>
+                <li>不负责判断“当前动作是否完成”。</li>
+                <li>不负责重新推断学生属于哪种错误模式。</li>
+                <li>不是通用讲题系统，不直接基于原题生成完整解析。</li>
+                <li>只负责在诊断结果明确后，生成对应点拨决策输出。</li>
+              </ol>
+            </article>
+
+            <article class="callout">
+              <h3>数据边界</h3>
+              <ol>
+                <li>只消费诊断结论快照、点拨策略库和点拨资源库三类结构化数据。</li>
+                <li>不直接回查原始题库、Excel 或非结构化教研资料。</li>
+                <li>不读取未发布状态的策略或资源。</li>
+                <li>缺少 <code>confirmed_error_mode_id</code> 时，允许返回“暂不点拨”。</li>
+              </ol>
+            </article>
+
+            <article class="callout">
+              <h3>流程约束</h3>
+              <ol>
+                <li>只有在 <code>ready_for_hint=true</code> 时才能正式触发点拨。</li>
+                <li>点拨必须发生在行为诊断和错误模式确认之后。</li>
+                <li>点拨结果必须是结构化输出，不能仅输出自由文本。</li>
+                <li>结果中需保留 <code>trace</code> 信息，便于回溯命中的动作、错误模式和策略。</li>
+              </ol>
+            </article>
+
+            <article class="callout">
+              <h3>V1 范围控制</h3>
+              <p><strong>重点解决：</strong></p>
+              <ul>
+                <li>标准化点拨决策链路</li>
+                <li>基于错误模式的规则化匹配</li>
+                <li>对话点拨、卡片、课程、练习等基础输出</li>
+                <li>支持 APP 侧直接调用与展示</li>
+              </ul>
+              <p style="margin-top: 12px;"><strong>暂不覆盖：</strong></p>
+              <ul>
+                <li>开放式个性化长文本讲解</li>
+                <li>自动生成全新资源内容</li>
+                <li>跨题或跨知识点长期路径规划</li>
+                <li>未确认错误模式下的推断式点拨</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="footer-note">
+            点拨结果必须与当前错误模式强相关，语言要简洁、明确、可执行，资源推荐要与点拨目标一致，并且整体结果应具备可复盘、可追踪、可持续维护的属性。
+          </div>
+        </section>
+
+        <section id="conclusion" class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">05 / Conclusion</span>
+              <h2>需求结论</h2>
+              <p>用一句产品定义收束整份需求文档。</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <h3>结论</h3>
+            <p>
+              点拨系统 V1 的本质，是一个位于“诊断完成之后”的结构化决策模块。它不重新判断学生错在哪里，而是在错误已经明确的前提下，快速、稳定地为学生生成“该怎么被提醒、该看什么资源、接下来该做什么”的点拨结果，并把这一结果以标准接口输出给业务系统，形成完整的诊断闭环。
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
