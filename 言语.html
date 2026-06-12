@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>成语专项补练</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232d6bff'/%3E%3Ccircle cx='20' cy='24' r='6' fill='white'/%3E%3Ccircle cx='32' cy='24' r='6' fill='white' opacity='.88'/%3E%3Ccircle cx='44' cy='24' r='6' fill='white' opacity='.76'/%3E%3Crect x='16' y='38' width='32' height='8' rx='4' fill='white' opacity='.9'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero__meta">
+        <span class="hero__eyebrow">错题后精准推题</span>
+        <span class="hero__badge" id="hero-badge">3 题推荐</span>
+      </div>
+      <h1 class="hero__title">成语专项补练</h1>
+      <p class="hero__subtitle" id="hero-subtitle">围绕你刚刚答错的成语题，先补正确成语，再补辨析薄弱点。</p>
+      <div class="hero__stats" aria-label="练习概览">
+        <div class="stat-card">
+          <span class="stat-card__label">预计用时</span>
+          <strong class="stat-card__value" id="total-minutes">8 分钟</strong>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">当前策略</span>
+          <strong class="stat-card__value" id="strategy-chip">正确项优先</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="panel question-panel" aria-labelledby="question-summary-title">
+        <div class="panel__header">
+          <h2 class="panel__title" id="question-summary-title">本题错因摘要</h2>
+          <span class="panel__tag panel__tag--error">已答错</span>
+        </div>
+        <div class="question-card">
+          <div class="question-card__stem">
+            <span class="question-card__label">原题片段</span>
+            <p id="question-snippet"></p>
+          </div>
+          <div class="idiom-summary">
+            <div class="idiom-summary__item">
+              <span class="idiom-summary__label">你选择了</span>
+              <strong class="idiom-summary__value idiom-summary__value--wrong" id="wrong-idiom"></strong>
+            </div>
+            <div class="idiom-summary__item">
+              <span class="idiom-summary__label">正确答案</span>
+              <strong class="idiom-summary__value idiom-summary__value--correct" id="correct-idiom"></strong>
+            </div>
+          </div>
+          <div class="tag-row" id="question-tags" aria-label="题目标签"></div>
+        </div>
+      </section>
+
+      <section class="panel strategy-panel" aria-labelledby="strategy-title">
+        <div class="panel__header">
+          <h2 class="panel__title" id="strategy-title">推荐说明</h2>
+          <span class="panel__tag" id="strategy-tag">正确项优先</span>
+        </div>
+        <p class="strategy-panel__copy" id="strategy-copy"></p>
+        <div class="strategy-panel__hint" id="strategy-hint"></div>
+      </section>
+
+      <section class="panel recommendations-panel" aria-labelledby="recommendations-title">
+        <div class="panel__header">
+          <h2 class="panel__title" id="recommendations-title">推荐练习</h2>
+          <span class="panel__tag panel__tag--soft" id="recommendation-count">3 道题</span>
+        </div>
+        <div class="recommendation-list" id="recommendation-list"></div>
+      </section>
+
+      <section class="panel feedback-panel" aria-labelledby="feedback-title">
+        <div class="panel__header">
+          <h2 class="panel__title" id="feedback-title">这组推荐有帮助吗</h2>
+        </div>
+        <div class="feedback-actions" role="group" aria-label="推荐反馈">
+          <button class="feedback-button" type="button" data-feedback="relevant">相关，想继续练</button>
+          <button class="feedback-button" type="button" data-feedback="uncertain">一般，先看看</button>
+          <button class="feedback-button" type="button" data-feedback="irrelevant">不够相关</button>
+        </div>
+      </section>
+    </main>
+
+    <button class="demo-toggle" id="demo-toggle" type="button" aria-expanded="false" aria-controls="demo-drawer" aria-label="打开演示状态">
+      演示
+    </button>
+
+    <aside class="demo-drawer" id="demo-drawer" aria-hidden="true">
+      <div class="demo-drawer__header">
+        <div>
+          <h2 class="demo-drawer__title">推荐链路演示</h2>
+          <p class="demo-drawer__subtitle">切换不同推荐来源，查看页面文案与题卡变化。</p>
+        </div>
+        <button class="demo-drawer__close" id="demo-close" type="button" aria-label="关闭演示状态面板">关闭</button>
+      </div>
+      <div class="demo-options" id="demo-options" role="radiogroup" aria-label="演示场景选择"></div>
+    </aside>
+
+    <div class="bottom-bar" role="region" aria-label="练习操作区">
+      <div class="bottom-bar__feedback" id="action-feedback" aria-live="polite"></div>
+      <div class="bottom-bar__actions">
+        <button class="button button--ghost" id="skip-button" type="button">暂时跳过</button>
+        <button class="button button--primary" id="start-button" type="button">开始本次补练</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="recommendation-template">
+    <article class="recommendation-card">
+      <div class="recommendation-card__header">
+        <div class="recommendation-card__meta">
+          <span class="recommendation-card__reason"></span>
+          <h3 class="recommendation-card__title"></h3>
+        </div>
+        <button class="recommendation-card__toggle" type="button" aria-expanded="false">
+          查看原因
+        </button>
+      </div>
+      <div class="recommendation-card__badges">
+        <span class="chip chip--idiom"></span>
+        <span class="chip chip--difficulty"></span>
+        <span class="chip chip--time"></span>
+      </div>
+      <p class="recommendation-card__snippet"></p>
+      <div class="recommendation-card__details" hidden>
+        <div class="detail-row">
+          <span class="detail-row__label">推荐依据</span>
+          <p class="detail-row__value detail-row__value--match-source"></p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">补练重点</span>
+          <p class="detail-row__value detail-row__value--knowledge-focus"></p>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./script.js"></script>
+</body>
+</html>
