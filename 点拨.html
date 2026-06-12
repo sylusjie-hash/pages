@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>错题点拨系统 H5 原型</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --paper: #fffaf2;
+      --ink: #24170e;
+      --muted: #726252;
+      --line: rgba(91, 67, 48, 0.14);
+      --orange: #ef7a2a;
+      --orange-deep: #cf5411;
+      --yellow: #d8a100;
+      --yellow-deep: #9b7700;
+      --green: #1c8c6a;
+      --card-shadow: 0 18px 45px rgba(57, 34, 11, 0.12);
+      --phone-shadow: 0 30px 70px rgba(31, 19, 8, 0.16);
+      --radius: 28px;
+      --ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+      --font-display: "Georgia", "Times New Roman", serif;
+      --font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(239, 122, 42, 0.22), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(216, 161, 0, 0.18), transparent 24%),
+        linear-gradient(180deg, #f7f1e8 0%, #efe6d7 100%);
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 36px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .hero-copy {
+      padding: 8px 4px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 250, 242, 0.8);
+      border: 1px solid rgba(113, 83, 56, 0.1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-family: var(--font-display);
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-copy p {
+      max-width: 680px;
+      margin: 0;
+      color: #594738;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .layout {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .panel {
+      background: rgba(255, 250, 242, 0.82);
+      border: 1px solid rgba(91, 67, 48, 0.08);
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .controls {
+      border-radius: var(--radius);
+      padding: 22px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .controls h2,
+    .spec h2 {
+      margin: 0 0 16px;
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .group {
+      margin-bottom: 18px;
+    }
+
+    .group:last-of-type {
+      margin-bottom: 8px;
+    }
+
+    .label {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .segmented {
+      display: grid;
+      gap: 10px;
+    }
+
+    .segmented.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .segmented button,
+    .ghost-button,
+    .cta,
+    .text-link,
+    .option,
+    .return-button {
+      appearance: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .segmented button {
+      border-radius: 18px;
+      padding: 14px 14px;
+      background: #fff;
+      color: #5f4d3d;
+      border: 1px solid rgba(91, 67, 48, 0.11);
+      text-align: left;
+      min-height: 72px;
+    }
+
+    .segmented button strong {
+      display: block;
+      font-size: 15px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .segmented button span {
+      display: block;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .segmented button.active {
+      border-color: rgba(207, 84, 17, 0.55);
+      background: linear-gradient(180deg, #fff7ef 0%, #fff1df 100%);
+      box-shadow: 0 10px 24px rgba(207, 84, 17, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .summary {
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(252, 243, 229, 0.96));
+      border: 1px solid rgba(91, 67, 48, 0.08);
+    }
+
+    .summary strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .summary p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .ghost-button {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #2e1f13;
+      color: #fff8f0;
+      box-shadow: 0 12px 24px rgba(46, 31, 19, 0.24);
+    }
+
+    .ghost-button:hover,
+    .cta:hover,
+    .return-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .spec {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 18px 18px 24px;
+    }
+
+    .stage {
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.78), transparent 35%),
+        linear-gradient(180deg, rgba(255, 246, 232, 0.92) 0%, rgba(248, 237, 221, 0.96) 100%);
+      padding: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .phone-shell {
+      margin: 0 auto;
+      width: min(100%, 395px);
+      border-radius: 38px;
+      padding: 16px 14px 20px;
+      background: linear-gradient(180deg, #2d1e14 0%, #140d08 100%);
+      box-shadow: var(--phone-shadow);
+      position: relative;
+    }
+
+    .phone-shell::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 116px;
+      height: 24px;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background: rgba(12, 7, 4, 0.8);
+    }
+
+    .screen {
+      border-radius: 28px;
+      overflow: hidden;
+      background: #f7f3ec;
+      position: relative;
+      min-height: 760px;
+    }
+
+    .app-header {
+      padding: 18px 20px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #8f7b68;
+      font-size: 12px;
+    }
+
+    .question-card,
+    .analysis-card,
+    .tips-card,
+    .feedback-card,
+    .method-card {
+      margin: 0 16px 14px;
+      background: #fffdf8;
+      border-radius: 26px;
+      border: 1px solid rgba(90, 68, 49, 0.08);
+      box-shadow: 0 16px 30px rgba(56, 37, 18, 0.08);
+    }
+
+    .question-card {
+      padding: 18px;
+    }
+
+    .question-tag {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: #f8efe5;
+      color: #83664f;
+      font-size: 12px;
+    }
+
+    .question-card h3 {
+      margin: 14px 0 8px;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .question-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .answer-status {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fff2ef 0%, #fff7f4 100%);
+      color: #a5492e;
+    }
+
+    .answer-status strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .pill-score {
+      border-radius: 999px;
+      padding: 10px 12px;
+      background: rgba(239, 122, 42, 0.14);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .analysis-card,
+    .tips-card,
+    .feedback-card,
+    .method-card {
+      padding: 18px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .card-title strong {
+      font-size: 17px;
+    }
+
+    .card-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bullet-list li {
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: #f7f1e9;
+      color: #564636;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 20px 18px;
+      background: linear-gradient(180deg, rgba(247, 243, 236, 0) 0%, rgba(247, 243, 236, 0.95) 38%, rgba(247, 243, 236, 1) 100%);
+      display: flex;
+      justify-content: space-around;
+      color: #8b7763;
+      font-size: 12px;
+    }
+
+    .bottom-nav div {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+    }
+
+    .bottom-nav i {
+      width: 24px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #efe5d7;
+      font-style: normal;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(31, 17, 8, 0.1);
+      transition: background 0.28s var(--ease);
+      pointer-events: none;
+    }
+
+    .overlay.modal {
+      align-items: center;
+      padding: 20px;
+    }
+
+    .overlay.show {
+      pointer-events: auto;
+      background: rgba(26, 14, 6, 0.34);
+    }
+
+    .sheet,
+    .modal-card {
+      width: 100%;
+      max-width: 364px;
+      background: #fffaf4;
+      border: 1px solid rgba(84, 59, 33, 0.08);
+      box-shadow: 0 28px 60px rgba(28, 16, 8, 0.22);
+      opacity: 0;
+      transition: transform 0.28s var(--ease), opacity 0.28s var(--ease);
+    }
+
+    .sheet {
+      border-radius: 30px 30px 0 0;
+      padding: 14px 18px 20px;
+      transform: translateY(110%);
+    }
+
+    .modal-card {
+      border-radius: 30px;
+      padding: 18px;
+      transform: scale(0.9) translateY(14px);
+    }
+
+    .overlay.show .sheet,
+    .overlay.show .modal-card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .handle {
+      width: 54px;
+      height: 6px;
+      border-radius: 999px;
+      margin: 4px auto 14px;
+      background: rgba(100, 75, 56, 0.18);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.knowledge {
+      background: rgba(239, 122, 42, 0.12);
+      color: var(--orange-deep);
+    }
+
+    .badge.careless {
+      background: rgba(216, 161, 0, 0.14);
+      color: var(--yellow-deep);
+    }
+
+    .dialog-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(89, 66, 47, 0.1);
+      background: #fff;
+      color: #786555;
+      cursor: pointer;
+    }
+
+    .headline {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .headline em {
+      font-style: normal;
+      color: var(--orange-deep);
+    }
+
+    .careless .headline em {
+      color: var(--yellow-deep);
+    }
+
+    .subcopy {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .highlight-box {
+      padding: 14px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff6ef 0%, #fff0df 100%);
+      margin-bottom: 14px;
+    }
+
+    .careless .highlight-box {
+      background: linear-gradient(180deg, #fff8e7 0%, #fff2c8 100%);
+    }
+
+    .highlight-box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      color: #5a4737;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .mini-item {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: #5d4939;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .mini-item b {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(239, 122, 42, 0.12);
+      color: var(--orange-deep);
+      font-size: 12px;
+    }
+
+    .careless .mini-item b {
+      background: rgba(216, 161, 0, 0.16);
+      color: var(--yellow-deep);
+    }
+
+    .cta {
+      width: 100%;
+      padding: 15px 18px;
+      border-radius: 20px;
+      color: #fffaf5;
+      font-weight: 700;
+      font-size: 15px;
+      background: linear-gradient(135deg, #ef7a2a 0%, #cf5411 100%);
+      box-shadow: 0 14px 26px rgba(207, 84, 17, 0.24);
+    }
+
+    .careless .cta {
+      background: linear-gradient(135deg, #d8a100 0%, #9b7700 100%);
+      box-shadow: 0 14px 26px rgba(155, 119, 0, 0.24);
+    }
+
+    .text-link {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      border-radius: 18px;
+      background: transparent;
+      color: #816b59;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .training,
+    .followup,
+    .return-panel,
+    .method-panel {
+      margin: 16px;
+      padding: 18px;
+      background: #fffdf8;
+      border: 1px solid rgba(90, 68, 49, 0.08);
+      border-radius: 28px;
+      box-shadow: 0 18px 36px rgba(56, 37, 18, 0.08);
+    }
+
+    .stepper {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stepper span {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: #efe4d6;
+      overflow: hidden;
+    }
+
+    .stepper span.active::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ef7a2a, #cf5411);
+    }
+
+    .training h4,
+    .followup h4,
+    .return-panel h4,
+    .method-panel h4 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .training p,
+    .followup p,
+    .return-panel p,
+    .method-panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(91, 67, 48, 0.12);
+      background: #fff;
+      text-align: left;
+      color: #4e3d2e;
+    }
+
+    .option.selected {
+      border-color: rgba(207, 84, 17, 0.55);
+      background: #fff3e4;
+      box-shadow: 0 8px 18px rgba(207, 84, 17, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .actions .cta,
+    .actions .ghost-button {
+      width: auto;
+      flex: 1;
+      margin: 0;
+    }
+
+    .actions .ghost-button {
+      padding: 15px 18px;
+      background: #f4ebdf;
+      color: #5e4c3b;
+      box-shadow: none;
+    }
+
+    .feedback-card {
+      background: linear-gradient(180deg, #effaf4 0%, #f7fffb 100%);
+    }
+
+    .score-ring {
+      display: grid;
+      place-items: center;
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #fff 48%, transparent 49%), conic-gradient(#1c8c6a 0 73%, rgba(28, 140, 106, 0.14) 73% 100%);
+      box-shadow: inset 0 0 0 10px rgba(28, 140, 106, 0.08);
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .return-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .return-button {
+      width: 100%;
+      padding: 15px 16px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid rgba(91, 67, 48, 0.1);
+      text-align: left;
+      color: #4f3e30;
+    }
+
+    .legend {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .legend-card {
+      padding: 14px;
+      border-radius: 20px;
+      background: #fffdf8;
+      border: 1px solid rgba(91, 67, 48, 0.08);
+    }
+
+    .legend-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .legend-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        position: static;
+      }
+
+      .legend {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100%, calc(100% - 20px));
+        padding-top: 18px;
+      }
+
+      .hero-copy p {
+        font-size: 14px;
+      }
+
+      .controls,
+      .spec,
+      .stage {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .phone-shell {
+        width: 100%;
+        padding: 14px 10px 18px;
+      }
+
+      .screen {
+        min-height: 716px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">H5 Prototype · 错题点拨</div>
+        <h1>把“错一道题”<br>变成“补一个漏点”</h1>
+        <p>这个 H5 原型基于需求文档中的触发式点拨场景搭建，重点演示错题结果页上的即时诊断、知识点型与粗心型分支、强化练习闭环，以及底部抽屉与居中模态两种交互方式。</p>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="panel controls">
+        <h2>原型控制台</h2>
+
+        <div class="group">
+          <div class="label">诊断类型</div>
+          <div class="segmented" id="typeSwitch">
+            <button class="active" data-type="knowledge">
+              <strong>知识点掌握不全</strong>
+              <span>强调重复错点、错因精讲与 5 题强化闭环。</span>
+            </button>
+            <button data-type="careless">
+              <strong>粗心大意</strong>
+              <span>强调习惯失误、改进建议与方法卡入口。</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="label">弹层形式</div>
+          <div class="segmented two" id="layoutSwitch">
+            <button class="active" data-layout="sheet">
+              <strong>底部抽屉</strong>
+              <span>更轻量，打扰感更低。</span>
+            </button>
+            <button data-layout="modal">
+              <strong>居中模态</strong>
+              <span>更强提醒，聚焦更集中。</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="label">流程跳转</div>
+          <div class="stack">
+            <button class="ghost-button" id="replayButton">重新播放触发流程</button>
+            <button class="ghost-button" id="trainingButton">直接查看强化练习</button>
+            <button class="ghost-button" id="methodButton">直接查看改进方法卡</button>
+          </div>
+        </div>
+
+        <div class="summary">
+          <strong>当前原型聚焦</strong>
+          <p id="summaryText">触发后自动弹出点拨卡，诊断结论使用偏橙色视觉，主按钮引导进入同考点练习（5题），次按钮保留“先继续刷题”。</p>
+        </div>
+      </aside>
+
+      <main class="panel spec">
+        <h2>移动端演示</h2>
+        <div class="stage">
+          <div class="phone-shell">
+            <div class="screen" id="screen">
+              <div class="app-header">
+                <span>09:41</span>
+                <strong>行测刷题</strong>
+                <span>4G · 86%</span>
+              </div>
+
+              <section class="question-card" id="resultPage">
+                <div class="question-tag">错题结果页 · 数量关系</div>
+                <h3>某环形跑道周长 600 米，甲乙两人同时同地反向出发，甲每秒 7 米，乙每秒 5 米，问两人首次相遇需要多少秒？</h3>
+                <p>你的答案：45 秒。正确答案：50 秒。系统识别到该题属于“环形单次相遇”知识标签，且你最近在同类题上出现了重复失误。</p>
+                <div class="answer-status">
+                  <div>
+                    <strong>本题作答错误</strong>
+                    <span>解析页即将展示点拨提醒</span>
+                  </div>
+                  <div class="pill-score">标签命中 · 第 3 次</div>
+                </div>
+              </section>
+
+              <section class="analysis-card" id="analysisPage">
+                <div class="card-title">
+                  <strong>题目解析</strong>
+                  <span>错因定位中</span>
+                </div>
+                <ul class="bullet-list">
+                  <li>反向相遇时应使用速度和，而不是速度差。</li>
+                  <li>首次相遇满足“路程和 = 环形周长”。</li>
+                  <li>本题正确式子为：600 ÷ (7 + 5) = 50 秒。</li>
+                </ul>
+              </section>
+
+              <section class="tips-card" id="stateStrip">
+                <div class="card-title">
+                  <strong>系统状态</strong>
+                  <span id="stateText">正在校验触发条件：最近组题错题 ≥ 1 且累计做题数 ≥ 3</span>
+                </div>
+              </section>
+
+              <section class="training hidden" id="trainingPanel">
+                <div class="stepper">
+                  <span class="active"></span>
+                  <span class="active"></span>
+                  <span class="active"></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <h4>同考点强化练习 3 / 5</h4>
+                <p>保持在 5 秒内读完核心信息，快速判断你此刻是“知识点没掌握”，还是“方法用错了”。</p>
+                <div class="options" id="practiceOptions">
+                  <button class="option">A. 仍然使用速度差，忽略了反向相遇要用速度和。</button>
+                  <button class="option">B. 忘记把周长代入总路程，直接计算了单人用时。</button>
+                  <button class="option">C. 粗心抄错题目数字，把乙的速度看成了 6 米/秒。</button>
+                </div>
+                <div class="actions">
+                  <button class="ghost-button" id="showFollowup">提交答案</button>
+                </div>
+              </section>
+
+              <section class="followup hidden" id="followupPanel">
+                <h4>追问一下：这道题为什么又错了？</h4>
+                <p>系统希望判断你是知识点没掌握，还是做题习惯导致失误。请选择最接近的一项。</p>
+                <div class="options" id="followupOptions">
+                  <button class="option">A. 我不知道反向相遇该怎么列式。</button>
+                  <button class="option">B. 我会做，但当时把“相遇”看成了“追及”。</button>
+                  <button class="option">C. 我算式对了，但口算时加错了。</button>
+                  <button class="option">D. 我时间紧，没仔细审题。</button>
+                  <button class="option">E. 其他原因。</button>
+                </div>
+                <div class="actions">
+                  <button class="cta" id="finishTraining">完成本轮强化</button>
+                </div>
+              </section>
+
+              <section class="feedback-card hidden" id="feedbackPanel">
+                <div class="score-ring">73%</div>
+                <div class="card-title">
+                  <strong>强化反馈</strong>
+                  <span>掌握度提升</span>
+                </div>
+                <ul class="bullet-list">
+                  <li>你已连续完成 5 道“环形单次相遇”同类题，掌握度由 42% 提升到 73%。</li>
+                  <li>高频失误已收敛到“相遇/追及混淆”，后续建议继续练 2 道中等难度题。</li>
+                </ul>
+              </section>
+
+              <section class="return-panel hidden" id="returnPanel">
+                <h4>下一步你想回到哪里？</h4>
+                <p>按照需求文档中的闭环设计，强化完成后需要给用户清晰的返回路径。</p>
+                <div class="return-actions">
+                  <button class="return-button" id="returnWrongList">返回错题列表</button>
+                  <button class="return-button" id="returnOrigin">返回原刷题位置</button>
+                </div>
+              </section>
+
+              <section class="method-panel hidden" id="methodPanel">
+                <h4>粗心改进方法卡</h4>
+                <p>这次更像是习惯性失误，不是不会，而是没有把关键条件抓牢。</p>
+                <ul class="bullet-list">
+                  <li>先画出题干中的“相遇/追及/反向”关系词，再列公式。</li>
+                  <li>把计算步骤拆成两步：列式确认后，再代数值。</li>
+                  <li>最后 3 秒回看一次题目条件，确认没有抄错数字。</li>
+                </ul>
+              </section>
+
+              <div class="overlay show" id="overlay">
+                <div class="sheet knowledge" id="dialogCard">
+                  <div class="handle" id="sheetHandle"></div>
+                  <div class="dialog-header">
+                    <div>
+                      <div class="badge knowledge" id="dialogBadge">知识点型提醒</div>
+                    </div>
+                    <button class="dialog-close" id="closeDialog">×</button>
+                  </div>
+                  <h3 class="headline" id="dialogHeadline">你已在 <em>“环形单次相遇”</em> 上连续错了 3 次</h3>
+                  <p class="subcopy" id="dialogSubcopy">这不是单题失误，系统判断你在这个考点上存在稳定薄弱点，现在补一轮，会比继续刷更省时间。</p>
+                  <div class="highlight-box" id="dialogHighlight">
+                    <strong id="highlightTitle">一句点拨</strong>
+                    <p id="highlightText">反向相遇要抓“速度和 = 总路程”。这类题别急着算，先确认相遇关系，再决定用和还是差。</p>
+                  </div>
+                  <div class="mini-list" id="dialogList">
+                    <div class="mini-item"><b>1</b><span>你最近 3 次同类错误都发生在“关系判断”而不是复杂运算。</span></div>
+                    <div class="mini-item"><b>2</b><span>建议立刻做 5 道同考点题，把“相遇/追及”区分练熟。</span></div>
+                  </div>
+                  <button class="cta" id="primaryAction">立即强化（5题）</button>
+                  <button class="text-link" id="secondaryAction">先继续刷题</button>
+                </div>
+              </div>
+
+              <div class="bottom-nav">
+                <div><i>题</i><span>刷题</span></div>
+                <div><i>错</i><span>错题</span></div>
+                <div><i>学</i><span>学习</span></div>
+                <div><i>我</i><span>我的</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="legend">
+            <div class="legend-card">
+              <strong>触发时机</strong>
+              <p>错题结果页加载完成后即弹出，动画控制在 0.3 秒以内，避免突兀。</p>
+            </div>
+            <div class="legend-card">
+              <strong>内容密度</strong>
+              <p>点拨卡片只给一句核心判断、一句精讲和明确动作，控制用户 5 秒内获取重点。</p>
+            </div>
+            <div class="legend-card">
+              <strong>闭环设计</strong>
+              <p>支持继续刷题、强化练习、追问错因、强化反馈和返回原路径，覆盖完整需求闭环。</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const typeSwitch = document.getElementById("typeSwitch");
+    const layoutSwitch = document.getElementById("layoutSwitch");
+    const replayButton = document.getElementById("replayButton");
+    const trainingButton = document.getElementById("trainingButton");
+    const methodButton = document.getElementById("methodButton");
+    const overlay = document.getElementById("overlay");
+    const dialogCard = document.getElementById("dialogCard");
+    const closeDialog = document.getElementById("closeDialog");
+    const primaryAction = document.getElementById("primaryAction");
+    const secondaryAction = document.getElementById("secondaryAction");
+    const trainingPanel = document.getElementById("trainingPanel");
+    const followupPanel = document.getElementById("followupPanel");
+    const feedbackPanel = document.getElementById("feedbackPanel");
+    const returnPanel = document.getElementById("returnPanel");
+    const methodPanel = document.getElementById("methodPanel");
+    const showFollowup = document.getElementById("showFollowup");
+    const finishTraining = document.getElementById("finishTraining");
+    const returnWrongList = document.getElementById("returnWrongList");
+    const returnOrigin = document.getElementById("returnOrigin");
+    const stateText = document.getElementById("stateText");
+    const summaryText = document.getElementById("summaryText");
+    const sheetHandle = document.getElementById("sheetHandle");
+    const practiceOptions = document.getElementById("practiceOptions");
+    const followupOptions = document.getElementById("followupOptions");
+
+    const dialogBadge = document.getElementById("dialogBadge");
+    const dialogHeadline = document.getElementById("dialogHeadline");
+    const dialogSubcopy = document.getElementById("dialogSubcopy");
+    const highlightTitle = document.getElementById("highlightTitle");
+    const highlightText = document.getElementById("highlightText");
+    const dialogList = document.getElementById("dialogList");
+
+    const contentMap = {
+      knowledge: {
+        summary: "触发后自动弹出点拨卡，诊断结论使用偏橙色视觉，主按钮引导进入同考点练习（5题），次按钮保留“先继续刷题”。",
+        badge: "知识点型提醒",
+        headline: "你已在 <em>“环形单次相遇”</em> 上连续错了 3 次",
+        subcopy: "这不是单题失误，系统判断你在这个考点上存在稳定薄弱点，现在补一轮，会比继续刷更省时间。",
+        highlightTitle: "一句点拨",
+        highlightText: "反向相遇要抓“速度和 = 总路程”。这类题别急着算，先确认相遇关系，再决定用和还是差。",
+        items: [
+          "你最近 3 次同类错误都发生在“关系判断”而不是复杂运算。",
+          "建议立刻做 5 道同考点题，把“相遇/追及”区分练熟。"
+        ],
+        primary: "立即强化（5题）",
+        secondary: "先继续刷题",
+        state: "已命中知识点型触发：最近组题错题 ≥ 1 且累计做题数 ≥ 3"
+      },
+      careless: {
+        summary: "触发后保留轻量提醒，但文案转向习惯纠偏，主按钮展示“查看改进方法”，色调偏黄，弱化“被责备”感。",
+        badge: "粗心型提醒",
+        headline: "你在 <em>“环形单次相遇”</em> 上反复丢分，更像是审题与计算习惯问题",
+        subcopy: "你并非不会，而是在紧张状态下把“相遇”误看成了“追及”。先修正方法，再回去刷题，效率会更高。",
+        highlightTitle: "本次更该改什么",
+        highlightText: "遇到相遇题，先圈出“同时、反向、首次相遇”三个关键词，再决定列速度和还是速度差。",
+        items: [
+          "系统识别到你在同类题上的错因更偏向审题遗漏和条件误读。",
+          "建议先看一张方法卡，再回到当前题目继续刷，降低打断感。"
+        ],
+        primary: "查看改进方法",
+        secondary: "先继续刷题",
+        state: "已命中粗心型触发：错因更接近审题遗漏/计算失误"
+      }
+    };
+
+    const uiState = {
+      type: "knowledge",
+      layout: "sheet"
+    };
+
+    function resetSelections(container) {
+      container.querySelectorAll(".option").forEach((button) => {
+        button.classList.remove("selected");
+      });
+    }
+
+    function wireSelectable(container) {
+      container.querySelectorAll(".option").forEach((button) => {
+        button.addEventListener("click", () => {
+          resetSelections(container);
+          button.classList.add("selected");
+        });
+      });
+    }
+
+    wireSelectable(practiceOptions);
+    wireSelectable(followupOptions);
+
+    function updateSwitchState(container, value) {
+      container.querySelectorAll("button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.type === value || button.dataset.layout === value);
+      });
+    }
+
+    function applyDialogContent() {
+      const content = contentMap[uiState.type];
+      summaryText.textContent = content.summary;
+      dialogBadge.textContent = content.badge;
+      dialogHeadline.innerHTML = content.headline;
+      dialogSubcopy.textContent = content.subcopy;
+      highlightTitle.textContent = content.highlightTitle;
+      highlightText.textContent = content.highlightText;
+      primaryAction.textContent = content.primary;
+      secondaryAction.textContent = content.secondary;
+      stateText.textContent = content.state;
+
+      dialogCard.classList.toggle("knowledge", uiState.type === "knowledge");
+      dialogCard.classList.toggle("careless", uiState.type === "careless");
+      dialogBadge.className = "badge " + uiState.type;
+      dialogList.innerHTML = content.items.map((item, index) => (
+        `<div class="mini-item"><b>${index + 1}</b><span>${item}</span></div>`
+      )).join("");
+    }
+
+    function applyLayout() {
+      overlay.classList.toggle("modal", uiState.layout === "modal");
+      dialogCard.className = uiState.layout === "modal" ? (uiState.type + " modal-card") : (uiState.type + " sheet");
+      sheetHandle.classList.toggle("hidden", uiState.layout === "modal");
+    }
+
+    function hideFlowPanels() {
+      trainingPanel.classList.add("hidden");
+      followupPanel.classList.add("hidden");
+      feedbackPanel.classList.add("hidden");
+      returnPanel.classList.add("hidden");
+      methodPanel.classList.add("hidden");
+    }
+
+    function openDialog() {
+      hideFlowPanels();
+      overlay.classList.add("show");
+      stateText.textContent = contentMap[uiState.type].state;
+    }
+
+    function closeDialogOnly() {
+      overlay.classList.remove("show");
+      hideFlowPanels();
+      stateText.textContent = "用户选择先继续刷题，页面保持在当前错题结果页。";
+    }
+
+    function showTraining() {
+      overlay.classList.remove("show");
+      hideFlowPanels();
+      trainingPanel.classList.remove("hidden");
+      stateText.textContent = "已进入知识点强化练习：5 题闭环训练。";
+      resetSelections(practiceOptions);
+      resetSelections(followupOptions);
+    }
+
+    function showMethodCard() {
+      overlay.classList.remove("show");
+      hideFlowPanels();
+      methodPanel.classList.remove("hidden");
+      stateText.textContent = "已打开粗心改进方法卡，准备返回当前刷题路径。";
+    }
+
+    function replayFlow() {
+      hideFlowPanels();
+      stateText.textContent = "错题结果页已加载完成，系统 0.3 秒内弹出点拨提醒。";
+      setTimeout(openDialog, 180);
+    }
+
+    typeSwitch.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-type]");
+      if (!button) return;
+      uiState.type = button.dataset.type;
+      updateSwitchState(typeSwitch, uiState.type);
+      applyDialogContent();
+      applyLayout();
+      replayFlow();
+    });
+
+    layoutSwitch.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-layout]");
+      if (!button) return;
+      uiState.layout = button.dataset.layout;
+      updateSwitchState(layoutSwitch, uiState.layout);
+      applyLayout();
+      replayFlow();
+    });
+
+    replayButton.addEventListener("click", replayFlow);
+    trainingButton.addEventListener("click", () => {
+      uiState.type = "knowledge";
+      updateSwitchState(typeSwitch, uiState.type);
+      applyDialogContent();
+      applyLayout();
+      showTraining();
+    });
+    methodButton.addEventListener("click", () => {
+      uiState.type = "careless";
+      updateSwitchState(typeSwitch, uiState.type);
+      applyDialogContent();
+      applyLayout();
+      showMethodCard();
+    });
+
+    closeDialog.addEventListener("click", closeDialogOnly);
+    secondaryAction.addEventListener("click", closeDialogOnly);
+    primaryAction.addEventListener("click", () => {
+      if (uiState.type === "knowledge") {
+        showTraining();
+      } else {
+        showMethodCard();
+      }
+    });
+
+    showFollowup.addEventListener("click", () => {
+      trainingPanel.classList.add("hidden");
+      followupPanel.classList.remove("hidden");
+      stateText.textContent = "系统检测到本轮强化仍有错题，弹出 A~E 追问错因。";
+    });
+
+    finishTraining.addEventListener("click", () => {
+      followupPanel.classList.add("hidden");
+      feedbackPanel.classList.remove("hidden");
+      returnPanel.classList.remove("hidden");
+      stateText.textContent = "强化完成，展示掌握度反馈并给出返回路径。";
+    });
+
+    returnWrongList.addEventListener("click", () => {
+      hideFlowPanels();
+      stateText.textContent = "已返回错题列表，用户可继续查看其他薄弱点。";
+    });
+
+    returnOrigin.addEventListener("click", () => {
+      hideFlowPanels();
+      stateText.textContent = "已返回原刷题位置，保持上下文连续。";
+    });
+
+    applyDialogContent();
+    applyLayout();
+    replayFlow();
+  </script>
+</body>
+</html>
