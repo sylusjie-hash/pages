@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>积累卡片 H5 预览</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --paper: #fffdf9;
+      --paper-2: #fff8f1;
+      --line: #ead9cc;
+      --line-strong: #d9b8a6;
+      --text: #1f1c18;
+      --muted: #6f655d;
+      --muted-2: #988a7f;
+      --accent: #d54d3f;
+      --accent-soft: #f6e3db;
+      --gold: #f4c84f;
+      --shadow: 0 18px 40px rgba(70, 45, 28, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background:
+        linear-gradient(180deg, #faf6ef 0%, #f6f1e8 42%, #f3ede4 100%);
+      color: var(--text);
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .page {
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    .shell {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 12px;
+      height: 44px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f05d4d 0%, #c9352b 100%);
+      box-shadow: 0 10px 18px rgba(201, 53, 43, 0.18);
+      flex: none;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .title {
+      margin: 0;
+      font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+      font-size: 32px;
+      line-height: 1.08;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .content {
+      display: grid;
+      gap: 16px;
+      padding-bottom: 28px;
+    }
+
+    .card {
+      border: 1px solid rgba(217, 184, 166, 0.82);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 249, 244, 0.95));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid rgba(234, 217, 204, 0.65);
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .card-bar {
+      width: 6px;
+      height: 32px;
+      margin-top: 5px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f04f42, #ca2d25);
+      flex: none;
+    }
+
+    .card-title-area {
+      min-width: 0;
+    }
+
+    .card-kicker {
+      margin: 0 0 6px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .card-title {
+      margin: 0;
+      font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+      font-size: 24px;
+      line-height: 1.18;
+      font-weight: 800;
+    }
+
+    .card-index {
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 28px;
+      line-height: 1;
+      color: rgba(168, 154, 145, 0.35);
+      font-weight: 700;
+      flex: none;
+      padding-top: 2px;
+    }
+
+    .summary {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px 4px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .summary-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .summary-label {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .help-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(214, 196, 185, 0.9);
+      color: #a08f84;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fff;
+      flex: none;
+    }
+
+    .level {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: none;
+      white-space: nowrap;
+    }
+
+    .level .star {
+      font-size: 18px;
+      line-height: 1;
+      color: #e5d8d2;
+    }
+
+    .level .star.on {
+      color: var(--gold);
+      text-shadow: 0 3px 10px rgba(244, 200, 79, 0.18);
+    }
+
+    .summary-note {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .section {
+      padding: 16px 18px 4px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+    }
+
+    .section-title h3 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 22px;
+      line-height: 1.22;
+      font-weight: 800;
+    }
+
+    .learn-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(213, 77, 63, 0.28);
+      color: #c05345;
+      background: rgba(255, 245, 241, 0.98);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      box-shadow: 0 6px 12px rgba(213, 77, 63, 0.05);
+      flex: none;
+    }
+
+    .body-copy {
+      margin: 0 0 18px;
+      font-size: 16px;
+      line-height: 1.9;
+      color: #2f2a26;
+    }
+
+    .points {
+      display: grid;
+      gap: 14px;
+      padding-bottom: 16px;
+    }
+
+    .point {
+      padding: 0;
+      margin: 0;
+    }
+
+    .point-title {
+      margin: 0 0 6px;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 19px;
+      line-height: 1.25;
+      font-weight: 800;
+      color: #25201c;
+    }
+
+    .point-text {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.9;
+      color: #4e463f;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 18px 18px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(217, 184, 166, 0.9);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .collapse-btn {
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      flex: none;
+    }
+
+    .card.collapsed .summary-note,
+    .card.collapsed .section,
+    .card.collapsed .points {
+      display: none;
+    }
+
+    .card.collapsed .card-footer {
+      padding-top: 14px;
+    }
+
+    .footer-bar {
+      padding: 10px 0 0;
+      color: var(--muted-2);
+      font-size: 12px;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    @media (max-width: 560px) {
+      .shell {
+        padding-inline: 12px;
+      }
+
+      .title {
+        font-size: 28px;
+      }
+
+      .card-head,
+      .summary,
+      .section,
+      .card-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .card-title {
+        font-size: 22px;
+      }
+
+      .summary-label {
+        font-size: 17px;
+      }
+
+      .section-title h3 {
+        font-size: 20px;
+      }
+
+      .point-title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div class="brand-text">
+            <h1 class="title">积累卡片</h1>
+          </div>
+        </div>
+      </header>
+
+      <section class="content" aria-label="知识点预览">
+        <article class="card" data-card>
+          <div class="card-head">
+            <div class="card-title-wrap">
+              <span class="card-bar" aria-hidden="true"></span>
+              <div class="card-title-area">
+                <p class="card-kicker">知识点1</p>
+                <h2 class="card-title">物权</h2>
+              </div>
+            </div>
+            <div class="card-index">01</div>
+          </div>
+
+          <div class="summary">
+            <div class="summary-row">
+              <div class="summary-left">
+                <p class="summary-label">综合评分</p>
+                <span class="help-dot" aria-hidden="true">?</span>
+              </div>
+              <div class="level" aria-label="重要程度 2 星">
+                <span class="star on">★</span>
+                <span class="star on">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+              </div>
+            </div>
+            <p class="summary-note">稍作了解，具体概念需在后文详细了解。</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <h3>1.1  什么是物权？</h3>
+              <span class="learn-tag">学一学</span>
+            </div>
+            <p class="body-copy">物权是指权利人依法对特定的物享有直接支配和排他的权利，包括所有权、用益物权和担保物权。</p>
+
+            <div class="points">
+              <div class="point">
+                <p class="point-title">1. 直接支配</p>
+                <p class="point-text">权利人可以直接对物进行占有、使用、收益和处分，不需要通过他人同意来实现核心权能。</p>
+              </div>
+              <div class="point">
+                <p class="point-title">2. 排他效力</p>
+                <p class="point-text">同一物上一般不能同时存在冲突的支配关系，物权强调对世性和排他性。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <h3>1.2  类型</h3>
+              <span class="learn-tag">学一学</span>
+            </div>
+            <div class="points">
+              <div class="point">
+                <p class="point-title">1. 所有权</p>
+                <p class="point-text">最完整、最充分的物权，权利人对自己的财产享有占有、使用、收益和处分的权利。</p>
+              </div>
+              <div class="point">
+                <p class="point-title">2. 用益物权</p>
+                <p class="point-text">对他人所有的不动产或动产，依法享有占有、使用和收益的权利，强调对物的利用。</p>
+              </div>
+              <div class="point">
+                <p class="point-title">3. 担保物权</p>
+                <p class="point-text">为实现债权提供保障，在债务履行不能时可优先受偿，常见于抵押、质押等情形。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="chip-row">
+              <span class="chip">法律常识</span>
+              <span class="chip">重要程度：高</span>
+              <span class="chip">适合复盘背诵</span>
+            </div>
+            <button class="collapse-btn" type="button" data-toggle>收起内容</button>
+          </div>
+        </article>
+
+        <article class="card" data-card>
+          <div class="card-head">
+            <div class="card-title-wrap">
+              <span class="card-bar" aria-hidden="true" style="background: linear-gradient(180deg, #f4a93f, #db7c21);"></span>
+              <div class="card-title-area">
+                <p class="card-kicker">知识点2</p>
+                <h2 class="card-title">中国四大高原</h2>
+              </div>
+            </div>
+            <div class="card-index">02</div>
+          </div>
+
+          <div class="summary">
+            <div class="summary-row">
+              <div class="summary-left">
+                <p class="summary-label">综合评分</p>
+                <span class="help-dot" aria-hidden="true">?</span>
+              </div>
+              <div class="level" aria-label="重要程度 3 星">
+                <span class="star on">★</span>
+                <span class="star on">★</span>
+                <span class="star on">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+              </div>
+            </div>
+            <p class="summary-note">常识题里很容易出现，需要记住名称、位置和主要特征。</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <h3>2.1  记忆要点</h3>
+              <span class="learn-tag">学一学</span>
+            </div>
+            <div class="points">
+              <div class="point">
+                <p class="point-title">1. 青藏高原</p>
+                <p class="point-text">海拔最高，雪山和冰川广布，被称为“世界屋脊”，是最具辨识度的高原之一。</p>
+              </div>
+              <div class="point">
+                <p class="point-title">2. 内蒙古高原</p>
+                <p class="point-text">地势起伏较缓，草原广阔，畜牧业特征明显，常考其平坦开阔的地貌印象。</p>
+              </div>
+              <div class="point">
+                <p class="point-title">3. 黄土高原</p>
+                <p class="point-text">黄土深厚，沟壑纵横，水土流失问题突出，是地理常识中的高频考点。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <h3>2.2  辨析提示</h3>
+              <span class="learn-tag">学一学</span>
+            </div>
+            <p class="body-copy">四大高原要结合“海拔、地表特征、主要资源与生态问题”来记，避免只背名称而忽略常考特征。</p>
+          </div>
+
+          <div class="card-footer">
+            <div class="chip-row">
+              <span class="chip">地理常识</span>
+              <span class="chip">重要程度：中高</span>
+              <span class="chip">适合列表记忆</span>
+            </div>
+            <button class="collapse-btn" type="button" data-toggle>收起内容</button>
+          </div>
+        </article>
+
+        <article class="card" data-card>
+          <div class="card-head">
+            <div class="card-title-wrap">
+              <span class="card-bar" aria-hidden="true" style="background: linear-gradient(180deg, #6aa9a1, #4d7f79);"></span>
+              <div class="card-title-area">
+                <p class="card-kicker">知识点3</p>
+                <h2 class="card-title">人工智能基础概念</h2>
+              </div>
+            </div>
+            <div class="card-index">03</div>
+          </div>
+
+          <div class="summary">
+            <div class="summary-row">
+              <div class="summary-left">
+                <p class="summary-label">综合评分</p>
+                <span class="help-dot" aria-hidden="true">?</span>
+              </div>
+              <div class="level" aria-label="重要程度 4 星">
+                <span class="star on">★</span>
+                <span class="star on">★</span>
+                <span class="star on">★</span>
+                <span class="star on">★</span>
+                <span class="star">★</span>
+              </div>
+            </div>
+            <p class="summary-note">科技类知识点更新快，适合做简洁、准确、易背的卡片。</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <h3>3.1  核心概念</h3>
+              <span class="learn-tag">学一学</span>
+            </div>
+            <div class="points">
+              <div class="point">
+                <p class="point-title">1. 什么是人工智能</p>
+                <p class="point-text">人工智能是让机器模拟人类的感知、推理、学习和决策能力，从而完成特定任务的技术体系。</p>
+              </div>
+              <div class="point">
+                <p class="point-title">2. 常见应用</p>
+                <p class="point-text">语音识别、图像识别、智能推荐、自动驾驶等，都是考试中常见的应用场景表达。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <h3>3.2  记忆提醒</h3>
+              <span class="learn-tag">学一学</span>
+            </div>
+            <p class="body-copy">答题时要区分“人工智能的概念”与“具体算法/产品名称”，前者更适合做常识积累，后者偏细节辨识。</p>
+          </div>
+
+          <div class="card-footer">
+            <div class="chip-row">
+              <span class="chip">科技常识</span>
+              <span class="chip">重要程度：高</span>
+              <span class="chip">适合重点标记</span>
+            </div>
+            <button class="collapse-btn" type="button" data-toggle>收起内容</button>
+          </div>
+        </article>
+      </section>
+
+      <div class="footer-bar">预览版示意内容已生成，可继续替换为真实知识点文案与图片素材。</div>
+    </main>
+  </div>
+
+  <script>
+    const cards = Array.from(document.querySelectorAll('[data-card]'));
+    cards.forEach((card) => {
+      const button = card.querySelector('[data-toggle]');
+      if (!button) return;
+
+      button.addEventListener('click', () => {
+        const collapsed = card.classList.toggle('collapsed');
+        button.textContent = collapsed ? '展开内容' : '收起内容';
+      });
+    });
+  </script>
+</body>
+</html>
