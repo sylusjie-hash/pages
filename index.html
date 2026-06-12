@@ -1,515 +1,1264 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#1b7077">
-  <title>线上公考错题点拨 H5</title>
-  <link rel="stylesheet" href="./shangancang-mobile-tokens.css">
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>错题点拨系统 H5 原型</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --paper: #fffaf2;
+      --ink: #24170e;
+      --muted: #726252;
+      --line: rgba(91, 67, 48, 0.14);
+      --orange: #ef7a2a;
+      --orange-deep: #cf5411;
+      --yellow: #d8a100;
+      --yellow-deep: #9b7700;
+      --green: #1c8c6a;
+      --card-shadow: 0 18px 45px rgba(57, 34, 11, 0.12);
+      --phone-shadow: 0 30px 70px rgba(31, 19, 8, 0.16);
+      --radius: 28px;
+      --ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+      --font-display: "Georgia", "Times New Roman", serif;
+      --font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(239, 122, 42, 0.22), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(216, 161, 0, 0.18), transparent 24%),
+        linear-gradient(180deg, #f7f1e8 0%, #efe6d7 100%);
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 36px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .hero-copy {
+      padding: 8px 4px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 250, 242, 0.8);
+      border: 1px solid rgba(113, 83, 56, 0.1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-family: var(--font-display);
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-copy p {
+      max-width: 680px;
+      margin: 0;
+      color: #594738;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .layout {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .panel {
+      background: rgba(255, 250, 242, 0.82);
+      border: 1px solid rgba(91, 67, 48, 0.08);
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .controls {
+      border-radius: var(--radius);
+      padding: 22px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .controls h2,
+    .spec h2 {
+      margin: 0 0 16px;
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .group {
+      margin-bottom: 18px;
+    }
+
+    .group:last-of-type {
+      margin-bottom: 8px;
+    }
+
+    .label {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .segmented {
+      display: grid;
+      gap: 10px;
+    }
+
+    .segmented.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .segmented button,
+    .ghost-button,
+    .cta,
+    .text-link,
+    .option,
+    .return-button {
+      appearance: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .segmented button {
+      border-radius: 18px;
+      padding: 14px 14px;
+      background: #fff;
+      color: #5f4d3d;
+      border: 1px solid rgba(91, 67, 48, 0.11);
+      text-align: left;
+      min-height: 72px;
+    }
+
+    .segmented button strong {
+      display: block;
+      font-size: 15px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .segmented button span {
+      display: block;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .segmented button.active {
+      border-color: rgba(207, 84, 17, 0.55);
+      background: linear-gradient(180deg, #fff7ef 0%, #fff1df 100%);
+      box-shadow: 0 10px 24px rgba(207, 84, 17, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .summary {
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(252, 243, 229, 0.96));
+      border: 1px solid rgba(91, 67, 48, 0.08);
+    }
+
+    .summary strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .summary p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .ghost-button {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #2e1f13;
+      color: #fff8f0;
+      box-shadow: 0 12px 24px rgba(46, 31, 19, 0.24);
+    }
+
+    .ghost-button:hover,
+    .cta:hover,
+    .return-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .spec {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 18px 18px 24px;
+    }
+
+    .stage {
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.78), transparent 35%),
+        linear-gradient(180deg, rgba(255, 246, 232, 0.92) 0%, rgba(248, 237, 221, 0.96) 100%);
+      padding: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .phone-shell {
+      margin: 0 auto;
+      width: min(100%, 395px);
+      border-radius: 38px;
+      padding: 16px 14px 20px;
+      background: linear-gradient(180deg, #2d1e14 0%, #140d08 100%);
+      box-shadow: var(--phone-shadow);
+      position: relative;
+    }
+
+    .phone-shell::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 116px;
+      height: 24px;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background: rgba(12, 7, 4, 0.8);
+    }
+
+    .screen {
+      border-radius: 28px;
+      overflow: hidden;
+      background: #f7f3ec;
+      position: relative;
+      min-height: 760px;
+    }
+
+    .app-header {
+      padding: 18px 20px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #8f7b68;
+      font-size: 12px;
+    }
+
+    .question-card,
+    .analysis-card,
+    .tips-card,
+    .feedback-card,
+    .method-card {
+      margin: 0 16px 14px;
+      background: #fffdf8;
+      border-radius: 26px;
+      border: 1px solid rgba(90, 68, 49, 0.08);
+      box-shadow: 0 16px 30px rgba(56, 37, 18, 0.08);
+    }
+
+    .question-card {
+      padding: 18px;
+    }
+
+    .question-tag {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: #f8efe5;
+      color: #83664f;
+      font-size: 12px;
+    }
+
+    .question-card h3 {
+      margin: 14px 0 8px;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .question-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .answer-status {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fff2ef 0%, #fff7f4 100%);
+      color: #a5492e;
+    }
+
+    .answer-status strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .pill-score {
+      border-radius: 999px;
+      padding: 10px 12px;
+      background: rgba(239, 122, 42, 0.14);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .analysis-card,
+    .tips-card,
+    .feedback-card,
+    .method-card {
+      padding: 18px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .card-title strong {
+      font-size: 17px;
+    }
+
+    .card-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bullet-list li {
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: #f7f1e9;
+      color: #564636;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 20px 18px;
+      background: linear-gradient(180deg, rgba(247, 243, 236, 0) 0%, rgba(247, 243, 236, 0.95) 38%, rgba(247, 243, 236, 1) 100%);
+      display: flex;
+      justify-content: space-around;
+      color: #8b7763;
+      font-size: 12px;
+    }
+
+    .bottom-nav div {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+    }
+
+    .bottom-nav i {
+      width: 24px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #efe5d7;
+      font-style: normal;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(31, 17, 8, 0.1);
+      transition: background 0.28s var(--ease);
+      pointer-events: none;
+    }
+
+    .overlay.modal {
+      align-items: center;
+      padding: 20px;
+    }
+
+    .overlay.show {
+      pointer-events: auto;
+      background: rgba(26, 14, 6, 0.34);
+    }
+
+    .sheet,
+    .modal-card {
+      width: 100%;
+      max-width: 364px;
+      background: #fffaf4;
+      border: 1px solid rgba(84, 59, 33, 0.08);
+      box-shadow: 0 28px 60px rgba(28, 16, 8, 0.22);
+      opacity: 0;
+      transition: transform 0.28s var(--ease), opacity 0.28s var(--ease);
+    }
+
+    .sheet {
+      border-radius: 30px 30px 0 0;
+      padding: 14px 18px 20px;
+      transform: translateY(110%);
+    }
+
+    .modal-card {
+      border-radius: 30px;
+      padding: 18px;
+      transform: scale(0.9) translateY(14px);
+    }
+
+    .overlay.show .sheet,
+    .overlay.show .modal-card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .handle {
+      width: 54px;
+      height: 6px;
+      border-radius: 999px;
+      margin: 4px auto 14px;
+      background: rgba(100, 75, 56, 0.18);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.knowledge {
+      background: rgba(239, 122, 42, 0.12);
+      color: var(--orange-deep);
+    }
+
+    .badge.careless {
+      background: rgba(216, 161, 0, 0.14);
+      color: var(--yellow-deep);
+    }
+
+    .dialog-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(89, 66, 47, 0.1);
+      background: #fff;
+      color: #786555;
+      cursor: pointer;
+    }
+
+    .headline {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .headline em {
+      font-style: normal;
+      color: var(--orange-deep);
+    }
+
+    .careless .headline em {
+      color: var(--yellow-deep);
+    }
+
+    .subcopy {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .highlight-box {
+      padding: 14px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff6ef 0%, #fff0df 100%);
+      margin-bottom: 14px;
+    }
+
+    .careless .highlight-box {
+      background: linear-gradient(180deg, #fff8e7 0%, #fff2c8 100%);
+    }
+
+    .highlight-box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      color: #5a4737;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .mini-item {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: #5d4939;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .mini-item b {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(239, 122, 42, 0.12);
+      color: var(--orange-deep);
+      font-size: 12px;
+    }
+
+    .careless .mini-item b {
+      background: rgba(216, 161, 0, 0.16);
+      color: var(--yellow-deep);
+    }
+
+    .cta {
+      width: 100%;
+      padding: 15px 18px;
+      border-radius: 20px;
+      color: #fffaf5;
+      font-weight: 700;
+      font-size: 15px;
+      background: linear-gradient(135deg, #ef7a2a 0%, #cf5411 100%);
+      box-shadow: 0 14px 26px rgba(207, 84, 17, 0.24);
+    }
+
+    .careless .cta {
+      background: linear-gradient(135deg, #d8a100 0%, #9b7700 100%);
+      box-shadow: 0 14px 26px rgba(155, 119, 0, 0.24);
+    }
+
+    .text-link {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      border-radius: 18px;
+      background: transparent;
+      color: #816b59;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .training,
+    .followup,
+    .return-panel,
+    .method-panel {
+      margin: 16px;
+      padding: 18px;
+      background: #fffdf8;
+      border: 1px solid rgba(90, 68, 49, 0.08);
+      border-radius: 28px;
+      box-shadow: 0 18px 36px rgba(56, 37, 18, 0.08);
+    }
+
+    .stepper {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stepper span {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: #efe4d6;
+      overflow: hidden;
+    }
+
+    .stepper span.active::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ef7a2a, #cf5411);
+    }
+
+    .training h4,
+    .followup h4,
+    .return-panel h4,
+    .method-panel h4 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .training p,
+    .followup p,
+    .return-panel p,
+    .method-panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(91, 67, 48, 0.12);
+      background: #fff;
+      text-align: left;
+      color: #4e3d2e;
+    }
+
+    .option.selected {
+      border-color: rgba(207, 84, 17, 0.55);
+      background: #fff3e4;
+      box-shadow: 0 8px 18px rgba(207, 84, 17, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .actions .cta,
+    .actions .ghost-button {
+      width: auto;
+      flex: 1;
+      margin: 0;
+    }
+
+    .actions .ghost-button {
+      padding: 15px 18px;
+      background: #f4ebdf;
+      color: #5e4c3b;
+      box-shadow: none;
+    }
+
+    .feedback-card {
+      background: linear-gradient(180deg, #effaf4 0%, #f7fffb 100%);
+    }
+
+    .score-ring {
+      display: grid;
+      place-items: center;
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #fff 48%, transparent 49%), conic-gradient(#1c8c6a 0 73%, rgba(28, 140, 106, 0.14) 73% 100%);
+      box-shadow: inset 0 0 0 10px rgba(28, 140, 106, 0.08);
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .return-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .return-button {
+      width: 100%;
+      padding: 15px 16px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid rgba(91, 67, 48, 0.1);
+      text-align: left;
+      color: #4f3e30;
+    }
+
+    .legend {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .legend-card {
+      padding: 14px;
+      border-radius: 20px;
+      background: #fffdf8;
+      border: 1px solid rgba(91, 67, 48, 0.08);
+    }
+
+    .legend-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .legend-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        position: static;
+      }
+
+      .legend {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100%, calc(100% - 20px));
+        padding-top: 18px;
+      }
+
+      .hero-copy p {
+        font-size: 14px;
+      }
+
+      .controls,
+      .spec,
+      .stage {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .phone-shell {
+        width: 100%;
+        padding: 14px 10px 18px;
+      }
+
+      .screen {
+        min-height: 716px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar reveal">
-      <div class="brand" aria-label="线上公考错题点拨 H5">
-        <div class="brand__mark">错</div>
-        <div class="brand__copy">
-          <span class="brand__name">线上公考错题点拨 H5</span>
-          <span class="brand__sub">把做错题变成一次可复盘的诊断</span>
-        </div>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">H5 Prototype · 错题点拨</div>
+        <h1>把“错一道题”<br>变成“补一个漏点”</h1>
+        <p>这个 H5 原型基于需求文档中的触发式点拨场景搭建，重点演示错题结果页上的即时诊断、知识点型与粗心型分支、强化练习闭环，以及底部抽屉与居中模态两种交互方式。</p>
       </div>
-      <div class="topbar__status" aria-label="页面状态">
-        <span class="chip chip--brand">诊断闭环</span>
-        <span class="chip">追问锁因</span>
-        <span class="chip">复练验证</span>
-      </div>
-    </header>
+    </section>
 
-    <main class="page">
-      <section class="hero panel reveal reveal--2">
-        <div class="hero__content">
-          <span class="eyebrow">线上公考错题点拨</span>
-          <h1 class="hero__title">把“知道答案”升级成“知道为什么错”</h1>
-          <p class="hero__copy">
-            线上公考错题复盘最缺的不是解析，而是把审题偏差、方法选错、步骤遗漏、计算失误和策略不当，
-            逐步锁定成用户能执行的改进动作。
-          </p>
-          <div class="hero__cta">
-            <a class="button button--primary" href="#demo">查看诊断演示</a>
-            <a class="button button--ghost" href="#flow">了解流程</a>
-          </div>
-          <div class="hero__tags" aria-label="闭环关键词">
-            <span class="feature-tag">标准动作判断</span>
-            <span class="feature-tag">追问锁因</span>
-            <span class="feature-tag">点拨建议</span>
-            <span class="feature-tag">复练验证</span>
+    <section class="layout">
+      <aside class="panel controls">
+        <h2>原型控制台</h2>
+
+        <div class="group">
+          <div class="label">诊断类型</div>
+          <div class="segmented" id="typeSwitch">
+            <button class="active" data-type="knowledge">
+              <strong>知识点掌握不全</strong>
+              <span>强调重复错点、错因精讲与 5 题强化闭环。</span>
+            </button>
+            <button data-type="careless">
+              <strong>粗心大意</strong>
+              <span>强调习惯失误、改进建议与方法卡入口。</span>
+            </button>
           </div>
         </div>
 
-        <aside class="hero__aside" aria-label="首期策略">
-          <article class="hero-card hero-card--accent">
-            <span class="hero-card__label">首期策略</span>
-            <p class="hero-card__copy">
-              先做高频题型、高频错因、可通过对话确认的错因，优先跑通最小可用闭环。
-            </p>
-          </article>
+        <div class="group">
+          <div class="label">弹层形式</div>
+          <div class="segmented two" id="layoutSwitch">
+            <button class="active" data-layout="sheet">
+              <strong>底部抽屉</strong>
+              <span>更轻量，打扰感更低。</span>
+            </button>
+            <button data-layout="modal">
+              <strong>居中模态</strong>
+              <span>更强提醒，聚焦更集中。</span>
+            </button>
+          </div>
+        </div>
 
-          <div class="hero-stats" aria-label="关键聚焦">
-            <article class="mini-stat">
-              <span class="mini-stat__label">聚焦题型</span>
-              <strong class="mini-stat__value">高频题</strong>
-            </article>
-            <article class="mini-stat">
-              <span class="mini-stat__label">聚焦错因</span>
-              <strong class="mini-stat__value">审题 / 方法 / 步骤</strong>
-            </article>
-            <article class="mini-stat">
-              <span class="mini-stat__label">输出目标</span>
-              <strong class="mini-stat__value">可执行建议</strong>
-            </article>
+        <div class="group">
+          <div class="label">流程跳转</div>
+          <div class="stack">
+            <button class="ghost-button" id="replayButton">重新播放触发流程</button>
+            <button class="ghost-button" id="trainingButton">直接查看强化练习</button>
+            <button class="ghost-button" id="methodButton">直接查看改进方法卡</button>
+          </div>
+        </div>
+
+        <div class="summary">
+          <strong>当前原型聚焦</strong>
+          <p id="summaryText">触发后自动弹出点拨卡，诊断结论使用偏橙色视觉，主按钮引导进入同考点练习（5题），次按钮保留“先继续刷题”。</p>
+        </div>
+      </aside>
+
+      <main class="panel spec">
+        <h2>移动端演示</h2>
+        <div class="stage">
+          <div class="phone-shell">
+            <div class="screen" id="screen">
+              <div class="app-header">
+                <span>09:41</span>
+                <strong>行测刷题</strong>
+                <span>4G · 86%</span>
+              </div>
+
+              <section class="question-card" id="resultPage">
+                <div class="question-tag">错题结果页 · 数量关系</div>
+                <h3>某环形跑道周长 600 米，甲乙两人同时同地反向出发，甲每秒 7 米，乙每秒 5 米，问两人首次相遇需要多少秒？</h3>
+                <p>你的答案：45 秒。正确答案：50 秒。系统识别到该题属于“环形单次相遇”知识标签，且你最近在同类题上出现了重复失误。</p>
+                <div class="answer-status">
+                  <div>
+                    <strong>本题作答错误</strong>
+                    <span>解析页即将展示点拨提醒</span>
+                  </div>
+                  <div class="pill-score">标签命中 · 第 3 次</div>
+                </div>
+              </section>
+
+              <section class="analysis-card" id="analysisPage">
+                <div class="card-title">
+                  <strong>题目解析</strong>
+                  <span>错因定位中</span>
+                </div>
+                <ul class="bullet-list">
+                  <li>反向相遇时应使用速度和，而不是速度差。</li>
+                  <li>首次相遇满足“路程和 = 环形周长”。</li>
+                  <li>本题正确式子为：600 ÷ (7 + 5) = 50 秒。</li>
+                </ul>
+              </section>
+
+              <section class="tips-card" id="stateStrip">
+                <div class="card-title">
+                  <strong>系统状态</strong>
+                  <span id="stateText">正在校验触发条件：最近组题错题 ≥ 1 且累计做题数 ≥ 3</span>
+                </div>
+              </section>
+
+              <section class="training hidden" id="trainingPanel">
+                <div class="stepper">
+                  <span class="active"></span>
+                  <span class="active"></span>
+                  <span class="active"></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <h4>同考点强化练习 3 / 5</h4>
+                <p>保持在 5 秒内读完核心信息，快速判断你此刻是“知识点没掌握”，还是“方法用错了”。</p>
+                <div class="options" id="practiceOptions">
+                  <button class="option">A. 仍然使用速度差，忽略了反向相遇要用速度和。</button>
+                  <button class="option">B. 忘记把周长代入总路程，直接计算了单人用时。</button>
+                  <button class="option">C. 粗心抄错题目数字，把乙的速度看成了 6 米/秒。</button>
+                </div>
+                <div class="actions">
+                  <button class="ghost-button" id="showFollowup">提交答案</button>
+                </div>
+              </section>
+
+              <section class="followup hidden" id="followupPanel">
+                <h4>追问一下：这道题为什么又错了？</h4>
+                <p>系统希望判断你是知识点没掌握，还是做题习惯导致失误。请选择最接近的一项。</p>
+                <div class="options" id="followupOptions">
+                  <button class="option">A. 我不知道反向相遇该怎么列式。</button>
+                  <button class="option">B. 我会做，但当时把“相遇”看成了“追及”。</button>
+                  <button class="option">C. 我算式对了，但口算时加错了。</button>
+                  <button class="option">D. 我时间紧，没仔细审题。</button>
+                  <button class="option">E. 其他原因。</button>
+                </div>
+                <div class="actions">
+                  <button class="cta" id="finishTraining">完成本轮强化</button>
+                </div>
+              </section>
+
+              <section class="feedback-card hidden" id="feedbackPanel">
+                <div class="score-ring">73%</div>
+                <div class="card-title">
+                  <strong>强化反馈</strong>
+                  <span>掌握度提升</span>
+                </div>
+                <ul class="bullet-list">
+                  <li>你已连续完成 5 道“环形单次相遇”同类题，掌握度由 42% 提升到 73%。</li>
+                  <li>高频失误已收敛到“相遇/追及混淆”，后续建议继续练 2 道中等难度题。</li>
+                </ul>
+              </section>
+
+              <section class="return-panel hidden" id="returnPanel">
+                <h4>下一步你想回到哪里？</h4>
+                <p>按照需求文档中的闭环设计，强化完成后需要给用户清晰的返回路径。</p>
+                <div class="return-actions">
+                  <button class="return-button" id="returnWrongList">返回错题列表</button>
+                  <button class="return-button" id="returnOrigin">返回原刷题位置</button>
+                </div>
+              </section>
+
+              <section class="method-panel hidden" id="methodPanel">
+                <h4>粗心改进方法卡</h4>
+                <p>这次更像是习惯性失误，不是不会，而是没有把关键条件抓牢。</p>
+                <ul class="bullet-list">
+                  <li>先画出题干中的“相遇/追及/反向”关系词，再列公式。</li>
+                  <li>把计算步骤拆成两步：列式确认后，再代数值。</li>
+                  <li>最后 3 秒回看一次题目条件，确认没有抄错数字。</li>
+                </ul>
+              </section>
+
+              <div class="overlay show" id="overlay">
+                <div class="sheet knowledge" id="dialogCard">
+                  <div class="handle" id="sheetHandle"></div>
+                  <div class="dialog-header">
+                    <div>
+                      <div class="badge knowledge" id="dialogBadge">知识点型提醒</div>
+                    </div>
+                    <button class="dialog-close" id="closeDialog">×</button>
+                  </div>
+                  <h3 class="headline" id="dialogHeadline">你已在 <em>“环形单次相遇”</em> 上连续错了 3 次</h3>
+                  <p class="subcopy" id="dialogSubcopy">这不是单题失误，系统判断你在这个考点上存在稳定薄弱点，现在补一轮，会比继续刷更省时间。</p>
+                  <div class="highlight-box" id="dialogHighlight">
+                    <strong id="highlightTitle">一句点拨</strong>
+                    <p id="highlightText">反向相遇要抓“速度和 = 总路程”。这类题别急着算，先确认相遇关系，再决定用和还是差。</p>
+                  </div>
+                  <div class="mini-list" id="dialogList">
+                    <div class="mini-item"><b>1</b><span>你最近 3 次同类错误都发生在“关系判断”而不是复杂运算。</span></div>
+                    <div class="mini-item"><b>2</b><span>建议立刻做 5 道同考点题，把“相遇/追及”区分练熟。</span></div>
+                  </div>
+                  <button class="cta" id="primaryAction">立即强化（5题）</button>
+                  <button class="text-link" id="secondaryAction">先继续刷题</button>
+                </div>
+              </div>
+
+              <div class="bottom-nav">
+                <div><i>题</i><span>刷题</span></div>
+                <div><i>错</i><span>错题</span></div>
+                <div><i>学</i><span>学习</span></div>
+                <div><i>我</i><span>我的</span></div>
+              </div>
+            </div>
           </div>
 
-          <article class="hero-card">
-            <span class="hero-card__label">闭环状态</span>
-            <div class="hero-progress" aria-hidden="true">
-              <span style="width: 100%;"></span>
+          <div class="legend">
+            <div class="legend-card">
+              <strong>触发时机</strong>
+              <p>错题结果页加载完成后即弹出，动画控制在 0.3 秒以内，避免突兀。</p>
             </div>
-            <p class="hero-card__note">标准动作判断 + 追问锁因 + 点拨策略 + 复练验证。</p>
-          </article>
-        </aside>
-      </section>
-
-      <section class="panel section-shell reveal" id="overview">
-        <div class="section-head">
-          <span class="eyebrow">背景与目标</span>
-          <h2>把需求文档收敛成一套清晰的产品叙事</h2>
-          <p>围绕为什么要做、要解决什么、什么叫成功，先把 H5 的主线讲明白。</p>
-        </div>
-        <div class="summary-grid">
-          <article class="info-card">
-            <span class="mini-label">为什么要做</span>
-            <h3 class="info-card__title">用户看得到答案，却看不见错因</h3>
-            <p class="info-card__body">
-              现有错题产品多停留在解析展示层，无法针对做题过程做动态判断。
-            </p>
-            <div class="info-card__chips">
-              <span class="soft-chip">审题偏差</span>
-              <span class="soft-chip">方法选错</span>
-              <span class="soft-chip">步骤遗漏</span>
+            <div class="legend-card">
+              <strong>内容密度</strong>
+              <p>点拨卡片只给一句核心判断、一句精讲和明确动作，控制用户 5 秒内获取重点。</p>
             </div>
-          </article>
-
-          <article class="info-card">
-            <span class="mini-label">项目目标</span>
-            <h3 class="info-card__title">识别步骤偏差，追问锁定错因</h3>
-            <p class="info-card__body">
-              通过“标准动作判断 + 追问锁因 + 点拨策略”形成真正的复盘闭环。
-            </p>
-            <div class="info-card__chips">
-              <span class="soft-chip">动态判断</span>
-              <span class="soft-chip">可解释分类</span>
-              <span class="soft-chip">纠错建议</span>
+            <div class="legend-card">
+              <strong>闭环设计</strong>
+              <p>支持继续刷题、强化练习、追问错因、强化反馈和返回原路径，覆盖完整需求闭环。</p>
             </div>
-          </article>
-
-          <article class="info-card">
-            <span class="mini-label">成功标准</span>
-            <h3 class="info-card__title">让用户知道错在哪、为什么错、怎么改</h3>
-            <p class="info-card__body">
-              首期不追求全量覆盖，而是优先验证闭环成立和二次正确率提升。
-            </p>
-            <div class="info-card__chips">
-              <span class="soft-chip">闭环成立</span>
-              <span class="soft-chip">二次正确率</span>
-              <span class="soft-chip">复盘提效</span>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel section-shell reveal reveal--2" id="audience">
-        <div class="section-head">
-          <span class="eyebrow">用户与场景</span>
-          <h2>把诊断能力放到最常见的学习瞬间里</h2>
-          <p>聚焦备考用户的真实场景，而不是做一个泛学习问答工具。</p>
-        </div>
-        <div class="persona-grid">
-          <article class="persona-card">
-            <div class="persona-card__head">
-              <span class="mini-label">核心用户</span>
-              <span class="persona-card__index">01</span>
-            </div>
-            <h3 class="persona-card__title">备考公考的线上学习用户</h3>
-            <p class="persona-card__text">
-              做题后最想快速知道自己错在哪一步，并立即得到纠错建议。
-            </p>
-            <ul class="persona-card__list">
-              <li>备考初期：方法不熟，容易在步骤层面出错</li>
-              <li>备考中期：容易出现方法选择和细节遗漏</li>
-              <li>冲刺期：更关注效率、稳定性和高频错因纠正</li>
-            </ul>
-          </article>
-
-          <article class="persona-card">
-            <div class="persona-card__head">
-              <span class="mini-label">次级用户</span>
-              <span class="persona-card__index">02</span>
-            </div>
-            <h3 class="persona-card__title">教研、产品与运营同学</h3>
-            <p class="persona-card__text">
-              需要更稳定的诊断链路、可积累的标签体系和后续可优化的数据闭环。
-            </p>
-            <ul class="persona-card__list">
-              <li>需要统一的错因分类口径</li>
-              <li>需要能沉淀的追问和结果反馈</li>
-              <li>需要可逐步扩展的题型覆盖策略</li>
-            </ul>
-          </article>
-
-          <article class="persona-card">
-            <div class="persona-card__head">
-              <span class="mini-label">典型场景</span>
-              <span class="persona-card__index">03</span>
-            </div>
-            <h3 class="persona-card__title">错题后的立即复盘</h3>
-            <p class="persona-card__text">
-              提交题目后马上判断作答路径是否标准，必要时立刻追问。
-            </p>
-            <ul class="persona-card__list">
-              <li>做题提交后立即复盘</li>
-              <li>错题本复习与再练</li>
-              <li>连续错同类题后的深度排查</li>
-            </ul>
-          </article>
-
-          <article class="persona-card">
-            <div class="persona-card__head">
-              <span class="mini-label">用户痛点</span>
-              <span class="persona-card__index">04</span>
-            </div>
-            <h3 class="persona-card__title">知道答案，但不会纠错</h3>
-            <p class="persona-card__text">
-              解析看懂了，下次还是会错，原因是错因没有被拆开确认。
-            </p>
-            <ul class="persona-card__list">
-              <li>不知道自己错在哪一步</li>
-              <li>不同错因被混在一起</li>
-              <li>缺少“错因确认”和“纠错建议”的闭环</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel section-shell reveal reveal--3" id="flow">
-        <div class="section-head">
-          <span class="eyebrow">关键流程</span>
-          <h2>先跑通一个完整闭环，再扩展精度和场景</h2>
-          <p>需求文档里的 8 个流程点，落到页面里就是这组顺序清晰的步骤。</p>
-        </div>
-        <div class="flow-grid">
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">1</div>
-              <div class="flow-card__title">进入诊断入口</div>
-            </div>
-            <p class="flow-card__text">用户从错题页或错题本进入诊断流程。</p>
-            <span class="flow-card__tag">发起复盘</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">2</div>
-              <div class="flow-card__title">读取题目结构</div>
-            </div>
-            <p class="flow-card__text">系统识别题型、知识点和标准解法信息。</p>
-            <span class="flow-card__tag">结构化解析</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">3</div>
-              <div class="flow-card__title">判断作答动作</div>
-            </div>
-            <p class="flow-card__text">检查用户做题步骤是否符合标准动作。</p>
-            <span class="flow-card__tag">步骤核对</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">4</div>
-              <div class="flow-card__title">发起追问</div>
-            </div>
-            <p class="flow-card__text">如果步骤异常，系统发起短、准、可答的问题。</p>
-            <span class="flow-card__tag">追问锁因</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">5</div>
-              <div class="flow-card__title">锁定错因</div>
-            </div>
-            <p class="flow-card__text">把追问结果归类到可解释的错因标签。</p>
-            <span class="flow-card__tag">分类收敛</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">6</div>
-              <div class="flow-card__title">输出点拨</div>
-            </div>
-            <p class="flow-card__text">统一生成用户能执行的点拨策略和纠错建议。</p>
-            <span class="flow-card__tag">给出动作</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">7</div>
-              <div class="flow-card__title">进入复练</div>
-            </div>
-            <p class="flow-card__text">用户复练同类题，验证改进动作是否生效。</p>
-            <span class="flow-card__tag">验证修正</span>
-          </article>
-          <article class="flow-card">
-            <div class="flow-card__top">
-              <div class="flow-card__index">8</div>
-              <div class="flow-card__title">沉淀结果</div>
-            </div>
-            <p class="flow-card__text">系统记录结果并用于后续优化。</p>
-            <span class="flow-card__tag">持续优化</span>
-          </article>
-        </div>
-
-        <div class="state-strip" aria-label="状态变化">
-          <span class="state-chip is-active">未诊断</span>
-          <span class="state-chip">步骤判断中</span>
-          <span class="state-chip">追问中</span>
-          <span class="state-chip">错因已锁定</span>
-          <span class="state-chip">点拨已输出</span>
-          <span class="state-chip">复练中</span>
-          <span class="state-chip">诊断完成</span>
-        </div>
-
-        <article class="flow-note">
-          <span class="mini-label">核心交互</span>
-          <p>
-            系统先判断，再追问，不直接跳到结论；追问要短、准、可答，
-            点拨要明确告诉用户“错因是什么”和“下次怎么改”。
-          </p>
-        </article>
-      </section>
-
-      <section class="panel section-shell reveal reveal--4" id="features">
-        <div class="section-head">
-          <span class="eyebrow">功能清单</span>
-          <h2>首期只做能形成闭环的最小功能集合</h2>
-          <p>不做通用问答助手，也不做全量题型一次性覆盖，优先保证诊断流程跑通。</p>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card">
-            <span class="mini-label">01</span>
-            <h3 class="feature-card__title">题目识别与结构化解析</h3>
-            <p class="feature-card__text">识别题目所属题型、知识点和标准解法，让输入先变得可读。</p>
-          </article>
-          <article class="feature-card">
-            <span class="mini-label">02</span>
-            <h3 class="feature-card__title">标准做题动作判断</h3>
-            <p class="feature-card__text">判断用户当前作答过程是否偏离标准步骤，先找偏差再下结论。</p>
-          </article>
-          <article class="feature-card">
-            <span class="mini-label">03</span>
-            <h3 class="feature-card__title">追问式错因诊断</h3>
-            <p class="feature-card__text">通过短问题把模糊偏差收敛成可解释错因标签。</p>
-          </article>
-          <article class="feature-card">
-            <span class="mini-label">04</span>
-            <h3 class="feature-card__title">点拨策略生成与展示</h3>
-            <p class="feature-card__text">输出能落地的改进动作，而不是只告诉用户对错结果。</p>
-          </article>
-          <article class="feature-card">
-            <span class="mini-label">05</span>
-            <h3 class="feature-card__title">结果反馈与复练验证</h3>
-            <p class="feature-card__text">记录用户是否修正成功，验证改进建议是否真的有效。</p>
-          </article>
-          <article class="feature-card">
-            <span class="mini-label">06</span>
-            <h3 class="feature-card__title">诊断数据沉淀与优化</h3>
-            <p class="feature-card__text">让错因标签、追问对话和结果反馈持续沉淀，支撑后续优化。</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel demo-shell reveal" id="demo">
-        <div class="demo-top">
-          <div class="section-head section-head--compact">
-            <span class="eyebrow">轻交互演示</span>
-            <h2>四态切换，演示错题诊断闭环如何跑通</h2>
-            <p>点击不同状态，查看标准判断、追问锁因、点拨输出和复练验证的完整展示。</p>
           </div>
-          <article class="demo-meta" aria-label="当前诊断状态">
-            <span class="demo-meta__label">当前步骤</span>
-            <strong data-state-step-label>步骤 1 / 4</strong>
-            <span data-state-summary>标准判断</span>
-          </article>
         </div>
-
-        <div class="demo-progress" aria-hidden="true">
-          <span data-state-progress></span>
-        </div>
-
-        <div class="state-tabs" role="tablist" aria-label="错题诊断状态切换">
-          <button class="state-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="diagnosis-panel" data-state-tab data-state="standard">标准判断</button>
-          <button class="state-tab" type="button" role="tab" aria-selected="false" aria-controls="diagnosis-panel" data-state-tab data-state="question">追问锁因</button>
-          <button class="state-tab" type="button" role="tab" aria-selected="false" aria-controls="diagnosis-panel" data-state-tab data-state="advice">点拨输出</button>
-          <button class="state-tab" type="button" role="tab" aria-selected="false" aria-controls="diagnosis-panel" data-state-tab data-state="practice">复练验证</button>
-        </div>
-
-        <div class="demo-grid" id="diagnosis-panel" data-diagnosis-panel role="tabpanel" aria-live="polite">
-          <article class="diagnosis-main">
-            <span class="state-badge" data-state-badge>标准判断</span>
-            <h3 data-state-title>先判断作答步骤是否符合标准动作</h3>
-            <p class="diagnosis-lead" data-state-lead>
-              系统先读取题目结构化信息，再检查用户有没有在题型识别、概念边界或标准步骤上偏离。
-            </p>
-
-            <div class="diagnosis-snapshot">
-              <div class="snapshot__header">
-                <span class="mini-label">本轮题目</span>
-                <span class="snapshot__state" data-state-snapshot>未诊断</span>
-              </div>
-              <p data-state-prompt>
-                题目：定义判断。用户把“看起来像”直接当成“符合定义”，系统先不下结论，而是检查作答顺序。
-              </p>
-            </div>
-
-            <ul class="bullet-list bullet-list--tight" data-state-focus></ul>
-
-            <div class="result-row">
-              <span class="result-pill result-pill--cause" data-state-cause>待锁定：步骤是否偏离</span>
-              <span class="result-pill result-pill--advice" data-state-advice>提示：先复述题干条件，再进入选项比对</span>
-            </div>
-          </article>
-
-          <aside class="diagnosis-side">
-            <article class="side-card side-card--accent">
-              <span class="mini-label">系统追问</span>
-              <p class="side-card__copy" data-state-question>
-                你判断这道题时，先核对概念边界，还是先看选项外观？
-              </p>
-            </article>
-
-            <article class="side-card">
-              <span class="mini-label">可执行动作</span>
-              <p class="side-card__copy" data-state-action>
-                下一次先按题干条件复述一遍，再去排除干扰项。
-              </p>
-            </article>
-
-            <article class="side-card">
-              <span class="mini-label">复练任务</span>
-              <p class="side-card__copy" data-state-practice>
-                重新做 1 道同类题，要求先说出标准动作再答题。
-              </p>
-            </article>
-
-            <article class="side-card side-card--soft">
-              <span class="mini-label">错因标签</span>
-              <ul class="tag-list" data-state-tags></ul>
-            </article>
-          </aside>
-
-          <article class="diagnosis-thread">
-            <div class="thread__item thread__item--system">
-              <span class="thread__label">系统判断</span>
-              <p data-thread-top>
-                系统先做标准动作判断，不直接给结论。
-              </p>
-            </div>
-            <div class="thread__item thread__item--user">
-              <span class="thread__label">用户作答</span>
-              <p data-thread-user>
-                用户：我先看选项，感觉 B 很像。
-              </p>
-            </div>
-            <div class="thread__item thread__item--system thread__item--accent">
-              <span class="thread__label">输出结果</span>
-              <p data-thread-result>
-                当前偏差：把“相似”当成“符合”，进入追问。
-              </p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel section-shell reveal reveal--2" id="boundaries">
-        <div class="section-head">
-          <span class="eyebrow">约束与边界</span>
-          <h2>先保证闭环跑通，再逐步扩大覆盖面</h2>
-          <p>首期聚焦高频题型、高频错因和可通过对话确认的错因，不做一次性全量覆盖。</p>
-        </div>
-        <div class="boundary-grid">
-          <article class="boundary-card">
-            <span class="mini-label">状态变化</span>
-            <h3 class="boundary-card__title">系统会在这些状态之间推进</h3>
-            <ul class="boundary-card__list">
-              <li>未诊断</li>
-              <li>步骤判断中</li>
-              <li>追问中</li>
-              <li>错因已锁定</li>
-              <li>点拨已输出</li>
-              <li>复练中</li>
-              <li>诊断完成</li>
-            </ul>
-          </article>
-
-          <article class="boundary-card">
-            <span class="mini-label">异常分支</span>
-            <h3 class="boundary-card__title">这些情况需要兜底处理</h3>
-            <ul class="boundary-card__list">
-              <li>题目数据不完整</li>
-              <li>用户没有提供足够信息</li>
-              <li>追问中断或超时</li>
-              <li>错因无法明确分类</li>
-              <li>点拨策略缺失</li>
-              <li>用户拒绝继续对话</li>
-            </ul>
-          </article>
-
-          <article class="boundary-card">
-            <span class="mini-label">优先级与边界</span>
-            <h3 class="boundary-card__title">本次只做最小可用闭环</h3>
-            <div class="boundary-group">
-              <span class="boundary-group__label">优先解决</span>
-              <div class="boundary-group__chips">
-                <span class="soft-chip">高频题型</span>
-                <span class="soft-chip">高频错因</span>
-                <span class="soft-chip">清晰步骤</span>
-                <span class="soft-chip">可对话确认</span>
-                <span class="soft-chip">可执行建议</span>
-              </div>
-            </div>
-            <div class="boundary-group">
-              <span class="boundary-group__label">本次不做</span>
-              <div class="boundary-group__chips">
-                <span class="soft-chip">全题型全场景</span>
-                <span class="soft-chip">通用答疑助手</span>
-                <span class="soft-chip">过重社交功能</span>
-                <span class="soft-chip">打卡排行</span>
-              </div>
-            </div>
-            <div class="boundary-group">
-              <span class="boundary-group__label">数据边界</span>
-              <div class="boundary-group__chips">
-                <span class="soft-chip">最小必要数据</span>
-                <span class="soft-chip">诊断闭环优先</span>
-                <span class="soft-chip">不做无目的扩张</span>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <footer class="footer-mark">
-        <span>移动端基准：375 × 812</span>
-        <span>响应式断点：720 / 920 / 1180</span>
-        <span>实现原则：不固定宽度，不使用整页缩放</span>
-      </footer>
-    </main>
+      </main>
+    </section>
   </div>
 
-  <script src="./app.js"></script>
+  <script>
+    const typeSwitch = document.getElementById("typeSwitch");
+    const layoutSwitch = document.getElementById("layoutSwitch");
+    const replayButton = document.getElementById("replayButton");
+    const trainingButton = document.getElementById("trainingButton");
+    const methodButton = document.getElementById("methodButton");
+    const overlay = document.getElementById("overlay");
+    const dialogCard = document.getElementById("dialogCard");
+    const closeDialog = document.getElementById("closeDialog");
+    const primaryAction = document.getElementById("primaryAction");
+    const secondaryAction = document.getElementById("secondaryAction");
+    const trainingPanel = document.getElementById("trainingPanel");
+    const followupPanel = document.getElementById("followupPanel");
+    const feedbackPanel = document.getElementById("feedbackPanel");
+    const returnPanel = document.getElementById("returnPanel");
+    const methodPanel = document.getElementById("methodPanel");
+    const showFollowup = document.getElementById("showFollowup");
+    const finishTraining = document.getElementById("finishTraining");
+    const returnWrongList = document.getElementById("returnWrongList");
+    const returnOrigin = document.getElementById("returnOrigin");
+    const stateText = document.getElementById("stateText");
+    const summaryText = document.getElementById("summaryText");
+    const sheetHandle = document.getElementById("sheetHandle");
+    const practiceOptions = document.getElementById("practiceOptions");
+    const followupOptions = document.getElementById("followupOptions");
+
+    const dialogBadge = document.getElementById("dialogBadge");
+    const dialogHeadline = document.getElementById("dialogHeadline");
+    const dialogSubcopy = document.getElementById("dialogSubcopy");
+    const highlightTitle = document.getElementById("highlightTitle");
+    const highlightText = document.getElementById("highlightText");
+    const dialogList = document.getElementById("dialogList");
+
+    const contentMap = {
+      knowledge: {
+        summary: "触发后自动弹出点拨卡，诊断结论使用偏橙色视觉，主按钮引导进入同考点练习（5题），次按钮保留“先继续刷题”。",
+        badge: "知识点型提醒",
+        headline: "你已在 <em>“环形单次相遇”</em> 上连续错了 3 次",
+        subcopy: "这不是单题失误，系统判断你在这个考点上存在稳定薄弱点，现在补一轮，会比继续刷更省时间。",
+        highlightTitle: "一句点拨",
+        highlightText: "反向相遇要抓“速度和 = 总路程”。这类题别急着算，先确认相遇关系，再决定用和还是差。",
+        items: [
+          "你最近 3 次同类错误都发生在“关系判断”而不是复杂运算。",
+          "建议立刻做 5 道同考点题，把“相遇/追及”区分练熟。"
+        ],
+        primary: "立即强化（5题）",
+        secondary: "先继续刷题",
+        state: "已命中知识点型触发：最近组题错题 ≥ 1 且累计做题数 ≥ 3"
+      },
+      careless: {
+        summary: "触发后保留轻量提醒，但文案转向习惯纠偏，主按钮展示“查看改进方法”，色调偏黄，弱化“被责备”感。",
+        badge: "粗心型提醒",
+        headline: "你在 <em>“环形单次相遇”</em> 上反复丢分，更像是审题与计算习惯问题",
+        subcopy: "你并非不会，而是在紧张状态下把“相遇”误看成了“追及”。先修正方法，再回去刷题，效率会更高。",
+        highlightTitle: "本次更该改什么",
+        highlightText: "遇到相遇题，先圈出“同时、反向、首次相遇”三个关键词，再决定列速度和还是速度差。",
+        items: [
+          "系统识别到你在同类题上的错因更偏向审题遗漏和条件误读。",
+          "建议先看一张方法卡，再回到当前题目继续刷，降低打断感。"
+        ],
+        primary: "查看改进方法",
+        secondary: "先继续刷题",
+        state: "已命中粗心型触发：错因更接近审题遗漏/计算失误"
+      }
+    };
+
+    const uiState = {
+      type: "knowledge",
+      layout: "sheet"
+    };
+
+    function resetSelections(container) {
+      container.querySelectorAll(".option").forEach((button) => {
+        button.classList.remove("selected");
+      });
+    }
+
+    function wireSelectable(container) {
+      container.querySelectorAll(".option").forEach((button) => {
+        button.addEventListener("click", () => {
+          resetSelections(container);
+          button.classList.add("selected");
+        });
+      });
+    }
+
+    wireSelectable(practiceOptions);
+    wireSelectable(followupOptions);
+
+    function updateSwitchState(container, value) {
+      container.querySelectorAll("button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.type === value || button.dataset.layout === value);
+      });
+    }
+
+    function applyDialogContent() {
+      const content = contentMap[uiState.type];
+      summaryText.textContent = content.summary;
+      dialogBadge.textContent = content.badge;
+      dialogHeadline.innerHTML = content.headline;
+      dialogSubcopy.textContent = content.subcopy;
+      highlightTitle.textContent = content.highlightTitle;
+      highlightText.textContent = content.highlightText;
+      primaryAction.textContent = content.primary;
+      secondaryAction.textContent = content.secondary;
+      stateText.textContent = content.state;
+
+      dialogCard.classList.toggle("knowledge", uiState.type === "knowledge");
+      dialogCard.classList.toggle("careless", uiState.type === "careless");
+      dialogBadge.className = "badge " + uiState.type;
+      dialogList.innerHTML = content.items.map((item, index) => (
+        `<div class="mini-item"><b>${index + 1}</b><span>${item}</span></div>`
+      )).join("");
+    }
+
+    function applyLayout() {
+      overlay.classList.toggle("modal", uiState.layout === "modal");
+      dialogCard.className = uiState.layout === "modal" ? (uiState.type + " modal-card") : (uiState.type + " sheet");
+      sheetHandle.classList.toggle("hidden", uiState.layout === "modal");
+    }
+
+    function hideFlowPanels() {
+      trainingPanel.classList.add("hidden");
+      followupPanel.classList.add("hidden");
+      feedbackPanel.classList.add("hidden");
+      returnPanel.classList.add("hidden");
+      methodPanel.classList.add("hidden");
+    }
+
+    function openDialog() {
+      hideFlowPanels();
+      overlay.classList.add("show");
+      stateText.textContent = contentMap[uiState.type].state;
+    }
+
+    function closeDialogOnly() {
+      overlay.classList.remove("show");
+      hideFlowPanels();
+      stateText.textContent = "用户选择先继续刷题，页面保持在当前错题结果页。";
+    }
+
+    function showTraining() {
+      overlay.classList.remove("show");
+      hideFlowPanels();
+      trainingPanel.classList.remove("hidden");
+      stateText.textContent = "已进入知识点强化练习：5 题闭环训练。";
+      resetSelections(practiceOptions);
+      resetSelections(followupOptions);
+    }
+
+    function showMethodCard() {
+      overlay.classList.remove("show");
+      hideFlowPanels();
+      methodPanel.classList.remove("hidden");
+      stateText.textContent = "已打开粗心改进方法卡，准备返回当前刷题路径。";
+    }
+
+    function replayFlow() {
+      hideFlowPanels();
+      stateText.textContent = "错题结果页已加载完成，系统 0.3 秒内弹出点拨提醒。";
+      setTimeout(openDialog, 180);
+    }
+
+    typeSwitch.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-type]");
+      if (!button) return;
+      uiState.type = button.dataset.type;
+      updateSwitchState(typeSwitch, uiState.type);
+      applyDialogContent();
+      applyLayout();
+      replayFlow();
+    });
+
+    layoutSwitch.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-layout]");
+      if (!button) return;
+      uiState.layout = button.dataset.layout;
+      updateSwitchState(layoutSwitch, uiState.layout);
+      applyLayout();
+      replayFlow();
+    });
+
+    replayButton.addEventListener("click", replayFlow);
+    trainingButton.addEventListener("click", () => {
+      uiState.type = "knowledge";
+      updateSwitchState(typeSwitch, uiState.type);
+      applyDialogContent();
+      applyLayout();
+      showTraining();
+    });
+    methodButton.addEventListener("click", () => {
+      uiState.type = "careless";
+      updateSwitchState(typeSwitch, uiState.type);
+      applyDialogContent();
+      applyLayout();
+      showMethodCard();
+    });
+
+    closeDialog.addEventListener("click", closeDialogOnly);
+    secondaryAction.addEventListener("click", closeDialogOnly);
+    primaryAction.addEventListener("click", () => {
+      if (uiState.type === "knowledge") {
+        showTraining();
+      } else {
+        showMethodCard();
+      }
+    });
+
+    showFollowup.addEventListener("click", () => {
+      trainingPanel.classList.add("hidden");
+      followupPanel.classList.remove("hidden");
+      stateText.textContent = "系统检测到本轮强化仍有错题，弹出 A~E 追问错因。";
+    });
+
+    finishTraining.addEventListener("click", () => {
+      followupPanel.classList.add("hidden");
+      feedbackPanel.classList.remove("hidden");
+      returnPanel.classList.remove("hidden");
+      stateText.textContent = "强化完成，展示掌握度反馈并给出返回路径。";
+    });
+
+    returnWrongList.addEventListener("click", () => {
+      hideFlowPanels();
+      stateText.textContent = "已返回错题列表，用户可继续查看其他薄弱点。";
+    });
+
+    returnOrigin.addEventListener("click", () => {
+      hideFlowPanels();
+      stateText.textContent = "已返回原刷题位置，保持上下文连续。";
+    });
+
+    applyDialogContent();
+    applyLayout();
+    replayFlow();
+  </script>
 </body>
 </html>
